@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salus AI — Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0c1e3a; --navy-mid:#162d52; --teal:#0a7c6e; --teal-light:#13a090;
+  --gold:#d4aa3a; --white:#f0ece4; --text-dim:rgba(240,236,228,0.55);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;}
+
+/* Background decoration */
+.bg-grid{position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at 50% 0%,black 40%,transparent 80%);}
+.bg-glow{position:fixed;top:-20%;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(10,124,110,0.12) 0%,transparent 70%);pointer-events:none;}
+
+/* LAYOUT */
+.login-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 24px;position:relative;}
+
+/* CARD */
+.login-card{width:100%;max-width:460px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:48px 44px;backdrop-filter:blur(16px);box-shadow:0 24px 80px rgba(0,0,0,0.4);animation:fadeUp .5s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+/* LOGO */
+.login-logo{display:flex;justify-content:center;margin-bottom:32px;}
+.login-logo img{height:80px;width:auto;object-fit:contain;}
+.login-logo-placeholder{height:80px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--gold);}
+
+/* TOGGLE TABS */
+.auth-tabs{display:flex;background:rgba(255,255,255,0.04);border-radius:12px;padding:4px;margin-bottom:32px;gap:4px;}
+.auth-tab{flex:1;padding:10px;border-radius:9px;border:none;background:transparent;color:rgba(255,255,255,0.4);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
+.auth-tab.active{background:rgba(255,255,255,0.08);color:var(--white);box-shadow:0 1px 4px rgba(0,0,0,0.2);}
+
+/* HEADING */
+.login-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:600;color:var(--white);margin-bottom:8px;text-align:center;}
+.login-sub{font-family:'Crimson Pro',serif;font-size:16px;color:var(--text-dim);text-align:center;line-height:1.5;margin-bottom:28px;}
+
+/* FORM */
+.form-group{margin-bottom:18px;}
+.form-group label{display:block;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:8px;}
+.form-group label .optional{font-size:10px;font-weight:400;letter-spacing:0;text-transform:none;color:rgba(255,255,255,0.2);margin-left:6px;}
+.form-input{width:100%;padding:13px 16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--white);outline:none;transition:all .2s;}
+.form-input:focus{border-color:rgba(19,160,144,0.6);background:rgba(19,160,144,0.06);box-shadow:0 0 0 3px rgba(19,160,144,0.1);}
+.form-input::placeholder{color:rgba(255,255,255,0.18);}
+.phone-wrap{position:relative;}
+.phone-prefix{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.3);font-size:15px;pointer-events:none;}
+.phone-input{padding-left:36px;}
+
+/* API KEY SECTION */
+.api-section{margin-top:8px;padding:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;margin-bottom:18px;}
+.api-section-title{font-size:12px;font-weight:700;color:rgba(255,255,255,0.4);margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.api-section-sub{font-size:12px;color:rgba(255,255,255,0.25);line-height:1.5;margin-bottom:10px;}
+.api-toggle{font-size:11px;color:rgba(19,160,144,0.8);cursor:pointer;text-decoration:underline;background:none;border:none;font-family:'DM Sans',sans-serif;padding:0;}
+.api-toggle:hover{color:var(--teal-light);}
+.api-key-row{display:none;margin-top:10px;}
+.api-key-row.visible{display:flex;gap:8px;}
+.api-key-input{flex:1;padding:9px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--white);outline:none;}
+.api-key-input:focus{border-color:rgba(19,160,144,0.4);}
+.api-key-input::placeholder{color:rgba(255,255,255,0.15);}
+
+/* SUBMIT */
+.submit-btn{width:100%;padding:15px;border-radius:12px;background:linear-gradient(135deg,var(--teal-light),var(--teal));color:white;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:all .25s;margin-top:4px;position:relative;overflow:hidden;}
+.submit-btn:hover:not(:disabled){background:linear-gradient(135deg,#1abfad,var(--teal-light));transform:translateY(-1px);box-shadow:0 6px 20px rgba(19,160,144,0.35);}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.submit-btn-inner{display:flex;align-items:center;justify-content:center;gap:8px;}
+
+/* FREE BADGE */
+.free-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;background:rgba(212,170,58,0.12);border:1px solid rgba(212,170,58,0.3);font-size:11px;font-weight:700;color:var(--gold);margin-bottom:24px;margin-left:auto;margin-right:auto;}
+.free-badge-wrap{display:flex;justify-content:center;margin-bottom:20px;}
+
+/* ERROR / SUCCESS */
+.auth-msg{display:none;padding:12px 16px;border-radius:10px;font-size:13px;line-height:1.5;margin-bottom:16px;}
+.auth-msg.error{background:rgba(192,57,43,0.12);border:1px solid rgba(192,57,43,0.3);color:#e07070;}
+.auth-msg.success{background:rgba(10,124,110,0.12);border:1px solid rgba(10,124,110,0.3);color:#13c0ac;}
+.auth-msg.visible{display:block;}
+
+/* TERMS */
+.terms-note{font-size:11px;color:rgba(255,255,255,0.2);text-align:center;line-height:1.6;margin-top:16px;}
+.terms-note a{color:rgba(255,255,255,0.35);text-decoration:underline;}
+
+/* DIVIDER */
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0;}
+.divider-line{flex:1;height:1px;background:rgba(255,255,255,0.07);}
+.divider-text{font-size:11px;color:rgba(255,255,255,0.25);}
+
+/* FOOTER */
+footer{text-align:center;padding:20px;font-size:11px;color:rgba(255,255,255,0.2);position:relative;z-index:1;}
+</style>
+  <script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+
+<div class="login-wrap">
+  <div class="login-card">
+
+    <div class="login-logo">
+      <img src="salusAI-logo.jpg" alt="Salus AI" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="login-logo-placeholder" style="display:none;">Salus AI</div>
+    </div>
+
+    <!-- Create / Sign In tabs -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabCreate" onclick="switchTab('create')">Create Account</button>
+      <button class="auth-tab" id="tabSignin" onclick="switchTab('signin')">Sign In</button>
+    </div>
+
+    <!-- Create Account panel -->
+    <div id="panelCreate">
+      <div class="free-badge-wrap">
+        <div class="free-badge">✦ Free access — no credit card required</div>
+      </div>
+      <div class="auth-msg" id="createMsg"></div>
+      <div class="form-group">
+        <label>Email address</label>
+        <input id="createEmail" class="form-input" type="email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Cell phone <span class="optional">optional — for future text reminders</span></label>
+        <div class="phone-wrap">
+          <span class="phone-prefix">+1</span>
+          <input id="createPhone" class="form-input phone-input" type="tel" placeholder="(555) 000-0000" autocomplete="tel">
+        </div>
+      </div>
+      <div class="api-section">
+        <div class="api-section-title">
+          🔑 Anthropic API Key
+          <button class="api-toggle" onclick="toggleApiSection('create')">Enter key →</button>
+        </div>
+        <div class="api-section-sub">Required to use AI features. Enter once and it will be saved across all Salus AI pages. You can also enter it later on any page.</div>
+        <div class="api-key-row" id="createApiRow">
+          <input id="createApiKey" class="api-key-input" type="password" placeholder="sk-ant-api03-…">
+        </div>
+      </div>
+      <button class="submit-btn" id="createBtn" onclick="doCreate()">
+        <div class="submit-btn-inner"><span>Create My Free Account</span><span>→</span></div>
+      </button>
+      <div class="terms-note">By creating an account you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. Your health information is encrypted and never sold.</div>
+    </div>
+
+    <!-- Sign In panel -->
+    <div id="panelSignin" style="display:none;">
+      <div class="auth-msg" id="signinMsg"></div>
+      <div class="form-group">
+        <label>Email address</label>
+        <input id="signinEmail" class="form-input" type="email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="api-section">
+        <div class="api-section-title">
+          🔑 Anthropic API Key
+          <button class="api-toggle" onclick="toggleApiSection('signin')">Enter key →</button>
+        </div>
+        <div class="api-section-sub">Re-enter your API key to restore AI features if this is a new browser.</div>
+        <div class="api-key-row" id="signinApiRow">
+          <input id="signinApiKey" class="api-key-input" type="password" placeholder="sk-ant-api03-…">
+        </div>
+      </div>
+      <button class="submit-btn" id="signinBtn" onclick="doSignIn()">
+        <div class="submit-btn-inner"><span>Sign In</span><span>→</span></div>
+      </button>
+    </div>
+
+    <div class="divider"><div class="divider-line"></div><div class="divider-text">SECURE · PRIVATE · PHYSICIAN-FOUNDED</div><div class="divider-line"></div></div>
+    <div class="terms-note" style="color:rgba(255,255,255,0.2);">salusai.health · Not a replacement for your physician. Your data stays in your browser until you connect records.</div>
+
+  </div>
+</div>
+
+<footer>© 2025 Salus AI · All health information is for educational purposes only</footer>
+
+<script>
+/* ── Already logged in? Redirect to destination ── */
+(function(){
+  var user=null;try{user=JSON.parse(localStorage.getItem('salus_user')||'null');}catch(_){}
+  if(user&&user.email){
+    var params=new URLSearchParams(window.location.search);
+    var redirect=params.get('redirect');
+    window.location.replace(redirect&&redirect.startsWith('http')?redirect:'health-decisions4.html');
+  }
+})();
+
+function switchTab(tab){
+  document.getElementById('tabCreate').classList.toggle('active',tab==='create');
+  document.getElementById('tabSignin').classList.toggle('active',tab==='signin');
+  document.getElementById('panelCreate').style.display=tab==='create'?'block':'none';
+  document.getElementById('panelSignin').style.display=tab==='signin'?'block':'none';
+}
+
+function toggleApiSection(which){
+  var row=document.getElementById(which+'ApiRow');
+  row.classList.toggle('visible');
+  var btn=row.previousElementSibling.querySelector('.api-toggle');
+  if(row.classList.contains('visible')){btn.textContent='Hide ↑';}
+  else{btn.textContent='Enter key →';}
+}
+
+function showMsg(id,type,text){
+  var el=document.getElementById(id);
+  el.className='auth-msg '+type+' visible';
+  el.textContent=text;
+}
+
+function validateEmail(e){return/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);}
+
+function doCreate(){
+  var email=document.getElementById('createEmail').value.trim();
+  var phone=document.getElementById('createPhone').value.trim();
+  var apiKey=document.getElementById('createApiKey').value.trim();
+  if(!email){showMsg('createMsg','error','Please enter your email address.');return;}
+  if(!validateEmail(email)){showMsg('createMsg','error','Please enter a valid email address.');return;}
+
+  var user={email,phone:phone||'',loginTime:Date.now(),created:true};
+  localStorage.setItem('salus_user',JSON.stringify(user));
+  if(apiKey&&apiKey.startsWith('sk-')){
+    localStorage.setItem('salus_api_key',apiKey);
+    sessionStorage.setItem('salus_api_key',apiKey);
+  }
+
+  showMsg('createMsg','success','Account created! Taking you to Salus AI…');
+  document.getElementById('createBtn').disabled=true;
+  setTimeout(()=>{
+    var params=new URLSearchParams(window.location.search);
+    var redirect=params.get('redirect');
+    window.location.href=redirect&&redirect.startsWith('http')?redirect:'health-decisions4.html';
+  },900);
+}
+
+function doSignIn(){
+  var email=document.getElementById('signinEmail').value.trim();
+  var apiKey=document.getElementById('signinApiKey').value.trim();
+  if(!email){showMsg('signinMsg','error','Please enter your email address.');return;}
+  if(!validateEmail(email)){showMsg('signinMsg','error','Please enter a valid email address.');return;}
+
+  /* In dev mode: look for existing stored user, or create session */
+  var existing=null;
+  try{existing=JSON.parse(localStorage.getItem('salus_user')||'null');}catch(_){}
+  var user=existing&&existing.email===email?existing:{email,phone:'',loginTime:Date.now()};
+  user.loginTime=Date.now();
+  localStorage.setItem('salus_user',JSON.stringify(user));
+  if(apiKey&&apiKey.startsWith('sk-')){
+    localStorage.setItem('salus_api_key',apiKey);
+    sessionStorage.setItem('salus_api_key',apiKey);
+  }
+
+  showMsg('signinMsg','success','Welcome back! Taking you to Salus AI…');
+  document.getElementById('signinBtn').disabled=true;
+  setTimeout(()=>{
+    var params=new URLSearchParams(window.location.search);
+    var redirect=params.get('redirect');
+    window.location.href=redirect&&redirect.startsWith('http')?redirect:'health-decisions4.html';
+  },900);
+}
+
+/* Enter key submits */
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'){
+    if(document.getElementById('panelCreate').style.display!=='none')doCreate();
+    else doSignIn();
+  }
+});
+</script>
+</body>
+</html>

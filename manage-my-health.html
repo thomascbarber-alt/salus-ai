@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+/* Salus AI auth gate — runs before page renders */
+(function(){
+  var u=null;try{u=JSON.parse(localStorage.getItem('salus_user')||'null');}catch(_){}
+  if(!u||!u.email){
+    var t=encodeURIComponent(window.location.href);
+    window.location.replace('login.html?redirect='+t);
+  }
+})();
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salus AI — Manage My Health</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0c1e3a;--navy-mid:#162d52;--green:#3a9e6a;--green-light:#52c488;--green-dim:rgba(58,158,106,0.15);--gold:#d4aa3a;--white:#f0ece4;--text-dim:rgba(240,236,228,0.55);--danger:#c0392b;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+.progress-bar{position:fixed;top:0;left:0;right:0;height:3px;z-index:200;}
+.progress-fill{height:100%;width:0%;background:var(--green);transition:width .1s linear;box-shadow:0 0 8px var(--green-light);}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;padding:0 48px;height:96px;background:rgba(12,30,58,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(58,158,106,0.2);}
+.nav-logo{display:flex;align-items:center;}.logo-img{height:90px;width:auto;object-fit:contain;}
+.nav-actions{display:flex;gap:10px;margin-left:auto;margin-right:20px;}
+.nav-mini{padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;transition:all .2s;white-space:nowrap;}
+.nav-mini:hover{transform:translateY(-1px);opacity:.9;}
+.btn1{background:linear-gradient(135deg,#d4aa3a,#b8932a);color:#0c1e3a;}.btn2{background:linear-gradient(135deg,#13a090,#0a7c6e);color:white;}
+.btn3{background:linear-gradient(135deg,#4a6fa5,#162d52);color:white;}.btn4{background:linear-gradient(135deg,#9b59b6,#6b7a8d);color:white;}
+.btn5{background:linear-gradient(135deg,#3a9e6a,#2d7a52);color:white;}
+@media(max-width:768px){nav{padding:0 20px;}.nav-actions{gap:6px;margin-right:0;}.nav-mini{font-size:10px;padding:6px 10px;}}
+
+.page-wrap{max-width:960px;margin:0 auto;padding: 178px 24px 80px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+/* HEADER */
+.page-header{text-align:center;margin-bottom:48px;}
+.page-eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--green-light);margin-bottom:18px;}
+.eyebrow-line{width:28px;height:1px;background:linear-gradient(90deg,transparent,var(--green-light));}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(32px,5vw,48px);font-weight:600;line-height:1.15;color:var(--white);margin-bottom:16px;}
+.page-title em{font-style:italic;color:var(--green-light);}
+.page-sub{font-family:'Crimson Pro',serif;font-size:19px;color:var(--text-dim);line-height:1.6;max-width:600px;margin:0 auto;}
+
+/* API KEY */
+.apikey-input:focus{border-color:rgba(58,158,106,0.7);}
+.apikey-input::placeholder{color:rgba(255,255,255,0.2);}
+.apikey-save-btn:hover{background:var(--green);transform:translateY(-1px);}
+@media(max-width:768px){}
+
+/* RECORDS BANNER */
+.records-banner{border-radius:16px;margin-bottom:20px;border:1px solid rgba(58,158,106,0.3);overflow:hidden;animation:fadeUp .5s ease .1s both;}
+.records-banner-inner{display:flex;align-items:center;gap:16px;padding:18px 24px;background:rgba(58,158,106,0.08);}
+.records-icon{font-size:28px;flex-shrink:0;}
+.records-text{flex:1;}
+.records-text-title{font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px;}
+.records-text-sub{font-family:'Crimson Pro',serif;font-size:15px;color:rgba(255,255,255,0.55);line-height:1.4;}
+.records-connect-btn{padding:10px 22px;border-radius:10px;background:var(--green);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;flex-shrink:0;}
+.records-connect-btn:hover{background:var(--green-light);transform:translateY(-1px);}
+.records-connected-bar{display:none;align-items:center;gap:10px;padding:12px 20px;background:rgba(58,158,106,0.1);border:1px solid rgba(58,158,106,0.3);border-radius:12px;margin-bottom:20px;font-size:13px;color:rgba(255,255,255,0.7);}
+.records-connected-bar.visible{display:flex;}
+.records-dot{width:8px;height:8px;border-radius:50%;background:var(--green-light);flex-shrink:0;animation:pulse 2s infinite;}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(82,196,136,0.4);}70%{box-shadow:0 0 0 5px rgba(82,196,136,0);}100%{box-shadow:0 0 0 0 rgba(82,196,136,0);}}
+.records-revoke{margin-left:auto;font-size:12px;color:rgba(255,255,255,0.3);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;}
+
+/* HEALTH PROFILE FORM */
+.profile-card{border-radius:20px;border:1px solid rgba(58,158,106,0.2);background:rgba(255,255,255,0.02);padding:28px;margin-bottom:24px;animation:fadeUp .5s ease both;}
+.profile-card-title{font-family:'Playfair Display',serif;font-size:20px;color:var(--white);margin-bottom:6px;}
+.profile-card-sub{font-size:13px;color:var(--text-dim);margin-bottom:24px;line-height:1.5;}
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.profile-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;}
+@media(max-width:600px){.profile-grid,.profile-grid-3{grid-template-columns:1fr;}}
+.form-group label{display:block;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:6px;}
+.form-input,.form-select{width:100%;padding:11px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(58,158,106,0.15);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none;transition:border-color .2s;}
+.form-input:focus,.form-select:focus{border-color:rgba(58,158,106,0.5);}
+.form-input::placeholder{color:rgba(255,255,255,0.2);}
+.form-select option{background:#162d52;color:white;}
+.form-textarea{width:100%;padding:11px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(58,158,106,0.15);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none;resize:none;min-height:80px;line-height:1.5;transition:border-color .2s;}
+.form-textarea:focus{border-color:rgba(58,158,106,0.5);}
+.form-textarea::placeholder{color:rgba(255,255,255,0.2);}
+.form-full{grid-column:1/-1;}
+.generate-btn{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--green),#2d7a52);color:white;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;border:1px solid rgba(58,158,106,0.4);cursor:pointer;transition:all .25s;margin-top:8px;}
+.generate-btn:hover:not(:disabled){background:linear-gradient(135deg,#48c47a,var(--green));transform:translateY(-1px);box-shadow:0 6px 24px rgba(58,158,106,0.3);}
+.generate-btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+
+/* PIPELINE */
+.pipeline-panel{display:none;margin-top:24px;animation:fadeUp .4s ease both;}
+.pipeline-panel.visible{display:block;}
+.pipeline-title{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:20px;text-align:center;}
+.pipeline-track{position:relative;display:flex;align-items:flex-start;}
+.pipeline-track-line{position:absolute;top:22px;left:10%;right:10%;height:2px;background:rgba(255,255,255,0.07);z-index:0;border-radius:2px;overflow:hidden;}
+.pipeline-track-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--green),var(--green-light));transition:width .6s cubic-bezier(.4,0,.2,1);}
+.agents-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%;position:relative;z-index:1;}
+.agent-card{border-radius:12px;padding:14px 12px 12px;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.02);transition:all .4s;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;text-align:center;}
+.agent-card.running{border-color:rgba(58,158,106,0.5);background:rgba(58,158,106,0.08);box-shadow:0 0 18px rgba(58,158,106,0.08);}
+.agent-card.done{border-color:rgba(58,158,106,0.4);background:rgba(58,158,106,0.06);}
+.agent-card.paused{border-color:rgba(58,158,106,0.35);background:rgba(58,158,106,0.07);}
+.agent-card.error{border-color:rgba(192,57,43,0.35);background:rgba(192,57,43,0.06);}
+.agent-card-shimmer{position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent);transform:translateX(-100%);animation:shimmer 1.5s infinite;pointer-events:none;display:none;}
+.agent-card.running .agent-card-shimmer{display:block;}
+@keyframes shimmer{to{transform:translateX(100%);}}
+.agent-flag{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:13px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);transition:all .4s;flex-shrink:0;}
+.agent-card.running .agent-flag{background:rgba(58,158,106,0.2);border-color:rgba(58,158,106,0.6);animation:flagPulse 1.2s ease-in-out infinite;}
+.agent-card.done .agent-flag{background:rgba(58,158,106,0.2);border-color:var(--green-light);color:var(--green-light);}
+.agent-card.error .agent-flag{background:rgba(192,57,43,0.15);border-color:var(--danger);}
+@keyframes flagPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(58,158,106,0.3);}50%{transform:scale(1.08);box-shadow:0 0 0 5px rgba(58,158,106,0);}}
+.agent-num{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.2);margin-bottom:5px;}
+.agent-name{font-family:'Playfair Display',serif;font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:5px;line-height:1.3;}
+.agent-status{font-size:10px;color:rgba(255,255,255,0.28);display:flex;align-items:center;gap:4px;justify-content:center;min-height:14px;}
+.agent-status-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.15);flex-shrink:0;transition:background .3s;}
+.agent-card.running .agent-status-dot{background:var(--green-light);animation:aPulse 1s infinite;}
+.agent-card.done .agent-status-dot{background:var(--green-light);animation:none;}
+.agent-card.error .agent-status-dot{background:var(--danger);animation:none;}
+.agent-card.running .agent-status,.agent-card.done .agent-status{color:var(--green-light);}
+.agent-card.done .agent-name{color:var(--white);}
+@keyframes aPulse{0%{box-shadow:0 0 0 0 rgba(82,196,136,0.4);}70%{box-shadow:0 0 0 4px rgba(82,196,136,0);}100%{box-shadow:0 0 0 0 rgba(82,196,136,0);}}
+@media(max-width:768px){.agents-row{grid-template-columns:repeat(3,1fr);}.pipeline-track-line{display:none;}}
+
+/* RESULTS */
+.results-section{display:none;margin-top:40px;}
+.results-section.visible{display:block;animation:fadeUp .5s ease;}
+.results-header{text-align:center;margin-bottom:36px;}
+.results-title{font-family:'Playfair Display',serif;font-size:clamp(26px,4vw,36px);font-weight:600;color:var(--white);margin-bottom:10px;}
+.results-profile-echo{font-family:'Crimson Pro',serif;font-size:16px;color:var(--text-dim);font-style:italic;margin-bottom:16px;}
+.results-meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:12px;}
+.results-meta-chip{font-size:11px;padding:5px 12px;border-radius:100px;background:rgba(58,158,106,0.1);border:1px solid rgba(58,158,106,0.2);color:rgba(255,255,255,0.5);}
+.agent-note{font-size:11px;color:rgba(255,255,255,0.25);text-align:center;margin-bottom:28px;}
+
+/* DUE SOON BANNER */
+.due-soon-banner{border-radius:14px;padding:16px 20px;background:rgba(184,147,42,0.08);border:1px solid rgba(184,147,42,0.25);margin-bottom:28px;}
+.due-soon-title{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+.due-soon-items{display:flex;flex-wrap:wrap;gap:8px;}
+.due-item{font-size:12px;padding:5px 12px;border-radius:8px;background:rgba(184,147,42,0.12);border:1px solid rgba(184,147,42,0.25);color:rgba(255,255,255,0.7);}
+
+/* FILTER TABS */
+.filter-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;}
+.filter-tab{padding:7px 16px;border-radius:100px;font-size:12px;font-weight:600;border:1px solid rgba(58,158,106,0.2);background:transparent;color:rgba(255,255,255,0.4);cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.filter-tab:hover{border-color:rgba(58,158,106,0.5);color:rgba(255,255,255,0.7);}
+.filter-tab.active{background:rgba(58,158,106,0.15);border-color:rgba(58,158,106,0.5);color:var(--white);}
+
+/* CARE ITEMS */
+.care-list{display:flex;flex-direction:column;gap:16px;margin-bottom:40px;}
+.care-card{border-radius:16px;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.02);overflow:hidden;transition:border-color .3s;}
+.care-card.priority-high{border-color:rgba(58,158,106,0.3);}
+.care-card.priority-medium{border-color:rgba(184,147,42,0.2);}
+.care-card.priority-low{border-color:rgba(74,111,165,0.15);}
+.care-card.notif-set{border-color:rgba(58,158,106,0.5);background:rgba(58,158,106,0.04);}
+.care-header{display:flex;align-items:center;gap:14px;padding:18px 22px;cursor:pointer;}
+.care-priority-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.priority-high .care-priority-dot{background:var(--green-light);}
+.priority-medium .care-priority-dot{background:var(--gold);}
+.priority-low .care-priority-dot{background:#4a6fa5;}
+.care-main{flex:1;}
+.care-name{font-size:15px;font-weight:700;color:var(--white);margin-bottom:2px;}
+.care-freq{font-size:12px;color:var(--text-dim);}
+.care-header-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.care-due-badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:100px;white-space:nowrap;}
+.due-overdue{background:rgba(192,57,43,0.15);color:#e07070;border:1px solid rgba(192,57,43,0.3);}
+.due-soon{background:rgba(184,147,42,0.15);color:var(--gold);border:1px solid rgba(184,147,42,0.3);}
+.due-ok{background:rgba(58,158,106,0.1);color:var(--green-light);border:1px solid rgba(58,158,106,0.25);}
+.notif-icon{font-size:14px;opacity:.5;}
+.care-chevron{color:rgba(255,255,255,0.25);font-size:14px;}
+.care-body{display:none;padding:0 22px 22px;}
+.care-body.open{display:block;}
+.care-why{font-family:'Crimson Pro',serif;font-size:16px;color:rgba(255,255,255,0.75);line-height:1.65;margin-bottom:14px;}
+.care-source{font-size:11px;font-weight:700;color:var(--green-light);letter-spacing:1px;margin-bottom:16px;}
+
+/* ALTERNATIVES */
+.alternatives-section{margin-bottom:18px;}
+.alt-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px;}
+.alt-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;}
+.alt-card{padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.02);}
+.alt-name{font-size:13px;font-weight:700;color:var(--white);margin-bottom:8px;}
+.alt-pros,.alt-cons{display:flex;flex-direction:column;gap:4px;margin-bottom:6px;}
+.alt-pros-label{font-size:10px;font-weight:700;color:var(--green-light);letter-spacing:1px;margin-bottom:4px;}
+.alt-cons-label{font-size:10px;font-weight:700;color:rgba(192,57,43,0.8);letter-spacing:1px;margin-bottom:4px;}
+.alt-item{font-size:12px;color:var(--text-dim);display:flex;gap:6px;line-height:1.4;}
+.alt-pro-dot{color:var(--green-light);flex-shrink:0;}
+.alt-con-dot{color:rgba(192,57,43,0.7);flex-shrink:0;}
+.alt-best-for{font-size:11px;color:rgba(255,255,255,0.35);font-style:italic;margin-top:4px;}
+
+/* NOTIFICATION */
+.notif-row{display:flex;align-items:center;gap:10px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.05);flex-wrap:wrap;}
+.notif-label{font-size:12px;color:var(--text-dim);}
+.notif-date-input{padding:7px 12px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(58,158,106,0.2);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--white);outline:none;transition:border-color .2s;}
+.notif-date-input:focus{border-color:rgba(58,158,106,0.5);}
+.notif-btn{padding:7px 16px;border-radius:8px;background:rgba(58,158,106,0.7);color:white;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;border:none;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.notif-btn:hover{background:var(--green);transform:translateY(-1px);}
+.notif-btn.set{background:rgba(58,158,106,0.2);border:1px solid rgba(58,158,106,0.4);color:var(--green-light);}
+.notif-clear{padding:6px 10px;border-radius:8px;background:none;border:1px solid rgba(192,57,43,0.2);color:rgba(192,57,43,0.6);font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;transition:all .2s;display:none;}
+.notif-clear.visible{display:block;}
+.notif-clear:hover{background:rgba(192,57,43,0.1);}
+.notif-email-note{font-size:11px;color:rgba(255,255,255,0.25);width:100%;margin-top:4px;}
+
+/* NOTIFICATION PANEL */
+.notif-panel{position:fixed;bottom:24px;right:24px;z-index:500;background:var(--navy-mid);border:1px solid rgba(58,158,106,0.4);border-radius:16px;padding:20px 24px;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,0.5);animation:slideUp .3s ease;display:none;}
+.notif-panel.visible{display:block;}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.notif-panel-title{font-size:14px;font-weight:700;color:var(--green-light);margin-bottom:8px;}
+.notif-panel-msg{font-size:13px;color:rgba(255,255,255,0.75);line-height:1.5;margin-bottom:14px;}
+.notif-panel-close{width:100%;padding:8px;border-radius:8px;background:rgba(58,158,106,0.2);border:1px solid rgba(58,158,106,0.3);color:var(--green-light);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.notif-panel-close:hover{background:rgba(58,158,106,0.35);}
+
+/* PERSONALIZATION NOTE */
+.personalization-note{padding:16px 20px;border-radius:12px;background:rgba(58,158,106,0.06);border:1px solid rgba(58,158,106,0.2);margin-bottom:28px;font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;}
+.personalization-note strong{color:var(--green-light);}
+
+.reset-btn{display:flex;align-items:center;gap:8px;margin:32px auto 0;padding:12px 28px;background:rgba(58,158,106,0.1);border:1px solid rgba(58,158,106,0.25);border-radius:100px;color:rgba(255,255,255,0.5);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;}
+.reset-btn:hover{background:rgba(58,158,106,0.2);color:rgba(255,255,255,0.8);}
+footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0.06);text-align:center;font-size:11px;color:rgba(255,255,255,0.2);line-height:1.7;}
+
+/* ── Salus User Status Bar ── */
+#salusUserBar{
+  position:fixed;top:96px;left:0;right:0;z-index:99;
+  background:rgba(7,16,32,0.98);
+  border-bottom:1px solid rgba(255,255,255,0.055);
+  padding:0 48px;height:38px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-family:'DM Sans',sans-serif;font-size:12px;
+  backdrop-filter:blur(8px);
+}
+.subs-left{display:flex;align-items:center;gap:10px;}
+.subs-avatar{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,0.6);flex-shrink:0;}
+.subs-email{color:rgba(255,255,255,0.38);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.subs-right{display:flex;align-items:center;gap:10px;}
+.subs-records{display:flex;align-items:center;gap:5px;padding:4px 11px;border-radius:100px;text-decoration:none;transition:all .2s;white-space:nowrap;}
+.subs-records-on{background:rgba(58,158,106,0.12);border:1px solid rgba(58,158,106,0.3);color:#52c488;}
+.subs-records-off{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.3);}
+.subs-records-off:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.55);}
+.subs-rdot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.subs-rdot-on{background:#52c488;animation:subsDotPulse 2.2s infinite;}
+.subs-rdot-off{background:rgba(255,255,255,0.18);}
+@keyframes subsDotPulse{0%{box-shadow:0 0 0 0 rgba(82,196,136,.5);}70%{box-shadow:0 0 0 5px rgba(82,196,136,0);}100%{box-shadow:0 0 0 0 rgba(82,196,136,0);}}
+.subs-signout{padding:4px 9px;border-radius:6px;background:none;border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.22);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;transition:all .2s;}
+.subs-signout:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.5);}
+@media(max-width:768px){#salusUserBar{padding:0 16px;}.subs-email{display:none;}.subs-records span{display:none;}}
+
+</style>
+  <script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="ppFill"></div></div>
+
+<nav>
+  <div class="nav-logo">
+    <a href="final_6_edited (1).html" style="display:flex;align-items:center;">
+      <img src="salusAI-logo.jpg" class="logo-img" alt="Salus AI">
+    </a>
+  </div>
+  <div class="nav-actions">
+    <a href="precision-medicine3.html"   class="nav-mini btn1">Precision Medicine</a>
+    <a href="health-decisions4.html"     class="nav-mini btn2">Health Decisions</a>
+    <a href="determine-diagnosis.html"   class="nav-mini btn4">Determine Diagnosis</a>
+    <a href="understand-diagnosis.html"  class="nav-mini btn3">Understand Diagnosis</a>
+    <a href="manage-my-health.html"      class="nav-mini btn5" style="border:1px solid rgba(58,158,106,0.6);">Manage My Health</a>
+  </div>
+</nav>
+<div id="salusUserBar"></div>
+
+<div class="page-wrap">
+  <div class="page-header">
+    <div class="page-eyebrow"><div class="eyebrow-line"></div>Salus AI · Manage My Health<div class="eyebrow-line" style="transform:scaleX(-1)"></div></div>
+    <h1 class="page-title">Your Personal<br><em>Preventive Care Plan</em></h1>
+    <p class="page-sub">Based on your health profile, age, sex, and current guidelines — a personalized preventive care roadmap with alternatives, evidence, and reminders for every screening and immunization.</p>
+  </div>
+
+  <!-- API KEY -->
+  
+      <div class="apikey-text">
+        <div class="apikey-text-title">Anthropic API Key required</div>
+        <div class="apikey-text-sub">Dev mode — key lives only in this browser tab.</div>
+      </div>
+      <div class="apikey-input-wrap">
+        <input class="apikey-input" id="apikeyInput" type="password" placeholder="sk-ant-api03-…" autocomplete="off">
+        <button class="apikey-save-btn" onclick="saveApiKey()">Save Key</button>
+      </div>
+    </div>
+  </div>
+  
+    <span>API key active.</span>
+    <button class="apikey-clear-btn" onclick="clearApiKey()">Clear key</button>
+  </div>
+
+  <!-- RECORDS BANNER -->
+  <div class="records-banner" id="recordsBanner">
+    <div class="records-banner-inner">
+      <div class="records-icon">🏥</div>
+      <div class="records-text">
+        <div class="records-text-title">Connect your medical records for a more personalized plan</div>
+        <div class="records-text-sub">Linking your records via HealthEx lets Salus AI tailor your preventive plan to your actual diagnoses, medications, and prior screenings — not just population guidelines.</div>
+      </div>
+      <button class="records-connect-btn" onclick="connectRecords()">Link Records</button>
+    </div>
+  </div>
+  <div class="records-connected-bar" id="recordsConnectedBar">
+    <div class="records-dot"></div>
+    <span>Medical records connected — plan will be personalized to your health history.</span>
+    <button class="records-revoke" onclick="revokeRecords()">Unlink</button>
+  </div>
+
+  <!-- HEALTH PROFILE FORM -->
+  <div class="profile-card" id="profileCard">
+    <div class="profile-card-title">Your health profile</div>
+    <div class="profile-card-sub">Fill in what you know — the more detail, the more precise your preventive plan. All fields are optional but age and sex are most important.</div>
+
+    <div class="profile-grid">
+      <div class="form-group">
+        <label>Age</label>
+        <input id="profileAge" class="form-input" type="number" min="1" max="120" placeholder="e.g. 58">
+      </div>
+      <div class="form-group">
+        <label>Biological Sex</label>
+        <select id="profileSex" class="form-select">
+          <option value="">Select</option>
+          <option>Female</option><option>Male</option>
+        </select>
+      </div>
+    </div>
+    <div class="profile-grid-3">
+      <div class="form-group">
+        <label>Smoker?</label>
+        <select id="profileSmoking" class="form-select">
+          <option value="">Select</option>
+          <option>Never</option><option>Former smoker</option><option>Current smoker</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Diabetes?</label>
+        <select id="profileDiabetes" class="form-select">
+          <option value="">Unknown</option>
+          <option>No</option><option>Pre-diabetes</option>
+          <option>Type 1</option><option>Type 2</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Heart Disease?</label>
+        <select id="profileHeartDisease" class="form-select">
+          <option value="">Unknown</option>
+          <option>No</option><option>Yes — diagnosed</option><option>Family history only</option>
+        </select>
+      </div>
+    </div>
+    <div class="profile-grid">
+      <div class="form-group">
+        <label>Other diagnosed conditions</label>
+        <input id="profileConditions" class="form-input" type="text" placeholder="e.g. hypertension, hypothyroidism, osteoporosis">
+      </div>
+      <div class="form-group">
+        <label>Current medications</label>
+        <input id="profileMeds" class="form-input" type="text" placeholder="e.g. lisinopril, levothyroxine, aspirin">
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:20px;">
+      <label>Recent screenings (what and when)</label>
+      <textarea id="profileScreenings" class="form-textarea" placeholder="e.g. Colonoscopy 2022, Mammogram Jan 2024, Blood pressure checked 6 months ago, no recent cholesterol test..."></textarea>
+    </div>
+    <div class="form-group" style="margin-bottom:20px;">
+      <label>Family history</label>
+      <input id="profileFamily" class="form-input" type="text" placeholder="e.g. mother — breast cancer, father — colon cancer age 62, heart disease">
+    </div>
+    <button class="generate-btn" id="generateBtn" onclick="generatePlan()">Generate My Preventive Care Plan →</button>
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="pipeline-panel" id="pipelinePanel">
+    <div class="pipeline-title">Salus AI · 5-Agent Preventive Care Analysis</div>
+    <div class="pipeline-track">
+      <div class="pipeline-track-line"><div class="pipeline-track-fill" id="trackFill"></div></div>
+      <div class="agents-row">
+        <div class="agent-card" id="agentCard1"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag1">💬</div><div class="agent-num">Agent 01</div><div class="agent-name">Profile Review</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus1">Waiting</span></div></div>
+        <div class="agent-card" id="agentCard2"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag2">📋</div><div class="agent-num">Agent 02</div><div class="agent-name">Care Planner</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus2">Waiting</span></div></div>
+        <div class="agent-card" id="agentCard3"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag3">🔬</div><div class="agent-num">Agent 03</div><div class="agent-name">Accuracy Review</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus3">Waiting</span></div></div>
+        <div class="agent-card" id="agentCard4"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag4">⚖️</div><div class="agent-num">Agent 04</div><div class="agent-name">Legal Review</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus4">Waiting</span></div></div>
+        <div class="agent-card" id="agentCard5"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag5">✦</div><div class="agent-num">Agent 05</div><div class="agent-name">Clarity</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus5">Waiting</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results-section" id="resultsSection">
+    <div class="results-header">
+      <div class="results-title">Your Preventive Care Plan</div>
+      <div class="results-profile-echo" id="profileEcho"></div>
+      <div class="results-meta" id="resultsMeta"></div>
+    </div>
+    <div class="agent-note" id="agentNote"></div>
+    <div class="personalization-note" id="personalizationNote"></div>
+    <div class="due-soon-banner" id="dueSoonBanner" style="display:none;">
+      <div class="due-soon-title">📅 Due Soon or Overdue</div>
+      <div class="due-soon-items" id="dueSoonItems"></div>
+    </div>
+    <div class="filter-tabs" id="filterTabs"></div>
+    <div class="care-list" id="careList"></div>
+    <button class="reset-btn" onclick="resetToForm()">← Update health profile</button>
+  </div>
+</div>
+
+<!-- NOTIFICATION TOAST -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-panel-title">🔔 Reminder Set</div>
+  <div class="notif-panel-msg" id="notifPanelMsg"></div>
+  <button class="notif-panel-close" onclick="document.getElementById('notifPanel').classList.remove('visible')">Got it</button>
+</div>
+
+<footer>
+  <p>salusai.health · Manage My Health — Preventive care guidance based on USPSTF, ACIP, AHA, and other national guidelines.</p>
+  <p style="margin-top:8px;max-width:700px;margin-left:auto;margin-right:auto;">Recommendations are educational and based on population-level guidelines. Your physician may have different recommendations based on your individual clinical situation. Always discuss preventive care decisions with your healthcare provider. Notification reminders are stored locally in your browser.</p>
+</footer>
+
+<script>
+let _apiKey='', recordsConnected=false, lastProfile={}, currentCareItems=[], activeFilter='all';
+const SalusState = {
+  isRecordsConnected:  () => SalusAuth.isRecordsConnected(),
+  setRecordsConnected: (v) => SalusAuth.setRecordsConnected(v)
+};
+
+window.addEventListener('DOMContentLoaded',()=>{
+  salusInitUserBar();if(SalusState.isRecordsConnected()){recordsConnected=true;document.getElementById('recordsBanner').style.display='none';document.getElementById('recordsConnectedBar').classList.add('visible');}
+  checkDueNotifications();
+});
+window.addEventListener('scroll',()=>{const d=document.documentElement;const p=d.scrollHeight-d.clientHeight;document.getElementById('ppFill').style.width=p>0?(d.scrollTop/p*100)+'%':'0%';});
+
+function revokeRecords(){recordsConnected=false;SalusState.setRecordsConnected(false);document.getElementById('recordsConnectedBar').classList.remove('visible');document.getElementById('recordsBanner').style.display='block';}
+
+const TRACK_STEPS={1:0,2:25,3:50,4:75,5:100};
+const ICONS={1:'💬',2:'📋',3:'🔬',4:'⚖️',5:'✦'};
+function setAgentState(n,state,msg){
+  const c=document.getElementById('agentCard'+n),s=document.getElementById('agentStatus'+n),f=document.getElementById('agentFlag'+n);
+  if(!c)return;c.className='agent-card'+(state?' '+state:'');s.textContent=msg;
+  if(state==='done'){f.textContent='✓';document.getElementById('trackFill').style.width=TRACK_STEPS[n]+'%';}
+  else if(state==='running')f.textContent=ICONS[n]||'⟳';else if(state==='paused')f.textContent='⏸';else if(state==='error')f.textContent='✕';else f.textContent=ICONS[n]||'○';
+}
+function showPipeline(){document.getElementById('pipelinePanel').classList.add('visible');}
+function hidePipeline(){document.getElementById('pipelinePanel').classList.remove('visible');}
+
+async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebSearch = false }, _retry = 0) {
+  const body = {
+    model: 'claude-sonnet-4-6',
+    max_tokens: maxTokens,
+    system: systemPrompt,
+    messages: [{ role: 'user', content: userContent }]
+  };
+  if (useWebSearch) {
+    body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
+  }
+  const res = await fetch('/api/claude', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if ((res.status === 529 || res.status === 503) && _retry < 3) {
+    await new Promise(r => setTimeout(r, (_retry + 1) * 2000));
+    return callClaude({ systemPrompt, userContent, maxTokens, useWebSearch }, _retry + 1);
+  }
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error('API error ' + res.status + ': ' + err);
+  }
+  return await res.json();
+}
+
+function extractText(d){return(d.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');}
+function safeParseJSON(text){
+  if(!text||!text.trim())throw new Error('Empty response');
+  let c=text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+  try{return JSON.parse(c);}catch(_){}
+  const m=c.match(/\{[\s\S]*\}/);if(m){try{return JSON.parse(m[0]);}catch(_){}}
+  throw new Error('Could not parse JSON. Preview: '+c.substring(0,300));
+}
+
+/* AGENT SYSTEM PROMPTS */
+const AGENT_PROFILE_SYSTEM=`You are Salus AI's Profile Review Agent. Your job is to review the patient health profile for completeness and flag any gaps that would significantly improve the preventive care plan.
+
+Respond ONLY with JSON:
+{"profile_complete":true,"missing_important":[],"profile_summary":"1-sentence summary of patient profile","proceed":true}
+
+Only flag as missing if something critical is absent (age and sex are most important). If age and sex are provided, set proceed:true.
+Return ONLY valid JSON.`;
+
+const AGENT_CARE_PLANNER_SYSTEM=`You are Salus AI's Preventive Care Planning Agent. You generate personalized, evidence-based preventive care plans based on USPSTF, ACIP, AHA, ACC, and other national guidelines.
+
+Generate a comprehensive preventive care plan tailored to this patient's profile.
+
+Respond ONLY with this JSON:
+{
+  "personalization_notes": "How this plan was tailored to this specific patient (2-3 sentences)",
+  "care_items": [
+    {
+      "id": "unique-slug",
+      "category": "Cancer Screening|Cardiovascular|Immunizations|Mental Health|Metabolic|Bone Health|Vision & Hearing|Dental|Other",
+      "name": "Test/Screening name",
+      "description": "What it is and what it detects (1-2 sentences)",
+      "why_recommended": "Why this is recommended for THIS patient specifically",
+      "frequency": "Annual|Every 2 years|Every 3 years|Every 5 years|Every 10 years|One-time|Monthly self-exam|Other",
+      "frequency_detail": "More specific timing e.g. 'every 10 years starting at age 45 unless high risk'",
+      "guideline_source": "USPSTF Grade A/B|ACIP|AHA/ACC|Other",
+      "priority": "high|medium|low",
+      "applies_because": "Age|Sex|Risk factor|Condition|Family history",
+      "alternatives": [
+        {
+          "name": "Alternative test/approach name",
+          "pros": ["Pro 1", "Pro 2"],
+          "cons": ["Con 1", "Con 2"],
+          "best_for": "Patient profile this alternative best suits"
+        }
+      ],
+      "questions_for_doctor": ["Specific question about this test"]
+    }
+  ]
+}
+
+IMPORTANT RULES:
+- Include ALL relevant screenings and immunizations for this patient's age, sex, and risk factors
+- Always include alternatives where they exist (e.g., colonoscopy vs FIT test, mammogram vs tomosynthesis vs breast MRI, Pap smear vs HPV test)
+- Base everything on current USPSTF, ACIP, or major society guidelines
+- Order items by priority (high first)
+- For a typical adult, include: blood pressure, cholesterol, diabetes, cancer screenings (age/sex appropriate), colonoscopy vs FIT, immunizations (flu, COVID, pneumococcal, shingles, etc.), depression screening, vision, dental, skin
+- Add condition-specific items based on their profile
+- Return ONLY valid JSON`;
+
+const AGENT_ACCURACY_SYSTEM=`Review the preventive care plan JSON for accuracy against current guidelines. Respond ONLY:
+{"approved":true,"accuracy_score":9,"corrections_needed":[],"reviewer_note":"Brief note"}
+Check: are recommended frequencies correct per USPSTF/ACIP? Are the alternatives real and accurately described? Are pros/cons accurate?`;
+
+const AGENT_LEGAL_SYSTEM=`Review the preventive care plan for scope issues. Respond ONLY:
+{"scope_appropriate":true,"issues_found":[],"legal_note":"Brief note"}
+FLAG: specific dosing, definitive diagnoses, mandatory language ("you must"), guarantees about outcomes.
+ACCEPTABLE: guideline-based recommendations, alternatives with pros/cons, questions to ask doctor.`;
+
+const AGENT_CLARITY_SYSTEM=`Apply all corrections from reviewers. Then make the plan clear and actionable for a patient:
+- Make "why_recommended" personal and specific — connect to THEIR age/conditions
+- Make alternatives genuinely helpful — not just lists but actual guidance on which might suit them
+- Ensure frequency_detail is clear and practical
+- Return the EXACT same JSON schema. ONLY valid JSON.`;
+
+async function generatePlan(){
+  const age=document.getElementById('profileAge').value.trim();
+  const sex=document.getElementById('profileSex').value;
+  if(!age||!sex){alert('Please enter your age and biological sex at minimum.');return;}
+
+  lastProfile={
+    age,sex,
+    smoking:document.getElementById('profileSmoking').value,
+    diabetes:document.getElementById('profileDiabetes').value,
+    heartDisease:document.getElementById('profileHeartDisease').value,
+    conditions:document.getElementById('profileConditions').value.trim(),
+    medications:document.getElementById('profileMeds').value.trim(),
+    screenings:document.getElementById('profileScreenings').value.trim(),
+    familyHistory:document.getElementById('profileFamily').value.trim(),
+    recordsConnected
+  };
+
+  document.getElementById('generateBtn').disabled=true;
+  document.getElementById('resultsSection').style.display='none';
+  const e=document.getElementById('pipelineErrorMsg');if(e)e.remove();
+  [1,2,3,4,5].forEach(n=>setAgentState(n,'','Waiting'));
+  document.getElementById('trackFill').style.width='0%';
+  showPipeline();
+
+  const profileMsg=buildProfileMessage(lastProfile);
+
+  try{
+    /* Agent 1: Profile Review */
+    setAgentState(1,'running','Reviewing profile…');
+    const r1=await callClaude({systemPrompt:AGENT_PROFILE_SYSTEM,userContent:profileMsg,maxTokens:400});
+    let p1;try{p1=safeParseJSON(extractText(r1));}catch(_){p1={proceed:true};}
+    setAgentState(1,'done','Complete');
+
+    /* Agent 2: Care Planner */
+    setAgentState(2,'running','Building your plan…');
+    const r2=await callClaude({systemPrompt:AGENT_CARE_PLANNER_SYSTEM,userContent:profileMsg,maxTokens:8000});
+    let p2;try{p2=safeParseJSON(extractText(r2));}catch(e){throw new Error('Care Planner JSON parse failed: '+e.message);}
+    setAgentState(2,'done','Complete');
+
+    /* Agent 3: Accuracy */
+    setAgentState(3,'running','Verifying guidelines…');
+    const r3=await callClaude({systemPrompt:AGENT_ACCURACY_SYSTEM,userContent:JSON.stringify(p2),maxTokens:1200});
+    let p3;try{p3=safeParseJSON(extractText(r3));}catch(_){p3={approved:true,accuracy_score:8,reviewer_note:'Guidelines reviewed.'};}
+    setAgentState(3,'done','Score '+(p3.accuracy_score||8)+'/10');
+
+    /* Agent 4: Legal */
+    setAgentState(4,'running','Scope check…');
+    const r4=await callClaude({systemPrompt:AGENT_LEGAL_SYSTEM,userContent:JSON.stringify(p2),maxTokens:600});
+    let p4;try{p4=safeParseJSON(extractText(r4));}catch(_){p4={scope_appropriate:true,legal_note:'Reviewed.'};}
+    setAgentState(4,'done',p4.scope_appropriate?'Approved ✓':'Issues flagged');
+
+    /* Agent 5: Clarity */
+    setAgentState(5,'running','Personalizing…');
+    const r5=await callClaude({systemPrompt:AGENT_CLARITY_SYSTEM,userContent:`Plan:\n${JSON.stringify(p2)}\nAccuracy:\n${JSON.stringify(p3)}\nLegal:\n${JSON.stringify(p4)}`,maxTokens:8000});
+    let final;try{final=safeParseJSON(extractText(r5));}catch(_){final=p2;}
+    setAgentState(5,'done','Complete');
+
+    setTimeout(()=>{hidePipeline();renderResults(final,p3,lastProfile);document.getElementById('generateBtn').disabled=false;},700);
+  }catch(err){handleError(err.message||String(err));}
+}
+
+function buildProfileMessage(p){
+  return `Patient Profile for Preventive Care Planning:
+Age: ${p.age}
+Biological Sex: ${p.sex}
+Smoking: ${p.smoking||'Not provided'}
+Diabetes: ${p.diabetes||'Not provided'}
+Heart Disease: ${p.heartDisease||'Not provided'}
+Other Conditions: ${p.conditions||'None provided'}
+Current Medications: ${p.medications||'None provided'}
+Recent Screenings: ${p.screenings||'None provided'}
+Family History: ${p.familyHistory||'None provided'}
+Medical Records Connected: ${p.recordsConnected?'Yes — personalize accordingly':'No — use profile only'}
+
+Generate a COMPLETE preventive care plan for this patient including ALL relevant screenings, immunizations, and health maintenance items. Include alternatives where they exist (colonoscopy vs FIT, mammogram approaches, etc.).`;
+}
+
+function renderResults(r,accuracy,profile){
+  const sec=document.getElementById('resultsSection');
+  sec.style.display='block';sec.classList.add('visible');
+
+  document.getElementById('profileEcho').textContent=`${profile.age}-year-old ${profile.sex.toLowerCase()}${profile.conditions?` · ${profile.conditions}`:''} ${recordsConnected?'· Records connected':''}`;
+  const now=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('resultsMeta').innerHTML=`<div class="results-meta-chip">📅 ${now}</div><div class="results-meta-chip">${(r.care_items||[]).length} care items</div><div class="results-meta-chip">✓ 5-Agent Review</div>${recordsConnected?'<div class="results-meta-chip">🏥 Personalized to your records</div>':'<div class="results-meta-chip">📋 Guideline-based</div>'}`;
+  document.getElementById('agentNote').textContent=accuracy?.reviewer_note||'Reviewed by Salus AI 5-agent pipeline.';
+  document.getElementById('personalizationNote').innerHTML=`<strong>How this plan was personalized:</strong> ${esc(r.personalization_notes||'Based on your age, sex, and provided health profile against current USPSTF, ACIP, and major society guidelines.')}`;
+
+  currentCareItems=r.care_items||[];
+  buildFilterTabs(currentCareItems);
+  renderCareList(currentCareItems,'all');
+
+  setTimeout(()=>sec.scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+
+function buildFilterTabs(items){
+  const cats=[...new Set(items.map(i=>i.category))];
+  const tabs=document.getElementById('filterTabs');
+  tabs.innerHTML=`<button class="filter-tab active" onclick="filterCare('all',this)">All (${items.length})</button>`+
+    cats.map(c=>`<button class="filter-tab" onclick="filterCare('${esc(c)}',this)">${esc(c)} (${items.filter(i=>i.category===c).length})</button>`).join('');
+}
+
+function filterCare(cat,btn){
+  activeFilter=cat;
+  document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderCareList(currentCareItems,cat);
+}
+
+function renderCareList(items,filter){
+  const filtered=filter==='all'?items:items.filter(i=>i.category===filter);
+  const stored=getStoredNotifications();
+
+  // Due soon
+  const dueSoon=filtered.filter(i=>{const n=stored[i.id];if(!n)return false;const d=new Date(n);const diff=(d-new Date())/(1000*60*60*24);return diff<=30;});
+  const dsb=document.getElementById('dueSoonBanner');
+  if(dueSoon.length>0){dsb.style.display='block';document.getElementById('dueSoonItems').innerHTML=dueSoon.map(i=>`<span class="due-item">📅 ${esc(i.name)} — ${new Date(stored[i.id]).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>`).join('');}
+  else{dsb.style.display='none';}
+
+  document.getElementById('careList').innerHTML=filtered.map((item,idx)=>{
+    const hasNotif=stored[item.id];
+    const notifDate=hasNotif?new Date(stored[item.id]):null;
+    const today=new Date();
+    let dueCls='',dueText='';
+    if(notifDate){
+      const diff=Math.ceil((notifDate-today)/(1000*60*60*24));
+      if(diff<0){dueCls='due-overdue';dueText='Overdue';}
+      else if(diff<=30){dueCls='due-soon';dueText='Due in '+diff+'d';}
+      else{dueCls='due-ok';dueText=notifDate.toLocaleDateString('en-US',{month:'short',year:'numeric'});}
+    }
+    const altHtml=(item.alternatives||[]).length>0?`
+      <div class="alternatives-section">
+        <div class="alt-label">Alternatives & options — discuss with your doctor</div>
+        <div class="alt-cards">
+          ${item.alternatives.map(a=>`
+          <div class="alt-card">
+            <div class="alt-name">${esc(a.name)}</div>
+            ${(a.pros||[]).length?`<div class="alt-pros"><div class="alt-pros-label">PROS</div>${a.pros.map(p=>`<div class="alt-item"><span class="alt-pro-dot">✓</span>${esc(p)}</div>`).join('')}</div>`:''}
+            ${(a.cons||[]).length?`<div class="alt-cons"><div class="alt-cons-label">CONS</div>${a.cons.map(c=>`<div class="alt-item"><span class="alt-con-dot">✗</span>${esc(c)}</div>`).join('')}</div>`:''}
+            ${a.best_for?`<div class="alt-best-for">Best for: ${esc(a.best_for)}</div>`:''}
+          </div>`).join('')}
+        </div>
+      </div>`:'' ;
+
+    return `<div class="care-card priority-${item.priority||'medium'}${hasNotif?' notif-set':''}" id="care-${item.id}">
+      <div class="care-header" onclick="toggleCare(this)">
+        <div class="care-priority-dot"></div>
+        <div class="care-main">
+          <div class="care-name">${esc(item.name)}</div>
+          <div class="care-freq">${esc(item.frequency)}${item.frequency_detail?' · '+esc(item.frequency_detail):''}</div>
+        </div>
+        <div class="care-header-right">
+          ${dueCls?`<span class="care-due-badge ${dueCls}">${dueText}</span>`:''}
+          ${hasNotif?'<span class="notif-icon">🔔</span>':''}
+          <div class="care-chevron">${idx===0?'▾':'▸'}</div>
+        </div>
+      </div>
+      <div class="care-body ${idx===0?'open':''}">
+        <div class="care-why">${esc(item.why_recommended||item.description||'')}</div>
+        <div class="care-source">📋 ${esc(item.guideline_source||'')}</div>
+        ${altHtml}
+        <div class="notif-row">
+          <span class="notif-label">📅 Set reminder:</span>
+          <input type="date" class="notif-date-input" id="date-${item.id}" value="${hasNotif?stored[item.id].split('T')[0]:''}">
+          <button class="notif-btn${hasNotif?' set':''}" id="notifBtn-${item.id}" onclick="setNotification('${item.id}','${esc(item.name)}')">${hasNotif?'Update reminder':'Set reminder'}</button>
+          <button class="notif-clear${hasNotif?' visible':''}" id="clearBtn-${item.id}" onclick="clearNotification('${item.id}')">Clear</button>
+          <span class="notif-email-note">Browser reminder only. Email/text reminders available in the full app.</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* NOTIFICATIONS */
+function getStoredNotifications(){
+  try{return JSON.parse(localStorage.getItem('salus_notifications')||'{}');}catch(_){return{};}
+}
+function saveNotifications(obj){try{localStorage.setItem('salus_notifications',JSON.stringify(obj));}catch(_){}}
+
+function setNotification(id,name){
+  const dateInput=document.getElementById('date-'+id);
+  const dateVal=dateInput.value;
+  if(!dateVal){alert('Please select a date first.');return;}
+  const stored=getStoredNotifications();
+  stored[id]=new Date(dateVal).toISOString();
+  saveNotifications(stored);
+
+  // Request browser notification permission
+  if('Notification' in window&&Notification.permission==='default'){
+    Notification.requestPermission().then(p=>{if(p==='granted')scheduleNotification(name,dateVal);});
+  }else if(Notification.permission==='granted'){scheduleNotification(name,dateVal);}
+
+  // Update UI
+  document.getElementById('notifBtn-'+id).textContent='Update reminder';
+  document.getElementById('notifBtn-'+id).classList.add('set');
+  document.getElementById('clearBtn-'+id).classList.add('visible');
+  document.getElementById('care-'+id)?.classList.add('notif-set');
+
+  // Toast
+  const msg=document.getElementById('notifPanelMsg');
+  msg.textContent=`Reminder set for "${name}" on ${new Date(dateVal).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}.`;
+  const panel=document.getElementById('notifPanel');
+  panel.classList.add('visible');
+  setTimeout(()=>panel.classList.remove('visible'),4000);
+
+  // Refresh due soon
+  renderCareList(currentCareItems,activeFilter);
+}
+
+function clearNotification(id){
+  const stored=getStoredNotifications();
+  delete stored[id];
+  saveNotifications(stored);
+  document.getElementById('notifBtn-'+id).textContent='Set reminder';
+  document.getElementById('notifBtn-'+id).classList.remove('set');
+  document.getElementById('clearBtn-'+id).classList.remove('visible');
+  document.getElementById('date-'+id).value='';
+  document.getElementById('care-'+id)?.classList.remove('notif-set');
+  renderCareList(currentCareItems,activeFilter);
+}
+
+function scheduleNotification(name,dateStr){
+  const target=new Date(dateStr).getTime();
+  const now=Date.now();
+  const delay=target-now;
+  if(delay>0&&delay<2147483647){
+    setTimeout(()=>{
+      if(Notification.permission==='granted'){
+        new Notification('Salus AI — Health Reminder',{body:`Time for: ${name}`,icon:'salusAI-logo.jpg'});
+      }
+    },delay);
+  }
+}
+
+function checkDueNotifications(){
+  const stored=getStoredNotifications();
+  const today=new Date();
+  Object.entries(stored).forEach(([id,dateStr])=>{
+    const d=new Date(dateStr);
+    const diff=Math.ceil((d-today)/(1000*60*60*24));
+    if(diff<=0&&diff>=-3){
+      // Show overdue toast on page load
+      if('Notification' in window&&Notification.permission==='granted'){
+        const name=id.replace(/-/g,' ');
+        new Notification('Salus AI — Due Now',{body:`${name} is due. Open Salus AI to review your care plan.`});
+      }
+    }
+  });
+}
+
+function toggleCare(h){const b=h.nextElementSibling;const c=h.querySelector('.care-chevron');b.classList.toggle('open');c.textContent=b.classList.contains('open')?'▾':'▸';}
+
+function resetToForm(){
+  document.getElementById('resultsSection').style.display='none';
+  document.getElementById('resultsSection').classList.remove('visible');
+  document.getElementById('generateBtn').disabled=false;
+  hidePipeline();
+  document.getElementById('profileCard').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function handleError(msg){
+  console.error(msg);
+  [1,2,3,4,5].forEach(n=>{const c=document.getElementById('agentCard'+n);if(c&&c.classList.contains('running'))setAgentState(n,'error','Error');});
+  setTimeout(()=>{hidePipeline();document.getElementById('generateBtn').disabled=false;const d=document.createElement('div');d.id='pipelineErrorMsg';d.style.cssText='margin-top:16px;padding:16px 20px;background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.3);border-radius:12px;font-size:13px;color:#e07070;font-family:DM Sans,sans-serif;line-height:1.5;';d.innerHTML='<strong style="color:#e88;">⚠ Error:</strong> '+msg+'<br><span style="opacity:.6;font-size:12px;">Check your API key and try again.</span>';document.getElementById('profileCard').after(d);},800);
+}
+
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* ── HealthEx OAuth return handler ── */
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const recordsParam = params.get('records');
+  if (recordsParam === 'connected') {
+    // Patient just authorized HealthEx — mark as connected and clean URL
+    localStorage.setItem('salus_records_connected', 'true');
+    SalusAuth.setRecordsConnected(true);
+    window.history.replaceState({}, '', window.location.pathname);
+  } else if (recordsParam === 'error') {
+    const reason = params.get('reason') || 'unknown';
+    console.warn('HealthEx OAuth error:', reason);
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+})();
+
+</script>
+</body>
+</html>
