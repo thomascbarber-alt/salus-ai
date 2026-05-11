@@ -797,28 +797,15 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 <!-- ══════════════════ MAIN INTERFACE ══════════════════ -->
 <section class="interface-section" id="interface">
   <div class="interface-wrap">
-<div class="apikey-text">
-          <div class="apikey-text-title">Anthropic API Key required</div>
-          <div class="apikey-text-sub">Dev mode — your key is stored only in this browser tab and never sent anywhere except Anthropic's API.</div>
         </div>
-        <div class="apikey-input-wrap">
           <input
-            class="apikey-input"
-            id="apikeyInput"
             type="password"
-            placeholder="sk-ant-api03-…"
             autocomplete="off"
             spellcheck="false"
           >
-          <button class="apikey-save-btn" onclick="saveApiKey()">Save Key</button>
-        </div>
       </div>
     </div>
-<span>API key set — ready to analyze. <span style="color:rgba(255,255,255,0.3);font-size:11px;">Key lives only in this tab's memory.</span></span>
-      <button class="apikey-clear-btn" onclick="clearApiKey()">Clear key</button>
-    </div>
-
-    <!-- Records permission banner -->
+<!-- Records permission banner -->
     <div class="records-banner" id="recordsBanner">
       <div class="records-banner-inner">
         <div class="records-icon">🏥</div>
@@ -937,13 +924,9 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
             <div class="agent-status">
               <div class="agent-status-dot"></div>
               <span id="agentStatus5">Waiting</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
-
-  </div><!-- /interface-wrap -->
+<!-- /interface-wrap -->
 </section>
 
 <!-- ══════════════════ RESULTS ══════════════════ -->
