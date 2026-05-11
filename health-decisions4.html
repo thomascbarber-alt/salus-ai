@@ -139,7 +139,95 @@ h1 em { font-style: italic; color: var(--gold); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ═══════════════════ MAIN INTERFACE ═══════════════════ */
+/* ═══════════════════ QUESTION CARD ═══════════════════ */
+.question-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(184,147,42,0.2);
+  border-radius: 20px;
+  padding: 32px 36px 28px;
+  margin-bottom: 28px;
+  animation: fadeUp 0.5s ease 0.1s both;
+  backdrop-filter: blur(12px);
+}
+.question-label {
+  display: flex; align-items: center; gap: 14px;
+  font-size: 11px; font-weight: 700; letter-spacing: 3px;
+  text-transform: uppercase; color: rgba(255,255,255,0.35);
+  margin-bottom: 18px;
+}
+.question-label-line {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(184,147,42,0.2));
+}
+.question-label-line:first-child {
+  background: linear-gradient(270deg, transparent, rgba(184,147,42,0.2));
+}
+.question-textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 18px 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(184,147,42,0.18);
+  border-radius: 12px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 18px;
+  color: var(--white);
+  line-height: 1.65;
+  resize: vertical;
+  outline: none;
+  transition: all 0.3s;
+  display: block;
+  margin-bottom: 18px;
+}
+.question-textarea:focus {
+  border-color: rgba(184,147,42,0.5);
+  background: rgba(184,147,42,0.05);
+  box-shadow: 0 0 0 3px rgba(184,147,42,0.08);
+}
+.question-textarea::placeholder {
+  color: rgba(255,255,255,0.2);
+  font-style: italic;
+}
+.question-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.question-hints {
+  display: flex; flex-wrap: wrap; gap: 8px; flex: 1;
+}
+.hint-chip {
+  font-size: 12px; padding: 6px 14px; border-radius: 100px;
+  border: 1px solid rgba(184,147,42,0.2);
+  color: rgba(255,255,255,0.4); cursor: pointer;
+  background: rgba(184,147,42,0.05);
+  transition: all 0.2s; white-space: nowrap;
+}
+.hint-chip:hover {
+  border-color: rgba(184,147,42,0.5);
+  color: rgba(255,255,255,0.75);
+  background: rgba(184,147,42,0.1);
+}
+.submit-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 15px 32px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--teal-light), var(--teal));
+  color: white; font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 700;
+  border: none; cursor: pointer;
+  transition: all 0.25s; white-space: nowrap; flex-shrink: 0;
+}
+.submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1abfad, var(--teal-light));
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(10,124,110,0.35);
+}
+.submit-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+.submit-arrow { font-size: 18px; }
+
+/* ═══════════════════ QUESTION CARD ═══════════════════ */
 .interface-section {
   padding: 0 48px 80px; background: var(--navy); position: relative; z-index: 2;
 }
@@ -764,9 +852,9 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
   <div class="nav-actions">
     <a href="precision-medicine3.html" class="nav-mini btn1">Precision Medicine</a>
     <a href="health-decisions4.html"   class="nav-mini btn2" style="border: 1px solid rgba(19,160,144,0.6);">Health Decisions</a>
-    <a href="determine-diagnosis.html" class="nav-mini btn4">Determine Diagnosis</a>
-    <a href="understand-diagnosis.html"                        class="nav-mini btn3">Understand Diagnosis</a>
-    <a href="manage-my-health.html" class="nav-mini btn5">Manage My Health</a>
+    <a href="#"                        class="nav-mini btn4">Determine Diagnosis</a>
+    <a href="#"                        class="nav-mini btn3">Understand Diagnosis</a>
+    <a href="#"                        class="nav-mini btn5">Manage My Health</a>
   </div>
   <div class="nav-links">
     <a href="#interface">Ask a Question</a>
@@ -797,15 +885,8 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 <!-- ══════════════════ MAIN INTERFACE ══════════════════ -->
 <section class="interface-section" id="interface">
   <div class="interface-wrap">
-        </div>
-          <input
-            type="password"
-            autocomplete="off"
-            spellcheck="false"
-          >
-      </div>
-    </div>
-<!-- Records permission banner -->
+
+    <!-- Records permission banner -->
     <div class="records-banner" id="recordsBanner">
       <div class="records-banner-inner">
         <div class="records-icon">🏥</div>
@@ -1461,7 +1542,7 @@ async function runMainPipeline() {
     const r2 = await callClaude({
       systemPrompt: AGENT_ANALYZE_SYSTEM,
       userContent:  userMsg,
-      maxTokens:    8000
+      maxTokens:    3000
     });
     const raw2 = extractText(r2);
     let parsed2;
@@ -1499,7 +1580,7 @@ async function runMainPipeline() {
     const r5 = await callClaude({
       systemPrompt: AGENT_CLARITY_SYSTEM,
       userContent:  clarityInput,
-      maxTokens:    8000
+      maxTokens:    3000
     });
     let finalResult;
     try { finalResult = safeParseJSON(extractText(r5)); }
