@@ -65,10 +65,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .notice-text strong{color:rgba(255,100,100,0.9);}
 
 /* API KEY */
-.apikey-input:focus{border-color:rgba(155,89,182,0.7);background:rgba(155,89,182,0.1);}
-.apikey-input::placeholder{color:rgba(255,255,255,0.2);}
-.apikey-save-btn:hover{background:var(--plum);transform:translateY(-1px);}
-.apikey-clear-btn:hover{color:rgba(255,255,255,0.6);}
 @media(max-width:768px){}
 
 /* INPUT CARD */
@@ -284,23 +280,10 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
 
   <div class="notice-bar">
     <div class="notice-icon">⚠️</div>
-    <div class="notice-text"><strong>Important:</strong> If you are experiencing chest pain, difficulty breathing, sudden severe headache, signs of stroke, or any emergency symptoms — <strong>call 911 or go to the nearest emergency room immediately.</strong> Do not use this tool in an emergency.</div>
-  </div>
-
-  
-      <div class="apikey-text">
-        <div class="apikey-text-title">Anthropic API Key required</div>
-        <div class="apikey-text-sub">Dev mode — key lives only in this browser tab.</div>
-      </div>
-      <div class="apikey-input-wrap">
-        <input class="apikey-input" id="apikeyInput" type="password" placeholder="sk-ant-api03-…" autocomplete="off">
-        <button class="apikey-save-btn" onclick="saveApiKey()">Save Key</button>
+    <div class="notice-text"><strong>Important:</strong> If you are experiencing chest pain, difficulty breathing, sudden severe headache, signs of stroke, or any emergency symptoms — <strong>call 911 or go to the nearest emergency room immediately.</strong> Do not use this tool in an emergency.
       </div>
     </div>
-  </div>
-  
-    <span>API key active.</span>
-    <button class="apikey-clear-btn" onclick="clearApiKey()">Clear key</button>
+<span>API key active.</span>
   </div>
 
   <div class="input-card" id="inputCard">
@@ -360,12 +343,10 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
         <div class="agent-card" id="agentCard2"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag2">🩺</div><div class="agent-num">Agent 02</div><div class="agent-name">Differential Analyst</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus2">Waiting</span></div></div>
         <div class="agent-card" id="agentCard3"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag3">🔬</div><div class="agent-num">Agent 03</div><div class="agent-name">Accuracy Review</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus3">Waiting</span></div></div>
         <div class="agent-card" id="agentCard4"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag4">⚖️</div><div class="agent-num">Agent 04</div><div class="agent-name">Legal Review</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus4">Waiting</span></div></div>
-        <div class="agent-card" id="agentCard5"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag5">✦</div><div class="agent-num">Agent 05</div><div class="agent-name">Clarity</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus5">Waiting</span></div></div>
+        <div class="agent-card" id="agentCard5"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag5">✦</div><div class="agent-num">Agent 05</div><div class="agent-name">Clarity</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus5">Waiting</span>
       </div>
     </div>
-  </div>
-
-  <div class="results-section" id="resultsSection">
+<div class="results-section" id="resultsSection">
     <div class="urgency-banner" id="urgencyBanner">
       <div class="urgency-icon" id="urgencyIcon"></div>
       <div><div class="urgency-label" id="urgencyLabel"></div><div class="urgency-reason" id="urgencyReason"></div></div>
