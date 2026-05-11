@@ -1090,6 +1090,37 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 
 <script>
 /* ══════════════════════════════════════════════════════
+   SALUS AUTH — shared state (localStorage-backed)
+══════════════════════════════════════════════════════ */
+const SalusAuth = {
+  getUser:             ()  => { try{ return JSON.parse(localStorage.getItem('salus_user')||'null'); }catch(_){return null;} },
+  logout:              ()  => { localStorage.removeItem('salus_user'); sessionStorage.clear(); window.location.href='login.html'; },
+  isRecordsConnected:  ()  => localStorage.getItem('salus_records_connected') === 'true',
+  setRecordsConnected: (v) => v ? localStorage.setItem('salus_records_connected','true') : localStorage.removeItem('salus_records_connected')
+};
+
+function salusInitUserBar() {
+  const bar = document.getElementById('salusUserBar');
+  if (!bar) return;
+  const user    = SalusAuth.getUser() || {};
+  const rc      = SalusAuth.isRecordsConnected();
+  const initials= (user.email||'?')[0].toUpperCase();
+  const email   = user.email || '';
+  bar.innerHTML =
+    '<div class="subs-left">' +
+      '<div class="subs-avatar">'+initials+'</div>' +
+      '<span class="subs-email">'+email+'</span>' +
+    '</div>' +
+    '<div class="subs-right">' +
+      (rc
+        ? '<div class="subs-records subs-records-on"><div class="subs-rdot subs-rdot-on"></div><span>Records Linked</span></div>'
+        : '<a href="health-decisions4.html" class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Link Medical Records</span></a>'
+      ) +
+      '<button class="subs-signout" onclick="SalusAuth.logout()">Sign out</button>' +
+    '</div>';
+}
+
+/* ══════════════════════════════════════════════════════
    STATE
 ══════════════════════════════════════════════════════ */
 let recordsConnected    = false;
