@@ -45,9 +45,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .page-sub{font-family:'Crimson Pro',serif;font-size:19px;color:var(--text-dim);line-height:1.6;max-width:600px;margin:0 auto;}
 
 /* API KEY */
-.apikey-input:focus{border-color:rgba(58,158,106,0.7);}
-.apikey-input::placeholder{color:rgba(255,255,255,0.2);}
-.apikey-save-btn:hover{background:var(--green);transform:translateY(-1px);}
 @media(max-width:768px){}
 
 /* RECORDS BANNER */
@@ -267,20 +264,9 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
   </div>
 
   <!-- API KEY -->
-  
-      <div class="apikey-text">
-        <div class="apikey-text-title">Anthropic API Key required</div>
-        <div class="apikey-text-sub">Dev mode — key lives only in this browser tab.</div>
-      </div>
-      <div class="apikey-input-wrap">
-        <input class="apikey-input" id="apikeyInput" type="password" placeholder="sk-ant-api03-…" autocomplete="off">
-        <button class="apikey-save-btn" onclick="saveApiKey()">Save Key</button>
       </div>
     </div>
-  </div>
-  
-    <span>API key active.</span>
-    <button class="apikey-clear-btn" onclick="clearApiKey()">Clear key</button>
+<span>API key active.</span>
   </div>
 
   <!-- RECORDS BANNER -->
@@ -373,12 +359,10 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
         <div class="agent-card" id="agentCard2"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag2">📋</div><div class="agent-num">Agent 02</div><div class="agent-name">Care Planner</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus2">Waiting</span></div></div>
         <div class="agent-card" id="agentCard3"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag3">🔬</div><div class="agent-num">Agent 03</div><div class="agent-name">Accuracy Review</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus3">Waiting</span></div></div>
         <div class="agent-card" id="agentCard4"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag4">⚖️</div><div class="agent-num">Agent 04</div><div class="agent-name">Legal Review</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus4">Waiting</span></div></div>
-        <div class="agent-card" id="agentCard5"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag5">✦</div><div class="agent-num">Agent 05</div><div class="agent-name">Clarity</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus5">Waiting</span></div></div>
+        <div class="agent-card" id="agentCard5"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag5">✦</div><div class="agent-num">Agent 05</div><div class="agent-name">Clarity</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus5">Waiting</span>
       </div>
     </div>
-  </div>
-
-  <!-- RESULTS -->
+<!-- RESULTS -->
   <div class="results-section" id="resultsSection">
     <div class="results-header">
       <div class="results-title">Your Preventive Care Plan</div>
