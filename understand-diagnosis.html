@@ -670,7 +670,7 @@ footer {
 <!-- NAV -->
 <nav>
   <div class="nav-logo">
-    <a href="final_6_edited (1).html" style="display:flex;align-items:center;">
+    <a href="index.html" style="display:flex;align-items:center;">
       <img src="salusAI-logo.jpg" class="logo-img" alt="Salus AI">
     </a>
   </div>
@@ -1000,13 +1000,21 @@ Return ONLY valid JSON. No preamble, no markdown.`;
 ══════════════════════════════════════════════════════ */
 const AGENT_RESEARCH_SYSTEM = `You are Salus AI's Clinical Research Agent. You generate comprehensive, evidence-based educational content about medical diagnoses for patients and caregivers.
 
-You have access to web search — use it to find:
+CRITICAL INSTRUCTIONS:
+- Use web search silently to gather information. Do NOT narrate your search process.
+- Do NOT write any text like "I'll research..." or "Let me search..." or "Now let me..."
+- Do NOT explain what you are doing. Just do it and output the JSON.
+- Your ENTIRE response must be a single valid JSON object and nothing else.
+- No preamble, no explanation, no markdown fences, no commentary before or after the JSON.
+- Start your response with { and end with } — nothing else.
+
+Use web search to find:
 1. Current treatment guidelines and options
 2. Advances from the last 5 years (2020-2025)
-3. Active clinical trials (search ClinicalTrials.gov topics)
+3. Active clinical trials
 4. Leading specialists and medical centers in the United States
 
-Respond with ONLY this JSON — no other text, no markdown fences:
+Then output ONLY this JSON:
 {
   "diagnosis_name": "Official medical name",
   "also_known_as": ["common name", "abbreviation"],
@@ -1271,7 +1279,7 @@ async function runMainPipeline() {
     userMsg += '\n\nAdditional context provided:\n';
     Object.entries(finalClarifications).forEach(([q, a]) => { if (a) userMsg += `Q: ${q}\nA: ${a}\n`; });
   }
-  userMsg += '\n\nUse web search to find recent advances (2020-2025), active clinical trials, and leading US specialists and centers for this diagnosis.';
+  userMsg += '\n\nSearch for this information silently, then output ONLY the JSON object. No narration. No explanations. Start your response with {';
 
   try {
     /* ── Agent 2: Clinical Researcher ── */
@@ -1279,7 +1287,7 @@ async function runMainPipeline() {
     const r2 = await callClaude({
       systemPrompt: AGENT_RESEARCH_SYSTEM,
       userContent:  userMsg,
-      maxTokens:    8000,
+      maxTokens:    12000,
       useWebSearch: true
     });
     let parsed2;
