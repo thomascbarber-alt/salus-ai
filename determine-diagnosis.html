@@ -301,13 +301,17 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
     </div>
   </div>
 
-  <!-- API Key Entry -->
-  <div id="apiKeyBar" style="margin-bottom:16px;padding:14px 20px;background:rgba(155,89,182,0.07);border:1px solid rgba(155,89,182,0.2);border-radius:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;animation:fadeUp .5s ease both;">
-    <span style="font-size:12px;color:rgba(255,255,255,0.4);white-space:nowrap;">🔑 Anthropic API Key</span>
-    <input id="apiKeyInput" type="password" placeholder="sk-ant-..." autocomplete="off"
-      style="flex:1;min-width:220px;padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(155,89,182,0.2);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--white);outline:none;"
-      oninput="saveApiKey(this.value)">
-    <span id="apiKeyStatus" style="font-size:11px;color:rgba(255,255,255,0.25);">Enter your key to enable analysis</span>
+  <!-- API Key Modal (only shown if key missing) -->
+  <div id="apiKeyModal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(7,16,32,0.85);backdrop-filter:blur(8px);align-items:center;justify-content:center;">
+    <div style="background:#162d52;border:1px solid rgba(74,111,165,0.35);border-radius:20px;padding:36px 40px;max-width:460px;width:90%;animation:fadeUp .3s ease;">
+      <div style="font-family:'Playfair Display',serif;font-size:22px;margin-bottom:8px;">API Key Required</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.45);margin-bottom:24px;line-height:1.5;">Enter your Anthropic API key to run analyses. It's stored only in your browser session and never sent anywhere except Anthropic.</div>
+      <input id="apiKeyInput" type="password" placeholder="sk-ant-..." autocomplete="off"
+        style="width:100%;padding:13px 16px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(74,111,165,0.3);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none;margin-bottom:8px;"
+        onkeydown="if(event.key==='Enter')confirmApiKey()">
+      <div id="apiKeyModalErr" style="font-size:12px;color:#e07070;min-height:18px;margin-bottom:12px;"></div>
+      <button onclick="confirmApiKey()" style="width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--navy-mid));color:white;font-weight:700;border:none;cursor:pointer;font-size:14px;">Save & Continue</button>
+    </div>
   </div>
 
   <div class="input-card" id="inputCard">
@@ -443,25 +447,38 @@ const SalusState = {
   setRecordsConnected: (v) => SalusAuth.setRecordsConnected(v)
 };
 
-function saveApiKey(val){
-  _apiKey=val.trim();
-  const status=document.getElementById('apiKeyStatus');
-  if(!status)return;
-  if(_apiKey.startsWith('sk-ant-')&&_apiKey.length>20){
-    status.textContent='✓ Key ready';status.style.color='rgba(82,196,136,0.9)';
-  } else if(_apiKey.length>0){
-    status.textContent='Key looks invalid';status.style.color='rgba(255,140,80,0.9)';
-  } else {
-    status.textContent='Enter your key to enable analysis';status.style.color='rgba(255,255,255,0.25)';
+function getApiKey(){return sessionStorage.getItem('salus_api_key')||'';}
+function setApiKey(k){sessionStorage.setItem('salus_api_key',k);_apiKey=k;}
+
+function confirmApiKey(){
+  const val=document.getElementById('apiKeyInput').value.trim();
+  const err=document.getElementById('apiKeyModalErr');
+  if(!val.startsWith('sk-ant-')||val.length<20){
+    err.textContent='That doesn\'t look like a valid Anthropic key.';return;
   }
+  err.textContent='';
+  setApiKey(val);
+  document.getElementById('apiKeyModal').style.display='none';
+  runAnalysis();
 }
+
+function requireApiKey(cb){
+  const k=getApiKey();
+  if(k&&k.startsWith('sk-ant-')&&k.length>20){_apiKey=k;cb();return;}
+  const modal=document.getElementById('apiKeyModal');
+  modal.style.display='flex';
+  document.getElementById('apiKeyInput').value='';
+  document.getElementById('apiKeyModalErr').textContent='';
+  setTimeout(()=>document.getElementById('apiKeyInput').focus(),100);
+}
+
+function saveApiKey(val){setApiKey(val);}// kept for any legacy callers
 
 window.addEventListener('DOMContentLoaded',()=>{
   salusInitUserBar();
-  const stored=sessionStorage.getItem('salus_api_key')||'';
-  if(stored){const inp=document.getElementById('apiKeyInput');if(inp){inp.value=stored;saveApiKey(stored);}}
+  const stored=getApiKey();
+  if(stored)_apiKey=stored;
 });
-document.addEventListener('input',e=>{if(e.target.id==='apiKeyInput'){sessionStorage.setItem('salus_api_key',e.target.value.trim());}});
 window.addEventListener('scroll',()=>{const d=document.documentElement;const p=d.scrollHeight-d.clientHeight;document.getElementById('ppFill').style.width=p>0?(d.scrollTop/p*100)+'%':'0%';});
 
 function showPipeline(){document.getElementById('pipelinePanel').classList.add('visible');}
@@ -582,6 +599,10 @@ Ensure clinical_summary and recent_research are well-written, complete paragraph
 async function runAnalysis(){
   const symptoms=document.getElementById('symptomInput').value.trim();
   if(!symptoms){document.getElementById('symptomInput').focus();return;}
+  requireApiKey(()=>_runAnalysis(symptoms));
+}
+
+async function _runAnalysis(symptoms){
   lastSymptoms=symptoms;lastAge=document.getElementById('patientAge').value;lastSex=document.getElementById('patientSex').value;
   clarifyingHistory=[];clarifyRound=0;finalClarifications={};
   document.getElementById('submitBtn').disabled=true;document.getElementById('symptomInput').disabled=true;
