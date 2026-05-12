@@ -443,7 +443,12 @@ function showPipeline(){document.getElementById('pipelinePanel').classList.add('
 function hidePipeline(){document.getElementById('pipelinePanel').classList.remove('visible');}
 
 async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebSearch = false, model = 'claude-sonnet-4-6' }, _retry = 0) {
-  const body = { model, max_tokens: maxTokens, system: systemPrompt, messages: [{ role: 'user', content: userContent }] };
+  const body = {
+    model: model,
+    max_tokens: maxTokens,
+    system: systemPrompt,
+    messages: [{ role: 'user', content: userContent }]
+  };
   if (useWebSearch) body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
   const res = await fetch('/api/claude', {
     method: 'POST',
