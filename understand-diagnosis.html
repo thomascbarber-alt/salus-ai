@@ -790,7 +790,7 @@ Output ONLY this JSON. No preamble. No markdown fences. Start with { and end wit
 }
 
 RULES:
-- 4-6 treatments, 3-5 recent advances (LAST 6 MONTHS prioritized — older items only if foundational)
+- 3-4 treatments (most important only), 2-3 recent advances
 - Evidence levels: high=guideline/RCT; moderate=observational/consensus; low=emerging/case series
 - Clinician tone — assume the reader knows anatomy and pharmacology
 - No drug doses or prescriptive language
@@ -997,7 +997,7 @@ async function runResearchInParallel(){
   // so the real JSON budget is much smaller than maxTokens. Keep these generous to
   // avoid mid-JSON truncation (which is what was causing Agent 2/3 parse errors).
   const [clin,trials]=await Promise.allSettled([
-    callClaude({systemPrompt:CLINICAL_SYSTEM,userContent:userMsg,maxTokens:6000,useWebSearch:true}),
+    callClaude({systemPrompt:CLINICAL_SYSTEM,userContent:userMsg,maxTokens:4000,useWebSearch:false}),
     callClaude({systemPrompt:TRIALS_SYSTEM,userContent:userMsg,maxTokens:5000,useWebSearch:true})
   ]);
 
