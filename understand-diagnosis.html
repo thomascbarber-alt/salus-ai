@@ -996,11 +996,94 @@ function extractText(data) {
 function safeParseJSON(text) {
   if (!text || !text.trim()) throw new Error('Empty response from API');
   let clean = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+  // Try direct parse first
   try { return JSON.parse(clean); } catch(_) {}
-  const objMatch = clean.match(/\{[\s\S]*\}/);
-  if (objMatch) { try { return JSON.parse(objMatch[0]); } catch(_) {} }
-  throw new Error('Could not parse JSON from response. Preview: ' + clean.substring(0, 300));
+  // Find first { and scan forward, tracking string state, to find its matching }
+  const start = clean.indexOf('{');
+  if (start === -1) throw new Error('No JSON object found in response. Preview: ' + clean.substring(0, 300));
+  let depth = 0, inString = false, escape = false;
+  for (let i = start; i < clean.length; i++) {
+    const ch = clean[i];
+    if (escape) { escape = false; continue; }
+    if (ch === '\\') { escape = true; continue; }
+    if (ch === '"') { inString = !inString; continue; }
+    if (inString) continue;
+    if (ch === '{') depth++;
+    else if (ch === '}') {
+      depth--;
+      if (depth === 0) {
+        const jsonStr = clean.substring(start, i + 1);
+        try { return JSON.parse(jsonStr); }
+        catch(e) { throw new Error('JSON parse failed: ' + e.message + '. Preview: ' + jsonStr.substring(0, 300)); }
+      }
+    }
+  }
+  // Reached end without finding matching } — output was truncated
+  throw new Error('Response truncated before JSON closed — model hit token limit. Raise maxTokens. Preview: ' + clean.substring(start, Math.min(start + 300, clean.length)));
 }
+Fix B — Raise Agent 2's max_tokens from 6000 back up to 10000
+FIND (around line 1329):
+
+javascript
+      maxTokens:    6000,
+REPLACE with:
+
+javascript
+      maxTokens:    10000,
+Why these fix it:
+
+The old parser used a greedy regex \{[\s\S]*\} which (a) silently grabs everything from first { to last }, breaking when there's trailing text, and (b) gives you no useful signal when the response is truncated. The new parser walks the string char-by-char counting brace depth (while respecting string literals so a { inside a quoted value doesn't confuse it). When it finds depth 0 on a }, that's the JSON object — everything around it is discarded. If it never reaches depth 0, you get a clear "truncated" error telling you to raise maxTokens, instead of a cryptic "could not parse."
+
+The 10000 token bump matters because your Agent 2 schema is large — 4–6 treatments × multiple fields each, plus advances, trials, specialists, centers. 6000 was cutting Autosomal Dominant Osteopetrosis off mid-write (which is exactly what your error preview showed — it ended mid-string inside also_known_as).
+
+Try again and let me know what happens. If you see "truncated" in the error after this, the response went even longer than 10000 — but with these examples I'd be surprised.
+
+You said: Should we try a different strategy and have an initial superficial review with a button that allows a deeper review .
+Should we try a different strategy and have an initial superficial review with a button that allows a deeper review .  That deeper review would be the clinical trials, the physicians and medical centers that are experts, and the lst 6 months of new information/research?
+
+8:26 PM
+Claude responded: Yes — this is a much better design, and honestly should have been the architecture from the start.
+
+Validated two-stage architecture and architected phased pipeline split
+Validated two-stage architecture and architected phased pipeline split
+Yes — this is a much better design, and honestly should have been the architecture from the start. Three real benefits:
+
+Perceived speed: user sees something useful in 25–30s instead of staring at a pipeline for 60s+
+Reliability: smaller JSON per call = less risk of truncation, less risk of Vercel timeout, easier to debug when one piece fails
+Cost & latency: many users will read the overview and never click deeper. You only pay (in tokens and wait time) for the heavy research when someone actually wants it
+Here's the split I'd propose. Confirm or adjust before I touch the code:
+
+Phase 1 — On submit (fast, ~25–30s) The "what is this and how is it generally handled" view:
+
+What it is (pathophysiology / definition)
+Who it affects (epidemiology, risk factors)
+How it's diagnosed (workup methods)
+Treatment alternatives with evidence levels
+Questions to ask the doctor
+Agents 1 → 2 (lighter Clinical Researcher) → 3 → 4 → 5 → render. Same 5-agent pipeline you already have, but Agent 2 produces ~3,000 tokens instead of 10,000.
+
+After render, show a button at the bottom: 🔬 Deeper review: recent research, trials, specialists →
+
+Phase 2 — On button click (~25–30s)
+
+Recent research (last 6 months specifically)
+Active clinical trials
+Leading specialists/physicians
+Centers of excellence
+This is one new agent (call it Agent 6 — Deep Research) with web search heavily emphasized. Probably skip running the full 3/4/5 review chain on it since it's mostly references/citations rather than clinical advice — or run a single quick scope check. Your call.
+
+While Phase 2 runs, show a mini progress indicator near the button so the user knows it's working, then expand new sections into the results.
+
+Things to confirm:
+
+Does the split above match what you had in mind? Specifically — does "treatments" belong in Phase 1 (where I put it) or Phase 2?
+For Phase 2, do you want the full 3-agent review (accuracy + legal + clarity) on it, or just legal scope check, or no review at all?
+Should Phase 2 results expand into the existing tabs, or add new tabs ("Recent Research", "Trials", "Experts")?
+Once you confirm, I'll make the edits as a small set of find-and-replace patches like the last round — no big file dumps.
+
+
+
+
 
 /* ══════════════════════════════════════════════════════
    AGENT 1 — CLARIFYING ASSISTANT
