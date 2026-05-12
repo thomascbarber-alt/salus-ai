@@ -834,6 +834,22 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 .subs-signout:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.5);}
 @media(max-width:768px){#salusUserBar{padding:0 16px;}.subs-email{display:none;}.subs-records span{display:none;}}
 
+
+/* ── Print/Download bar ── */
+.print-bar{display:flex;gap:12px;justify-content:flex-end;margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.07);}
+.print-btn{display:flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;border:none;}
+.print-btn-download{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.7);}
+.print-btn-download:hover{background:rgba(255,255,255,0.12);color:white;}
+.print-btn-print{background:rgba(19,160,144,0.15);color:#13c0ac;border:1px solid rgba(19,160,144,0.3);}
+.print-btn-print:hover{background:rgba(19,160,144,0.25);color:white;}
+@media print{
+  nav,#salusUserBar,.print-bar,.pipeline-panel,.input-card,.clarify-panel,
+  .section-tabs,.filter-tabs,.reset-btn,.records-banner,.records-connected-bar{display:none!important;}
+  body{background:white!important;color:#111!important;}
+  .results-section,.results-section.visible{display:block!important;}
+  .section-pane{display:block!important;margin-bottom:24px;}
+}
+
 </style>
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -849,12 +865,12 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
       <img src="salusAI-logo.jpg" class="logo-img" alt="Salus AI">
     </a>
   </div>
-  <div class="nav-actions">
-    <a href="precision-medicine3.html" class="nav-mini btn1">Precision Medicine</a>
-    <a href="health-decisions4.html"   class="nav-mini btn2" style="border: 1px solid rgba(19,160,144,0.6);">Health Decisions</a>
-    <a href="#"                        class="nav-mini btn4">Determine Diagnosis</a>
-    <a href="#"                        class="nav-mini btn3">Understand Diagnosis</a>
-    <a href="#"                        class="nav-mini btn5">Manage My Health</a>
+    <div class="nav-actions">
+    <a href="precision-medicine3.html"  class="nav-mini btn1">Precision Medicine</a>
+    <a href="health-decisions4.html"    class="nav-mini btn2" style="border:1px solid rgba(19,160,144,0.6);">Health Decisions</a>
+    <a href="determine-diagnosis.html"  class="nav-mini btn4">Determine Diagnosis</a>
+    <a href="understand-diagnosis.html" class="nav-mini btn3">Understand Diagnosis</a>
+    <a href="manage-my-health.html"     class="nav-mini btn5">Manage My Health</a>
   </div>
   <div class="nav-links">
     <a href="#interface">Ask a Question</a>
@@ -1806,6 +1822,22 @@ document.getElementById('questionInput').addEventListener('keydown', function(e)
     window.history.replaceState({}, '', window.location.pathname);
   }
 })();
+
+
+function downloadResults() {
+  const title = document.getElementById('resultsDiagnosisName')?.textContent ||
+                document.getElementById('resultQuestionEcho')?.textContent || 'Salus AI Results';
+  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+title+'</title>' +
+    '<style>body{font-family:Georgia,serif;max-width:800px;margin:40px auto;color:#111;line-height:1.6;}' +
+    'h1{font-size:28px;}h2{font-size:20px;margin-top:32px;border-bottom:1px solid #ccc;padding-bottom:6px;}' +
+    'p,li{font-size:15px;}.section{margin-bottom:32px;}</style></head><body>' +
+    document.getElementById("resultsSection").innerHTML + '</body></html>';
+  const blob = new Blob([html], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = title.replace(/[^a-z0-9]/gi,'_').toLowerCase() + '_salus_ai.html';
+  a.click();
+}
 
 </script>
 </body>

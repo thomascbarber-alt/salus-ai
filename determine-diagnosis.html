@@ -248,6 +248,22 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
 .subs-signout:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.5);}
 @media(max-width:768px){#salusUserBar{padding:0 16px;}.subs-email{display:none;}.subs-records span{display:none;}}
 
+
+/* ── Print/Download bar ── */
+.print-bar{display:flex;gap:12px;justify-content:flex-end;margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.07);}
+.print-btn{display:flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;border:none;}
+.print-btn-download{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.7);}
+.print-btn-download:hover{background:rgba(255,255,255,0.12);color:white;}
+.print-btn-print{background:rgba(19,160,144,0.15);color:#13c0ac;border:1px solid rgba(19,160,144,0.3);}
+.print-btn-print:hover{background:rgba(19,160,144,0.25);color:white;}
+@media print{
+  nav,#salusUserBar,.print-bar,.pipeline-panel,.input-card,.clarify-panel,
+  .section-tabs,.filter-tabs,.reset-btn,.records-banner,.records-connected-bar{display:none!important;}
+  body{background:white!important;color:#111!important;}
+  .results-section,.results-section.visible{display:block!important;}
+  .section-pane{display:block!important;margin-bottom:24px;}
+}
+
 </style>
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -260,12 +276,12 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
       <img src="salusAI-logo.jpg" class="logo-img" alt="Salus AI">
     </a>
   </div>
-  <div class="nav-actions">
-    <a href="precision-medicine3.html"   class="nav-mini btn1">Precision Medicine</a>
-    <a href="health-decisions4.html"     class="nav-mini btn2">Health Decisions</a>
-    <a href="determine-diagnosis.html"   class="nav-mini btn4" style="border:1px solid rgba(155,89,182,0.6);">Determine Diagnosis</a>
-    <a href="understand-diagnosis.html"  class="nav-mini btn3">Understand Diagnosis</a>
-    <a href="manage-my-health.html"      class="nav-mini btn5">Manage My Health</a>
+    <div class="nav-actions">
+    <a href="precision-medicine3.html"  class="nav-mini btn1">Precision Medicine</a>
+    <a href="health-decisions4.html"    class="nav-mini btn2">Health Decisions</a>
+    <a href="determine-diagnosis.html"  class="nav-mini btn4" style="border:1px solid rgba(155,89,182,0.6);">Determine Diagnosis</a>
+    <a href="understand-diagnosis.html" class="nav-mini btn3">Understand Diagnosis</a>
+    <a href="manage-my-health.html"     class="nav-mini btn5">Manage My Health</a>
   </div>
 </nav>
 <div id="salusUserBar"></div>
@@ -380,6 +396,25 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
 </footer>
 
 <script>
+
+const SalusAuth = {
+  getUser:             ()  => { try{ return JSON.parse(localStorage.getItem('salus_user')||'null'); }catch(_){return null;} },
+  logout:              ()  => { localStorage.removeItem('salus_user'); sessionStorage.clear(); window.location.href='login.html'; },
+  isRecordsConnected:  ()  => localStorage.getItem('salus_records_connected') === 'true',
+  setRecordsConnected: (v) => v ? localStorage.setItem('salus_records_connected','true') : localStorage.removeItem('salus_records_connected')
+};
+function salusInitUserBar() {
+  const bar = document.getElementById('salusUserBar');
+  if (!bar) return;
+  const user=SalusAuth.getUser()||{}, rc=SalusAuth.isRecordsConnected();
+  const initials=(user.email||'?')[0].toUpperCase(), email=user.email||'';
+  bar.innerHTML='<div class="subs-left"><div class="subs-avatar">'+initials+'</div><span class="subs-email">'+email+'</span></div>'+
+    '<div class="subs-right">'+(rc?'<div class="subs-records subs-records-on"><div class="subs-rdot subs-rdot-on"></div><span>Records Linked</span></div>':
+    '<a href="health-decisions4.html" class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Link Medical Records</span></a>')+
+    '<button class="subs-signout" onclick="SalusAuth.logout()">Sign out</button></div>';
+}
+
+
 let lastSymptoms='', lastAge='', lastSex='', clarifyingHistory=[], clarifyRound=0, finalClarifications={}, _apiKey='';
 const MAX_CLARIFY_ROUNDS=3;
 const SalusState = {
@@ -621,6 +656,22 @@ function handleError(msg){console.error(msg);[1,2,3,4,5].forEach(n=>{const c=doc
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 document.getElementById('symptomInput').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')runAnalysis();});
 document.getElementById('symptomInput').addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(300,Math.max(100,this.scrollHeight))+'px';});
+
+function downloadResults() {
+  const title = document.getElementById('resultsDiagnosisName')?.textContent ||
+                document.getElementById('resultQuestionEcho')?.textContent || 'Salus AI Results';
+  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+title+'</title>' +
+    '<style>body{font-family:Georgia,serif;max-width:800px;margin:40px auto;color:#111;line-height:1.6;}' +
+    'h1{font-size:28px;}h2{font-size:20px;margin-top:32px;border-bottom:1px solid #ccc;padding-bottom:6px;}' +
+    'p,li{font-size:15px;}.section{margin-bottom:32px;}</style></head><body>' +
+    document.getElementById("resultsSection").innerHTML + '</body></html>';
+  const blob = new Blob([html], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = title.replace(/[^a-z0-9]/gi,'_').toLowerCase() + '_salus_ai.html';
+  a.click();
+}
+
 </script>
 </body>
 </html>
