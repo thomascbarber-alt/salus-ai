@@ -347,19 +347,6 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
     <p class="page-disclaimer">For clinician reference. Not personalized medical advice.</p>
   </div>
 
-  <!-- API Key Modal (only shown if key missing) -->
-  <div id="apiKeyModal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(7,16,32,0.85);backdrop-filter:blur(8px);align-items:center;justify-content:center;">
-    <div style="background:#162d52;border:1px solid rgba(74,111,165,0.35);border-radius:20px;padding:36px 40px;max-width:460px;width:90%;animation:fadeUp .3s ease;">
-      <div style="font-family:'Playfair Display',serif;font-size:22px;margin-bottom:8px;">API Key Required</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.45);margin-bottom:24px;line-height:1.5;">Enter your Anthropic API key to run analyses. It's stored only in your browser session and never sent anywhere except Anthropic.</div>
-      <input id="apiKeyInput" type="password" placeholder="sk-ant-..." autocomplete="off"
-        style="width:100%;padding:13px 16px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(74,111,165,0.3);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none;margin-bottom:8px;"
-        onkeydown="if(event.key==='Enter')confirmApiKey()">
-      <div id="apiKeyModalErr" style="font-size:12px;color:#e07070;min-height:18px;margin-bottom:12px;"></div>
-      <button onclick="confirmApiKey()" style="width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--navy-mid));color:white;font-weight:700;border:none;cursor:pointer;font-size:14px;">Save & Continue</button>
-    </div>
-  </div>
-
   <!-- INPUT CARD -->
   <div class="input-card" id="inputCard">
     <div class="input-card-header">
@@ -548,26 +535,6 @@ function salusInitUserBar(){
 }
 window.addEventListener('DOMContentLoaded',salusInitUserBar);
 
-function confirmApiKey(){
-  const val=document.getElementById('apiKeyInput').value.trim();
-  const err=document.getElementById('apiKeyModalErr');
-  if(!val.startsWith('sk-ant-')||val.length<20){err.textContent="That doesn't look like a valid Anthropic key.";return;}
-  err.textContent='';
-  sessionStorage.setItem('salus_api_key',val);
-  document.getElementById('apiKeyModal').style.display='none';
-  runAnalysis();
-}
-
-function requireApiKey(cb){
-  const k=(sessionStorage.getItem('salus_api_key')||'').trim();
-  if(k&&k.startsWith('sk-ant-')&&k.length>20){cb();return;}
-  const modal=document.getElementById('apiKeyModal');
-  modal.style.display='flex';
-  document.getElementById('apiKeyInput').value='';
-  document.getElementById('apiKeyModalErr').textContent='';
-  setTimeout(()=>document.getElementById('apiKeyInput').focus(),100);
-}
-
 /* ════════════════════════════════════
    STATE
 ════════════════════════════════════ */
@@ -631,10 +598,6 @@ function freezePipelineTimer(){
    API
 ════════════════════════════════════ */
 async function callClaude({systemPrompt,userContent,maxTokens=2500,useWebSearch=false,model='claude-sonnet-4-6'},_retry=0){
-  const apiKey=(sessionStorage.getItem('salus_api_key')||'').trim();
-  if(!apiKey||!apiKey.startsWith('sk-ant-')){
-    throw new Error('No API key found. Please run an analysis on the Determine Diagnosis page first to register your API key, or add it via the key prompt.');
-  }
   const body={
     model:model,
     max_tokens:maxTokens,
@@ -644,24 +607,20 @@ async function callClaude({systemPrompt,userContent,maxTokens=2500,useWebSearch=
   if(useWebSearch){
     body.tools=[{type:'web_search_20250305',name:'web_search'}];
   }
+  // 90s client-side timeout — if /api/claude hangs we want to fail fast, not forever
   const ctrl=new AbortController();
   const timeoutId=setTimeout(()=>ctrl.abort(),90000);
   let res;
   try{
-    res=await fetch('https://api.anthropic.com/v1/messages',{
+    res=await fetch('/api/claude',{
       method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key':apiKey,
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
+      headers:{'Content-Type':'application/json'},
       body:JSON.stringify(body),
       signal:ctrl.signal
     });
   }catch(e){
     clearTimeout(timeoutId);
-    if(e.name==='AbortError')throw new Error('Request timed out after 90s. Try a more specific diagnosis.');
+    if(e.name==='AbortError')throw new Error('Request timed out after 90s. The serverless function likely exceeded its limit. Try a more specific diagnosis or reduce max_tokens.');
     throw e;
   }
   clearTimeout(timeoutId);
@@ -944,10 +903,7 @@ Output ONLY the polished JSON. No preamble. No markdown fences. Start with { and
 async function runAnalysis(){
   const q=document.getElementById('diagnosisInput').value.trim();
   if(!q){document.getElementById('diagnosisInput').focus();return;}
-  requireApiKey(()=>_runAnalysis(q));
-}
 
-async function _runAnalysis(q){
   lastDiagnosis=q;
   clarifications={};
 
