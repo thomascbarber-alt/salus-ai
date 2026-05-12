@@ -1242,13 +1242,6 @@ function hidePipeline() {
 /* ══════════════════════════════════════════════════════
    ANTHROPIC API CALL
 ══════════════════════════════════════════════════════ */
-/* ══════════════════════════════════════════════════════
-   API KEY MANAGEMENT
-══════════════════════════════════════════════════════ */
-
-/* Allow Enter key in API input */
-});
-
 async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebSearch = false, model = 'claude-sonnet-4-6' }, _retry = 0) {
   const body = {
     model: model,
