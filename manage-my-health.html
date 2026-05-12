@@ -429,7 +429,22 @@ function salusInitUserBar() {
 }
 
 
-let _apiKey='', recordsConnected=false, lastProfile={}, currentCareItems=[], activeFilter='all';
+let recordsConnected=false, lastProfile={}, currentCareItems=[], activeFilter='all';
+
+/* Reads personal context saved on the Precision Medicine page */
+function getSalusLifeContext(){
+  try{
+    const ctx=JSON.parse(localStorage.getItem('salus_life_context')||'null');
+    if(!ctx)return '';
+    const parts=[];
+    if(ctx.activities)parts.push('Favorite activities: '+ctx.activities);
+    if(ctx.important) parts.push('Important personal context: '+ctx.important);
+    if(ctx.caregiver) parts.push('Caregiver responsibilities: '+ctx.caregiver);
+    if(ctx.living)    parts.push('Living situation: '+ctx.living);
+    if(!parts.length) return '';
+    return '\n\nPersonal context about this patient:\n'+parts.join('\n');
+  }catch(_){return '';}
+}
 const SalusState = {
   isRecordsConnected:  () => SalusAuth.isRecordsConnected(),
   setRecordsConnected: (v) => SalusAuth.setRecordsConnected(v)
@@ -665,9 +680,9 @@ Other Conditions: ${p.conditions||'None provided'}
 Current Medications: ${p.medications||'None provided'}
 Recent Screenings: ${p.screenings||'None provided'}
 Family History: ${p.familyHistory||'None provided'}
-Medical Records Connected: ${p.recordsConnected?'Yes — personalize accordingly':'No — use profile only'}
+Medical Records Connected: ${p.recordsConnected?'Yes — personalize accordingly':'No — use profile only'}${getSalusLifeContext()}
 
-Generate a COMPLETE preventive care plan for this patient including ALL relevant screenings, immunizations, and health maintenance items. Include alternatives where they exist (colonoscopy vs FIT, mammogram approaches, etc.).`;
+Generate a COMPLETE preventive care plan for this patient including ALL relevant screenings, immunizations, and health maintenance items. Include alternatives where they exist (colonoscopy vs FIT, mammogram approaches, etc.). Use the personal context above to make recommendations practical for this patient's actual life — their activities, responsibilities, and living situation.`;
 }
 
 function renderResults(r,accuracy,profile){

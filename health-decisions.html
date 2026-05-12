@@ -1167,6 +1167,22 @@ window.addEventListener('DOMContentLoaded', () => {
 /* ══════════════════════════════════════════════════════
    SCROLL PROGRESS
 ══════════════════════════════════════════════════════ */
+
+/* Reads personal context saved on the Precision Medicine page */
+function getSalusLifeContext(){
+  try{
+    const ctx=JSON.parse(localStorage.getItem('salus_life_context')||'null');
+    if(!ctx)return '';
+    const parts=[];
+    if(ctx.activities)parts.push('Favorite activities: '+ctx.activities);
+    if(ctx.important) parts.push('Important personal context: '+ctx.important);
+    if(ctx.caregiver) parts.push('Caregiver responsibilities: '+ctx.caregiver);
+    if(ctx.living)    parts.push('Living situation: '+ctx.living);
+    if(!parts.length) return '';
+    return '\n\n---\nPersonal context about this patient:\n'+parts.join('\n')+'\n---';
+  }catch(_){return '';}
+}
+
 window.addEventListener('scroll', () => {
   const d = document.documentElement;
   const pct = d.scrollHeight - d.clientHeight;
@@ -1487,7 +1503,7 @@ async function runClarifyAgent() {
   setAgentState(1, 'running', 'Reading your question…');
 
   // Build clarify message with full history
-  let msg = `The patient's health question: "${lastQuestion}"\n`;
+  let msg = `The patient's health question: "${lastQuestion}"\n${getSalusLifeContext()}`;
   if (clarifyingHistory.length > 0) {
     msg += `\nPrevious clarification rounds (${clarifyingHistory.length}):\n`;
     clarifyingHistory.forEach(r => {
@@ -1579,7 +1595,7 @@ function submitClarifications() {
 ══════════════════════════════════════════════════════ */
 async function runMainPipeline() {
   // Build analysis message
-  let userMsg = `The patient asks: "${lastQuestion}"`;
+  let userMsg = `The patient asks: "${lastQuestion}"${getSalusLifeContext()}`;
   const hasClarifications = Object.keys(finalClarifications).some(k => finalClarifications[k]);
   if (hasClarifications) {
     userMsg += '\n\nClarifying information provided by the patient:\n';
