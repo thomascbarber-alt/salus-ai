@@ -551,6 +551,22 @@ function setHint(el){
 /* ════════════════════════════════════
    AGENT STATE UI
 ════════════════════════════════════ */
+
+/* Reads personal context saved on the Precision Medicine page */
+function getSalusLifeContext(){
+  try{
+    const ctx=JSON.parse(localStorage.getItem('salus_life_context')||'null');
+    if(!ctx)return '';
+    const parts=[];
+    if(ctx.activities)parts.push('Favorite activities: '+ctx.activities);
+    if(ctx.important) parts.push('Important personal context: '+ctx.important);
+    if(ctx.caregiver) parts.push('Caregiver responsibilities: '+ctx.caregiver);
+    if(ctx.living)    parts.push('Living situation: '+ctx.living);
+    if(!parts.length) return '';
+    return '\n\n---\nPersonal context about this patient:\n'+parts.join('\n')+'\n---';
+  }catch(_){return '';}
+}
+
 const AGENT_ICONS={1:'💬',2:'🩺',3:'🔬',4:'⚖️',5:'✦'};
 // Track fill % when each agent completes — visual progress indicator across the 5-stage pipeline
 const TRACK_STEPS={1:20,2:50,3:50,4:75,5:100}; // agents 2 & 3 share the same step (parallel)
@@ -996,6 +1012,7 @@ async function runResearchInParallel(){
   if(clarifications.answer){
     userMsg+=`\n\nAdditional context from user: ${clarifications.answer}`;
   }
+  userMsg+=getSalusLifeContext();
   userMsg+='\n\nReturn ONLY the JSON object. No preamble.';
 
   setAgentState(2,'running','Summarizing…');
