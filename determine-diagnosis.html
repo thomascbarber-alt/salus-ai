@@ -552,7 +552,7 @@ Respond with ONLY this JSON:
   "red_flag_symptoms": ["Specific symptom requiring immediate care 1","Symptom 2"],
   "tests_likely_ordered": ["Test 1","Test 2"],
   "questions_for_doctor": ["Specific question 1","Question 2","Question 3","Question 4","Question 5"],
-  "clinical_summary": "A 2-3 paragraph plain-language summary of the overall clinical picture: what the symptom pattern suggests, how the most likely diagnoses relate to each other, and what a clinician would be thinking about. Write as if explaining to an intelligent patient preparing to see their doctor.",
+  "clinical_summary": "A 2-3 paragraph plain-language overview of the clinical picture written for a non-medical reader. Explain what the symptom pattern suggests, how the most likely diagnoses relate to each other, and what a doctor would be thinking about — using everyday words, not medical jargon. Avoid Latin terms, clinical shorthand, or passive voice. Write warmly, as if a knowledgeable friend is helping the patient understand what might be going on before their appointment.",
   "recent_research": "2-3 sentences describing any clinically relevant recent developments, updated guidelines, or emerging understanding related to the top 1-2 differential diagnoses. Focus on information that would be useful context for a patient conversation. If nothing notable, note that standard guidelines apply."
 }
 
@@ -573,7 +573,11 @@ const AGENT_LEGAL_SYSTEM=`Review the differential diagnosis JSON for scope-of-pr
 {"scope_appropriate":true,"issues_found":[],"legal_note":"Brief note"}
 FLAG if content: diagnoses the patient definitively, recommends specific medications or doses, creates false urgency, or minimizes symptoms that could be serious.`;
 
-const AGENT_CLARITY_SYSTEM=`Apply all corrections from Accuracy and Legal reviewers. Then rewrite for a worried patient: be clear, direct, and reassuring where appropriate — not alarmist, not dismissive. Make "why_it_fits" explanations feel connected to what THEY described. Ensure clinical_summary and recent_research are well-written, complete paragraphs — never empty. Return the exact same JSON schema, polished. ONLY valid JSON.`;
+const AGENT_CLARITY_SYSTEM=`Apply all corrections from Accuracy and Legal reviewers. Then rewrite for a worried patient: be clear, direct, and reassuring where appropriate — not alarmist, not dismissive. Make "why_it_fits" explanations feel connected to what THEY described.
+
+For the clinical_summary specifically: rewrite it in plain, conversational language a non-medical person can easily understand. Replace medical jargon with everyday words (e.g. "inflammation" → "irritation and swelling", "presenting symptoms" → "the symptoms you're describing", "etiology" → "cause"). Write as if a knowledgeable friend is explaining it over coffee — warm, clear, and human. No Latin, no clinical shorthand, no passive voice.
+
+Ensure clinical_summary and recent_research are well-written, complete paragraphs — never empty. Return the exact same JSON schema, polished. ONLY valid JSON.`;
 
 async function runAnalysis(){
   const symptoms=document.getElementById('symptomInput').value.trim();
