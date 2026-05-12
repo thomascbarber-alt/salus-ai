@@ -1143,7 +1143,7 @@ let recordsConnected    = false;
 let lastQuestion        = '';
 let clarifyingHistory   = [];
 let clarifyRound        = 0;
-const MAX_CLARIFY_ROUNDS = 3;
+const MAX_CLARIFY_ROUNDS = 1;  // Keep fast — 1 round max
 let finalClarifications = {};
 
 const SalusState = {
@@ -1249,9 +1249,9 @@ function hidePipeline() {
 /* Allow Enter key in API input */
 });
 
-async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebSearch = false }, _retry = 0) {
+async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebSearch = false, model = 'claude-sonnet-4-6' }, _retry = 0) {
   const body = {
-    model: 'claude-sonnet-4-6',
+    model: model,
     max_tokens: maxTokens,
     system: systemPrompt,
     messages: [{ role: 'user', content: userContent }]
@@ -1266,7 +1266,7 @@ async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebS
   });
   if ((res.status === 529 || res.status === 503) && _retry < 3) {
     await new Promise(r => setTimeout(r, (_retry + 1) * 2000));
-    return callClaude({ systemPrompt, userContent, maxTokens, useWebSearch }, _retry + 1);
+    return callClaude({ systemPrompt, userContent, maxTokens, useWebSearch, model }, _retry + 1);
   }
   if (!res.ok) {
     const err = await res.text();
@@ -1282,28 +1282,36 @@ function extractText(data) {
     .join('\n');
 }
 
-function safeParseJSON(text) {
-  if (!text || !text.trim()) throw new Error('Empty response from API');
-
-  // 1. Strip markdown code fences
-  let clean = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-
-  // 2. Try direct parse
-  try { return JSON.parse(clean); } catch(_) {}
-
-  // 3. Extract first {...} block (handles preamble / trailing text)
-  const objMatch = clean.match(/\{[\s\S]*\}/);
-  if (objMatch) {
-    try { return JSON.parse(objMatch[0]); } catch(_) {}
-  }
-
-  // 4. Extract first [...] block (arrays)
-  const arrMatch = clean.match(/\[[\s\S]*\]/);
-  if (arrMatch) {
-    try { return JSON.parse(arrMatch[0]); } catch(_) {}
-  }
-
-  throw new Error('Could not parse JSON from response. Preview: ' + clean.substring(0, 300));
+function safeParseJSON(text){
+  if(!text||!text.trim())throw new Error('Empty response');
+  let c=text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+  // 1. Direct parse
+  try{return JSON.parse(c);}catch(_){}
+  // 2. Extract largest { } block
+  const m=c.match(/\{[\s\S]*\}/);
+  if(m){try{return JSON.parse(m[0]);}catch(_){}}
+  // 3. Partial JSON recovery — close open strings/arrays/objects from truncated response
+  try{
+    let fixed=m?m[0]:c, inStr=false, escape=false, braces=0, brackets=0;
+    for(let i=0;i<fixed.length;i++){
+      const ch=fixed[i];
+      if(escape){escape=false;continue;}
+      if(ch==='\\'&&inStr){escape=true;continue;}
+      if(ch==='"'){inStr=!inStr;continue;}
+      if(!inStr){
+        if(ch==='{')braces++;else if(ch==='}')braces--;
+        else if(ch==='[')brackets++;else if(ch===']')brackets--;
+      }
+    }
+    if(inStr)fixed+='"';
+    fixed=fixed.replace(/,\s*$/,'');
+    while(brackets>0){fixed+=']';brackets--;}
+    while(braces>0){fixed+='}';braces--;}
+    const recovered=JSON.parse(fixed);
+    console.warn('safeParseJSON: partial JSON recovery used — response was truncated');
+    return recovered;
+  }catch(_){}
+  throw new Error('Could not parse JSON. Preview: '+c.substring(0,300));
 }
 
 /* ══════════════════════════════════════════════════════
@@ -1597,50 +1605,59 @@ async function runMainPipeline() {
     catch(e) { throw new Error('Clinical Analyst JSON parse failed: ' + e.message); }
     setAgentState(2, 'done', 'Complete');
 
-    /* ── Agent 3: Accuracy Review ── */
-    setAgentState(3, 'running', 'Verifying accuracy & citations…');
-    const r3 = await callClaude({
-      systemPrompt: AGENT_ACCURACY_SYSTEM,
-      userContent:  JSON.stringify(parsed2),
-      maxTokens:    1200
-    });
-    let parsed3;
-    try { parsed3 = safeParseJSON(extractText(r3)); }
-    catch(e) { parsed3 = { approved: true, accuracy_score: 8, reviewer_note: 'Reviewed.', corrections_needed: [], flagged_statements: [], citation_issues: [] }; }
-    setAgentState(3, 'done', 'Score ' + (parsed3.accuracy_score || 8) + '/10');
+    /* ── Show interim results immediately after Agent 2 ── */
+    renderResults(parsed2, { reviewer_note: 'Review in progress…' }, { scope_appropriate: true }, lastQuestion);
 
-    /* ── Agent 4: Legal Review ── */
-    setAgentState(4, 'running', 'Checking scope of practice…');
-    const r4 = await callClaude({
-      systemPrompt: AGENT_LEGAL_SYSTEM,
-      userContent:  JSON.stringify(parsed2),
-      maxTokens:    1000
-    });
-    let parsed4;
+    /* ── Agents 3 + 4: Run IN PARALLEL using Haiku (5× faster) ── */
+    setAgentState(3, 'running', 'Verifying…');
+    setAgentState(4, 'running', 'Checking scope…');
+    const [r3, r4] = await Promise.all([
+      callClaude({
+        systemPrompt: AGENT_ACCURACY_SYSTEM,
+        userContent:  JSON.stringify(parsed2),
+        maxTokens:    600,
+        model:        'claude-haiku-4-5-20251001'
+      }),
+      callClaude({
+        systemPrompt: AGENT_LEGAL_SYSTEM,
+        userContent:  JSON.stringify(parsed2),
+        maxTokens:    500,
+        model:        'claude-haiku-4-5-20251001'
+      })
+    ]);
+    let parsed3, parsed4;
+    try { parsed3 = safeParseJSON(extractText(r3)); }
+    catch(e) { parsed3 = { approved: true, accuracy_score: 8, reviewer_note: 'Reviewed.', corrections_needed: [], citation_issues: [] }; }
     try { parsed4 = safeParseJSON(extractText(r4)); }
-    catch(e) { parsed4 = { scope_appropriate: true, issues_found: [], required_changes: [], legal_note: 'Scope reviewed.' }; }
+    catch(e) { parsed4 = { scope_appropriate: true, issues_found: [], legal_note: 'Scope reviewed.' }; }
+    setAgentState(3, 'done', 'Score ' + (parsed3.accuracy_score || 8) + '/10');
     setAgentState(4, 'done', parsed4.scope_appropriate ? 'Approved ✓' : 'Issues flagged');
 
-    /* ── Agent 5: Clarity ── */
-    setAgentState(5, 'running', 'Optimizing for clarity…');
-    const clarityInput = `Clinical Analysis:\n${JSON.stringify(parsed2)}\n\nAccuracy Review:\n${JSON.stringify(parsed3)}\n\nLegal Review:\n${JSON.stringify(parsed4)}`;
-    const r5 = await callClaude({
-      systemPrompt: AGENT_CLARITY_SYSTEM,
-      userContent:  clarityInput,
-      maxTokens:    3000
-    });
-    let finalResult;
-    try { finalResult = safeParseJSON(extractText(r5)); }
-    catch(e) { finalResult = parsed2; }
-    setAgentState(5, 'done', 'Complete');
+    /* ── Agent 5: Clarity — only if reviewers found issues, else skip ── */
+    let finalResult = parsed2;
+    const hasIssues = (parsed3.corrections_needed||[]).length > 0 || (parsed4.issues_found||[]).length > 0;
+    if (hasIssues) {
+      setAgentState(5, 'running', 'Applying corrections…');
+      const clarityInput = `Clinical Analysis:\n${JSON.stringify(parsed2)}\n\nAccuracy Review:\n${JSON.stringify(parsed3)}\n\nLegal Review:\n${JSON.stringify(parsed4)}`;
+      const r5 = await callClaude({
+        systemPrompt: AGENT_CLARITY_SYSTEM,
+        userContent:  clarityInput,
+        maxTokens:    4000
+      });
+      try { finalResult = safeParseJSON(extractText(r5)); }
+      catch(e) { finalResult = parsed2; }
+      setAgentState(5, 'done', 'Corrections applied');
+    } else {
+      setAgentState(5, 'done', 'No changes needed');
+    }
 
-    /* ── Render ── */
+    /* ── Final render with polished results ── */
     setTimeout(() => {
       hidePipeline();
       renderResults(finalResult, parsed3, parsed4, lastQuestion);
       document.getElementById('submitBtn').disabled = false;
       document.getElementById('questionInput').disabled = false;
-    }, 700);
+    }, 400);
 
   } catch(err) {
     handlePipelineError(err);

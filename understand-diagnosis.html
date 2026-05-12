@@ -919,7 +919,7 @@ function salusInitUserBar() {
 let lastDiagnosis       = '';
 let clarifyingHistory   = [];
 let clarifyRound        = 0;
-const MAX_CLARIFY_ROUNDS = 2;   // Diagnosis queries need less back-and-forth
+const MAX_CLARIFY_ROUNDS = 1;   // Diagnosis queries need less back-and-forth
 let finalClarifications = {};
 const SalusState = {
   isRecordsConnected:  () => SalusAuth.isRecordsConnected(),
@@ -968,9 +968,9 @@ function hidePipeline() { document.getElementById('pipelinePanel').classList.rem
 /* ══════════════════════════════════════════════════════
    API CALL (with retry on 529)
 ══════════════════════════════════════════════════════ */
-async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebSearch = false }, _retry = 0) {
+async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebSearch = false, model = 'claude-sonnet-4-6' }, _retry = 0) {
   const body = {
-    model: 'claude-sonnet-4-6',
+    model: model,
     max_tokens: maxTokens,
     system: systemPrompt,
     messages: [{ role: 'user', content: userContent }]
@@ -985,7 +985,7 @@ async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebS
   });
   if ((res.status === 529 || res.status === 503) && _retry < 3) {
     await new Promise(r => setTimeout(r, (_retry + 1) * 2000));
-    return callClaude({ systemPrompt, userContent, maxTokens, useWebSearch }, _retry + 1);
+    return callClaude({ systemPrompt, userContent, maxTokens, useWebSearch, model }, _retry + 1);
   }
   if (!res.ok) {
     const err = await res.text();
@@ -1334,33 +1334,37 @@ async function runMainPipeline() {
     catch(e) { throw new Error('Clinical Research JSON parse failed: ' + e.message); }
     setAgentState(2, 'done', 'Complete');
 
-    /* ── Agent 3: Accuracy Review ── */
-    setAgentState(3, 'running', 'Verifying accuracy…');
-    const r3 = await callClaude({ systemPrompt: AGENT_ACCURACY_SYSTEM, userContent: JSON.stringify(parsed2), maxTokens: 1200 });
-    let parsed3;
-    try { parsed3 = safeParseJSON(extractText(r3)); }
-    catch(_) { parsed3 = { approved: true, accuracy_score: 8, reviewer_note: 'Reviewed.', specialist_verification: 'Not verified.' }; }
-    setAgentState(3, 'done', 'Score ' + (parsed3.accuracy_score || 8) + '/10');
-
-    /* ── Agent 4: Legal Review ── */
-    setAgentState(4, 'running', 'Scope check…');
-    const r4 = await callClaude({ systemPrompt: AGENT_LEGAL_SYSTEM, userContent: JSON.stringify(parsed2), maxTokens: 800 });
-    let parsed4;
-    try { parsed4 = safeParseJSON(extractText(r4)); }
-    catch(_) { parsed4 = { scope_appropriate: true, legal_note: 'Reviewed.' }; }
+        /* ── Agents 3 + 4: parallel with Haiku (5× faster) ── */
+    setAgentState(3, 'running', 'Verifying…');
+    setAgentState(4, 'running', 'Checking scope…');
+    const [r3, r4] = await Promise.all([
+      callClaude({ systemPrompt: AGENT_ACCURACY_SYSTEM, userContent: JSON.stringify(parsed2), maxTokens: 600, model: 'claude-haiku-4-5-20251001' }),
+      callClaude({ systemPrompt: AGENT_LEGAL_SYSTEM,    userContent: JSON.stringify(parsed2), maxTokens: 500, model: 'claude-haiku-4-5-20251001' })
+    ]);
+    let parsed3, parsed4;
+    try { parsed3 = safeParseJSON(extractText(r3)); } catch(e) { parsed3 = { approved:true, accuracy_score:8, reviewer_note:'Reviewed.', corrections_needed:[], citation_issues:[] }; }
+    try { parsed4 = safeParseJSON(extractText(r4)); } catch(e) { parsed4 = { scope_appropriate:true, issues_found:[], legal_note:'Reviewed.' }; }
+    setAgentState(3, 'done', 'Score ' + (parsed3.accuracy_score||8) + '/10');
     setAgentState(4, 'done', parsed4.scope_appropriate ? 'Approved ✓' : 'Issues flagged');
 
-    /* ── Agent 5: Clarity ── */
-    setAgentState(5, 'running', 'Polishing…');
-    const r5 = await callClaude({
-      systemPrompt: AGENT_CLARITY_SYSTEM,
-      userContent:  `Research:\n${JSON.stringify(parsed2)}\n\nAccuracy:\n${JSON.stringify(parsed3)}\n\nLegal:\n${JSON.stringify(parsed4)}`,
-      maxTokens:    8000
-    });
-    let finalResult;
-    try { finalResult = safeParseJSON(extractText(r5)); }
-    catch(_) { finalResult = parsed2; }
-    setAgentState(5, 'done', 'Complete');
+        /* ── Agent 5: only run if issues found (saves 4-5s in clean cases) ── */
+    let finalResult = parsed2;
+    const hasIssues = (parsed3.corrections_needed||[]).length > 0 || (parsed4.issues_found||[]).length > 0;
+    if (hasIssues) {
+      setAgentState(5, 'running', 'Applying corrections…');
+      const r5 = await callClaude({ systemPrompt: AGENT_CLARITY_SYSTEM, userContent: `Analysis:
+${JSON.stringify(parsed2)}
+
+Accuracy:
+${JSON.stringify(parsed3)}
+
+Legal:
+${JSON.stringify(parsed4)}`, maxTokens: 4000 });
+      try { finalResult = safeParseJSON(extractText(r5)); } catch(e) { finalResult = parsed2; }
+      setAgentState(5, 'done', 'Corrections applied');
+    } else {
+      setAgentState(5, 'done', 'No changes needed');
+    }
 
     setTimeout(() => {
       hidePipeline();

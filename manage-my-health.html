@@ -454,9 +454,9 @@ function setAgentState(n,state,msg){
 function showPipeline(){document.getElementById('pipelinePanel').classList.add('visible');}
 function hidePipeline(){document.getElementById('pipelinePanel').classList.remove('visible');}
 
-async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebSearch = false }, _retry = 0) {
+async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebSearch = false, model = 'claude-sonnet-4-6' }, _retry = 0) {
   const body = {
-    model: 'claude-sonnet-4-6',
+    model: model,
     max_tokens: maxTokens,
     system: systemPrompt,
     messages: [{ role: 'user', content: userContent }]
@@ -471,7 +471,7 @@ async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebS
   });
   if ((res.status === 529 || res.status === 503) && _retry < 3) {
     await new Promise(r => setTimeout(r, (_retry + 1) * 2000));
-    return callClaude({ systemPrompt, userContent, maxTokens, useWebSearch }, _retry + 1);
+    return callClaude({ systemPrompt, userContent, maxTokens, useWebSearch, model }, _retry + 1);
   }
   if (!res.ok) {
     const err = await res.text();
@@ -484,8 +484,32 @@ function extractText(d){return(d.content||[]).filter(b=>b.type==='text').map(b=>
 function safeParseJSON(text){
   if(!text||!text.trim())throw new Error('Empty response');
   let c=text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+  // 1. Direct parse
   try{return JSON.parse(c);}catch(_){}
-  const m=c.match(/\{[\s\S]*\}/);if(m){try{return JSON.parse(m[0]);}catch(_){}}
+  // 2. Extract largest { } block
+  const m=c.match(/\{[\s\S]*\}/);
+  if(m){try{return JSON.parse(m[0]);}catch(_){}}
+  // 3. Partial JSON recovery — close open strings/arrays/objects from truncated response
+  try{
+    let fixed=m?m[0]:c, inStr=false, escape=false, braces=0, brackets=0;
+    for(let i=0;i<fixed.length;i++){
+      const ch=fixed[i];
+      if(escape){escape=false;continue;}
+      if(ch==='\\'&&inStr){escape=true;continue;}
+      if(ch==='"'){inStr=!inStr;continue;}
+      if(!inStr){
+        if(ch==='{')braces++;else if(ch==='}')braces--;
+        else if(ch==='[')brackets++;else if(ch===']')brackets--;
+      }
+    }
+    if(inStr)fixed+='"';
+    fixed=fixed.replace(/,\s*$/,'');
+    while(brackets>0){fixed+=']';brackets--;}
+    while(braces>0){fixed+='}';braces--;}
+    const recovered=JSON.parse(fixed);
+    console.warn('safeParseJSON: partial JSON recovery used — response was truncated');
+    return recovered;
+  }catch(_){}
   throw new Error('Could not parse JSON. Preview: '+c.substring(0,300));
 }
 
@@ -502,42 +526,49 @@ const AGENT_CARE_PLANNER_SYSTEM=`You are Salus AI's Preventive Care Planning Age
 
 Generate a comprehensive preventive care plan tailored to this patient's profile.
 
-Respond ONLY with this JSON:
+CRITICAL — BE CONCISE to fit within token limits:
+- description: MAX 1 sentence
+- why_recommended: MAX 1 sentence  
+- frequency_detail: MAX 10 words
+- alternatives: MAX 2 per item
+- pros/cons: MAX 2 each, MAX 6 words each
+- questions_for_doctor: MAX 1 per item
+
+Respond ONLY with this JSON — start with { and end with } — no other text:
 {
-  "personalization_notes": "How this plan was tailored to this specific patient (2-3 sentences)",
+  "personalization_notes": "1-2 sentence summary only",
   "care_items": [
     {
       "id": "unique-slug",
       "category": "Cancer Screening|Cardiovascular|Immunizations|Mental Health|Metabolic|Bone Health|Vision & Hearing|Dental|Other",
       "name": "Test/Screening name",
-      "description": "What it is and what it detects (1-2 sentences)",
-      "why_recommended": "Why this is recommended for THIS patient specifically",
+      "description": "One sentence only",
+      "why_recommended": "One sentence specific to this patient",
       "frequency": "Annual|Every 2 years|Every 3 years|Every 5 years|Every 10 years|One-time|Monthly self-exam|Other",
-      "frequency_detail": "More specific timing e.g. 'every 10 years starting at age 45 unless high risk'",
+      "frequency_detail": "Brief timing note",
       "guideline_source": "USPSTF Grade A/B|ACIP|AHA/ACC|Other",
       "priority": "high|medium|low",
       "applies_because": "Age|Sex|Risk factor|Condition|Family history",
       "alternatives": [
         {
-          "name": "Alternative test/approach name",
+          "name": "Alternative name",
           "pros": ["Pro 1", "Pro 2"],
           "cons": ["Con 1", "Con 2"],
-          "best_for": "Patient profile this alternative best suits"
+          "best_for": "Brief patient profile"
         }
       ],
-      "questions_for_doctor": ["Specific question about this test"]
+      "questions_for_doctor": ["One specific question"]
     }
   ]
 }
 
-IMPORTANT RULES:
+RULES:
 - Include ALL relevant screenings and immunizations for this patient's age, sex, and risk factors
-- Always include alternatives where they exist (e.g., colonoscopy vs FIT test, mammogram vs tomosynthesis vs breast MRI, Pap smear vs HPV test)
-- Base everything on current USPSTF, ACIP, or major society guidelines
-- Order items by priority (high first)
-- For a typical adult, include: blood pressure, cholesterol, diabetes, cancer screenings (age/sex appropriate), colonoscopy vs FIT, immunizations (flu, COVID, pneumococcal, shingles, etc.), depression screening, vision, dental, skin
-- Add condition-specific items based on their profile
-- Return ONLY valid JSON`;
+- Include alternatives where they exist (colonoscopy vs FIT, mammogram options, Pap vs HPV, etc.)
+- Base on current USPSTF, ACIP, or major society guidelines
+- Order by priority (high first)
+- Include: blood pressure, cholesterol, diabetes, cancer screenings, colonoscopy/FIT, immunizations, depression, vision, dental, skin — plus condition-specific items
+- Return ONLY valid JSON — complete the entire response before stopping`;
 
 const AGENT_ACCURACY_SYSTEM=`Review the preventive care plan JSON for accuracy against current guidelines. Respond ONLY:
 {"approved":true,"accuracy_score":9,"corrections_needed":[],"reviewer_note":"Brief note"}
@@ -589,29 +620,37 @@ async function generatePlan(){
 
     /* Agent 2: Care Planner */
     setAgentState(2,'running','Building your plan…');
-    const r2=await callClaude({systemPrompt:AGENT_CARE_PLANNER_SYSTEM,userContent:profileMsg,maxTokens:8000});
+    const r2=await callClaude({systemPrompt:AGENT_CARE_PLANNER_SYSTEM,userContent:profileMsg,maxTokens:16000});
     let p2;try{p2=safeParseJSON(extractText(r2));}catch(e){throw new Error('Care Planner JSON parse failed: '+e.message);}
     setAgentState(2,'done','Complete');
 
-    /* Agent 3: Accuracy */
-    setAgentState(3,'running','Verifying guidelines…');
-    const r3=await callClaude({systemPrompt:AGENT_ACCURACY_SYSTEM,userContent:JSON.stringify(p2),maxTokens:1200});
-    let p3;try{p3=safeParseJSON(extractText(r3));}catch(_){p3={approved:true,accuracy_score:8,reviewer_note:'Guidelines reviewed.'};}
-    setAgentState(3,'done','Score '+(p3.accuracy_score||8)+'/10');
+    /* Show interim results immediately so user sees their plan */
+    renderResults(p2,{reviewer_note:'Review in progress…'},lastProfile);
 
-    /* Agent 4: Legal */
-    setAgentState(4,'running','Scope check…');
-    const r4=await callClaude({systemPrompt:AGENT_LEGAL_SYSTEM,userContent:JSON.stringify(p2),maxTokens:600});
-    let p4;try{p4=safeParseJSON(extractText(r4));}catch(_){p4={scope_appropriate:true,legal_note:'Reviewed.'};}
+    /* Agents 3+4: parallel with Haiku */
+    setAgentState(3,'running','Verifying…');
+    setAgentState(4,'running','Checking scope…');
+    const [r3,r4]=await Promise.all([
+      callClaude({systemPrompt:AGENT_ACCURACY_SYSTEM,userContent:JSON.stringify(p2),maxTokens:600,model:'claude-haiku-4-5-20251001'}),
+      callClaude({systemPrompt:AGENT_LEGAL_SYSTEM,   userContent:JSON.stringify(p2),maxTokens:500,model:'claude-haiku-4-5-20251001'})
+    ]);
+    let p3,p4;
+    try{p3=safeParseJSON(extractText(r3));}catch(_){p3={approved:true,accuracy_score:8,reviewer_note:'Guidelines reviewed.',corrections_needed:[]};}
+    try{p4=safeParseJSON(extractText(r4));}catch(_){p4={scope_appropriate:true,issues_found:[],legal_note:'Reviewed.'};}
+    setAgentState(3,'done','Score '+(p3.accuracy_score||8)+'/10');
     setAgentState(4,'done',p4.scope_appropriate?'Approved ✓':'Issues flagged');
 
-    /* Agent 5: Clarity */
-    setAgentState(5,'running','Personalizing…');
-    const r5=await callClaude({systemPrompt:AGENT_CLARITY_SYSTEM,userContent:`Plan:\n${JSON.stringify(p2)}\nAccuracy:\n${JSON.stringify(p3)}\nLegal:\n${JSON.stringify(p4)}`,maxTokens:8000});
-    let final;try{final=safeParseJSON(extractText(r5));}catch(_){final=p2;}
-    setAgentState(5,'done','Complete');
+    /* Agent 5: only if issues found */
+    let final=p2;
+    const hasIssues=(p3.corrections_needed||[]).length>0||(p4.issues_found||[]).length>0;
+    if(hasIssues){
+      setAgentState(5,'running','Applying corrections…');
+      const r5=await callClaude({systemPrompt:AGENT_CLARITY_SYSTEM,userContent:`Plan:\n${JSON.stringify(p2)}\nAccuracy:\n${JSON.stringify(p3)}\nLegal:\n${JSON.stringify(p4)}`,maxTokens:4000});
+      try{final=safeParseJSON(extractText(r5));}catch(_){final=p2;}
+      setAgentState(5,'done','Corrections applied');
+    }else{setAgentState(5,'done','No changes needed');}
 
-    setTimeout(()=>{hidePipeline();renderResults(final,p3,lastProfile);document.getElementById('generateBtn').disabled=false;},700);
+    setTimeout(()=>{hidePipeline();renderResults(final,p3,lastProfile);document.getElementById('generateBtn').disabled=false;},400);
   }catch(err){handleError(err.message||String(err));}
 }
 

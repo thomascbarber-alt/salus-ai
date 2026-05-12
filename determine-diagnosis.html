@@ -429,9 +429,9 @@ window.addEventListener('scroll',()=>{const d=document.documentElement;const p=d
 function showPipeline(){document.getElementById('pipelinePanel').classList.add('visible');}
 function hidePipeline(){document.getElementById('pipelinePanel').classList.remove('visible');}
 
-async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebSearch = false }, _retry = 0) {
+async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebSearch = false, model = 'claude-sonnet-4-6' }, _retry = 0) {
   const body = {
-    model: 'claude-sonnet-4-6',
+    model: model,
     max_tokens: maxTokens,
     system: systemPrompt,
     messages: [{ role: 'user', content: userContent }]
@@ -446,7 +446,7 @@ async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebS
   });
   if ((res.status === 529 || res.status === 503) && _retry < 3) {
     await new Promise(r => setTimeout(r, (_retry + 1) * 2000));
-    return callClaude({ systemPrompt, userContent, maxTokens, useWebSearch }, _retry + 1);
+    return callClaude({ systemPrompt, userContent, maxTokens, useWebSearch, model }, _retry + 1);
   }
   if (!res.ok) {
     const err = await res.text();
@@ -578,22 +578,33 @@ async function runMainPipeline(){
     let p2;try{p2=safeParseJSON(extractText(r2));}catch(e){throw new Error('Differential Analyst JSON parse failed: '+e.message);}
     setAgentState(2,'done','Complete');
 
-    setAgentState(3,'running','Verifying accuracy…');
-    const r3=await callClaude({systemPrompt:AGENT_ACCURACY_SYSTEM,userContent:JSON.stringify(p2),maxTokens:800});
-    let p3;try{p3=safeParseJSON(extractText(r3));}catch(_){p3={approved:true,accuracy_score:8,reviewer_note:'Reviewed.'};}
-    setAgentState(3,'done','Score '+(p3.accuracy_score||8)+'/10');
+    /* Show interim results immediately */
+    renderResults(p2,{reviewer_note:'Review in progress…'});
 
-    setAgentState(4,'running','Scope check…');
-    const r4=await callClaude({systemPrompt:AGENT_LEGAL_SYSTEM,userContent:JSON.stringify(p2),maxTokens:600});
-    let p4;try{p4=safeParseJSON(extractText(r4));}catch(_){p4={scope_appropriate:true,legal_note:'Reviewed.'};}
+    /* Agents 3+4: parallel with Haiku */
+    setAgentState(3,'running','Verifying…');
+    setAgentState(4,'running','Checking scope…');
+    const [r3,r4]=await Promise.all([
+      callClaude({systemPrompt:AGENT_ACCURACY_SYSTEM,userContent:JSON.stringify(p2),maxTokens:600,model:'claude-haiku-4-5-20251001'}),
+      callClaude({systemPrompt:AGENT_LEGAL_SYSTEM,   userContent:JSON.stringify(p2),maxTokens:500,model:'claude-haiku-4-5-20251001'})
+    ]);
+    let p3,p4;
+    try{p3=safeParseJSON(extractText(r3));}catch(_){p3={approved:true,accuracy_score:8,reviewer_note:'Reviewed.',corrections_needed:[]};}
+    try{p4=safeParseJSON(extractText(r4));}catch(_){p4={scope_appropriate:true,issues_found:[],legal_note:'Reviewed.'};}
+    setAgentState(3,'done','Score '+(p3.accuracy_score||8)+'/10');
     setAgentState(4,'done',p4.scope_appropriate?'Approved ✓':'Issues flagged');
 
-    setAgentState(5,'running','Polishing…');
-    const r5=await callClaude({systemPrompt:AGENT_CLARITY_SYSTEM,userContent:`Analysis:\n${JSON.stringify(p2)}\nAccuracy:\n${JSON.stringify(p3)}\nLegal:\n${JSON.stringify(p4)}`,maxTokens:6000});
-    let final;try{final=safeParseJSON(extractText(r5));}catch(_){final=p2;}
-    setAgentState(5,'done','Complete');
+    /* Agent 5: only if issues found */
+    let final=p2;
+    const hasIssues=(p3.corrections_needed||[]).length>0||(p4.issues_found||[]).length>0;
+    if(hasIssues){
+      setAgentState(5,'running','Applying corrections…');
+      const r5=await callClaude({systemPrompt:AGENT_CLARITY_SYSTEM,userContent:`Analysis:\n${JSON.stringify(p2)}\nAccuracy:\n${JSON.stringify(p3)}\nLegal:\n${JSON.stringify(p4)}`,maxTokens:4000});
+      try{final=safeParseJSON(extractText(r5));}catch(_){final=p2;}
+      setAgentState(5,'done','Corrections applied');
+    }else{setAgentState(5,'done','No changes needed');}
 
-    setTimeout(()=>{hidePipeline();renderResults(final,p3);document.getElementById('submitBtn').disabled=false;document.getElementById('symptomInput').disabled=false;},700);
+    setTimeout(()=>{hidePipeline();renderResults(final,p3);document.getElementById('submitBtn').disabled=false;document.getElementById('symptomInput').disabled=false;},400);
   }catch(err){handleError(err.message||String(err));}
 }
 
