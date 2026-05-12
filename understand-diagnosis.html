@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <script>
-/* Salus AI auth gate */
+/* Salus AI auth gate — runs before page renders */
 (function(){
   var u=null;try{u=JSON.parse(localStorage.getItem('salus_user')||'null');}catch(_){}
   if(!u||!u.email){
@@ -18,303 +18,670 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
 <style>
+/* ═══════════════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════════════ */
 :root {
-  --navy:#0c1e3a; --navy-mid:#162d52; --navy-light:#1e3a68;
-  --teal:#0a7c6e; --teal-light:#13a090;
-  --gold:#d4aa3a; --gold-light:#e8c84a;
-  --blue:#4a6fa5; --blue-light:#6b8fc0;
-  --plum:#9b59b6; --green:#3a9e6a;
-  --white:#f0ece4; --danger:#c0392b;
-  --text-dim:rgba(240,236,228,0.55);
+  --navy:       #0c1e3a;
+  --navy-mid:   #162d52;
+  --navy-light: #1e3a68;
+  --teal:       #0a7c6e;
+  --teal-light: #13a090;
+  --gold:       #d4aa3a;
+  --gold-light: #e8c84a;
+  --blue:       #4a6fa5;
+  --blue-light: #6b8fc0;
+  --plum:       #9b59b6;
+  --green:      #3a9e6a;
+  --white:      #f0ece4;
+  --danger:     #c0392b;
+  --text-dim:   rgba(240,236,228,0.55);
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
 
-/* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;
-  padding:0 48px;height:96px;background:rgba(12,30,58,0.97);backdrop-filter:blur(12px);
-  border-bottom:1px solid rgba(74,111,165,0.25);}
-.nav-logo{display:flex;align-items:center;}
-.logo-img{height:90px;width:auto;object-fit:contain;}
-.nav-actions{display:flex;gap:10px;margin-left:auto;margin-right:20px;}
-.nav-mini{padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;
-  text-decoration:none;transition:all 0.2s;white-space:nowrap;}
-.nav-mini:hover{transform:translateY(-1px);opacity:0.9;}
-.btn1{background:linear-gradient(135deg,#d4aa3a,#b8932a);color:#0c1e3a;}
-.btn2{background:linear-gradient(135deg,#13a090,#0a7c6e);color:white;}
-.btn3{background:linear-gradient(135deg,#4a6fa5,#162d52);color:white;}
-.btn4{background:linear-gradient(135deg,#9b59b6,#6b7a8d);color:white;}
-.btn5{background:linear-gradient(135deg,#3a9e6a,#2d7a52);color:white;}
-@media(max-width:768px){nav{padding:0 20px;}.nav-actions{gap:6px;margin-right:0;}.nav-mini{font-size:10px;padding:6px 10px;}}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* USER BAR */
-#salusUserBar{position:fixed;top:96px;left:0;right:0;z-index:99;
-  background:rgba(7,16,32,0.98);border-bottom:1px solid rgba(255,255,255,0.055);
-  padding:0 48px;height:38px;display:flex;align-items:center;justify-content:space-between;
-  font-family:'DM Sans',sans-serif;font-size:12px;backdrop-filter:blur(8px);}
+body {
+  background: var(--navy);
+  color: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ═══════════════════ SCROLL PROGRESS ═══════════════════ */
+.progress-bar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 3px; z-index: 200; background: transparent;
+}
+.progress-fill {
+  height: 100%; width: 0%; background: var(--blue);
+  transition: width 0.1s linear;
+  box-shadow: 0 0 8px var(--blue-light);
+}
+
+/* ═══════════════════ NAV ═══════════════════ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100; display: flex; align-items: center;
+  padding: 0 48px; height: 96px;
+  background: rgba(12,30,58,0.97);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(74,111,165,0.25);
+}
+.nav-logo { display: flex; align-items: center; }
+.logo-img  { height: 90px; width: auto; object-fit: contain; }
+.nav-actions {
+  display: flex; gap: 10px;
+  margin-left: auto; margin-right: 20px;
+}
+.nav-mini {
+  padding: 8px 14px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+  text-decoration: none; transition: all 0.2s;
+  white-space: nowrap;
+}
+.nav-mini:hover { transform: translateY(-1px); opacity: 0.9; }
+.btn1 { background: linear-gradient(135deg,#d4aa3a,#b8932a); color:#0c1e3a; }
+.btn2 { background: linear-gradient(135deg,#13a090,#0a7c6e); color:white; }
+.btn3 { background: linear-gradient(135deg,#4a6fa5,#162d52); color:white; }
+.btn4 { background: linear-gradient(135deg,#9b59b6,#6b7a8d); color:white; }
+.btn5 { background: linear-gradient(135deg,#3a9e6a,#2d7a52); color:white; }
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .nav-actions { gap: 6px; margin-right: 0; }
+  .nav-mini { font-size: 10px; padding: 6px 10px; }
+}
+
+/* ═══════════════════ PAGE LAYOUT ═══════════════════ */
+.page-wrap {
+  max-width: 900px; margin: 0 auto;
+  padding: 178px 24px 80px;
+}
+
+/* ═══════════════════ HEADER ═══════════════════ */
+.page-header { text-align: center; margin-bottom: 52px; }
+.page-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 11px; font-weight: 700; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--blue-light);
+  margin-bottom: 18px;
+}
+.eyebrow-line {
+  width: 28px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--blue-light));
+}
+.page-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 600; line-height: 1.15;
+  color: var(--white); margin-bottom: 16px;
+}
+.page-title em { font-style: italic; color: var(--blue-light); }
+.page-sub {
+  font-family: 'Crimson Pro', serif;
+  font-size: 19px; color: var(--text-dim);
+  line-height: 1.6; max-width: 580px; margin: 0 auto;
+}
+.page-disclaimer {
+  font-size: 11px; color: rgba(255,255,255,0.28);
+  margin-top: 12px; line-height: 1.5;
+}
+
+/* ═══════════════════ INPUT CARD ═══════════════════ */
+.input-card {
+  border-radius: 20px; overflow: hidden;
+  border: 1px solid rgba(74,111,165,0.2);
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(12px);
+  margin-bottom: 28px;
+  animation: fadeUp 0.5s ease 0.1s both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.input-card-header {
+  padding: 24px 28px 0;
+  display: flex; align-items: center; gap: 12px;
+}
+.input-card-icon { font-size: 24px; }
+.input-card-label {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px; color: var(--white);
+}
+.input-card-sub {
+  font-size: 12px; color: var(--text-dim);
+  margin-top: 2px;
+}
+.input-area { padding: 20px 28px 8px; }
+.diagnosis-input-wrap {
+  display: flex; gap: 12px; align-items: flex-end;
+}
+.diagnosis-input {
+  flex: 1; padding: 16px 20px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(74,111,165,0.2);
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px; color: var(--white);
+  outline: none; transition: all 0.3s;
+  resize: none; min-height: 56px; max-height: 120px;
+}
+.diagnosis-input:focus {
+  border-color: rgba(74,111,165,0.6);
+  background: rgba(74,111,165,0.08);
+  box-shadow: 0 0 0 3px rgba(74,111,165,0.1);
+}
+.diagnosis-input::placeholder { color: rgba(255,255,255,0.2); }
+.submit-btn {
+  padding: 16px 28px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--blue), var(--navy-mid));
+  color: white; font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 700;
+  border: 1px solid rgba(74,111,165,0.4);
+  cursor: pointer; transition: all 0.25s;
+  white-space: nowrap; flex-shrink: 0;
+}
+.submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5a7fbf, var(--blue));
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(74,111,165,0.3);
+}
+.submit-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+/* Hint chips */
+.hint-chips {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  padding: 14px 28px 22px;
+}
+.hint-chip {
+  font-size: 12px; padding: 6px 12px; border-radius: 100px;
+  border: 1px solid rgba(74,111,165,0.25);
+  color: rgba(255,255,255,0.45); cursor: pointer;
+  background: rgba(74,111,165,0.06);
+  transition: all 0.2s; white-space: nowrap;
+}
+.hint-chip:hover {
+  border-color: rgba(74,111,165,0.55);
+  color: rgba(255,255,255,0.75);
+  background: rgba(74,111,165,0.12);
+}
+
+/* ═══════════════════ CLARIFY PANEL ═══════════════════ */
+.clarify-panel {
+  border-radius: 16px; margin-bottom: 20px;
+  border: 1px solid rgba(74,111,165,0.3);
+  background: rgba(74,111,165,0.07);
+  padding: 0; display: none; overflow: hidden;
+  animation: fadeUp 0.35s ease;
+}
+.clarify-panel.visible { display: block; }
+.clarify-header {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 22px 24px 16px;
+}
+.clarify-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.clarify-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px; color: var(--white); margin-bottom: 4px;
+}
+.clarify-sub { font-size: 13px; color: var(--text-dim); }
+.clarify-round-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 4px 12px; border-radius: 100px;
+  margin: 0 24px 12px;
+}
+.clarify-round-dot { width: 6px; height: 6px; border-radius: 50%; background: #4a6fa5; }
+.clarify-questions { padding: 0 24px; }
+.clarify-q { margin-bottom: 16px; }
+.clarify-q-label {
+  font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.7);
+  margin-bottom: 8px;
+}
+.clarify-q-input {
+  width: 100%; padding: 11px 14px; border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(74,111,165,0.25);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; color: var(--white); outline: none;
+  transition: border-color 0.2s;
+}
+.clarify-q-input:focus { border-color: rgba(74,111,165,0.6); }
+.clarify-q-input::placeholder { color: rgba(255,255,255,0.2); }
+.clarify-submit {
+  display: block; width: calc(100% - 48px);
+  margin: 14px 24px 22px;
+  padding: 13px; border-radius: 10px;
+  background: rgba(74,111,165,0.7); color: white;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
+  border: none; cursor: pointer; transition: all 0.2s;
+}
+.clarify-submit:hover { background: var(--blue); transform: translateY(-1px); }
+
+/* ═══════════════════ PIPELINE ═══════════════════ */
+.pipeline-panel { display: none; margin-top: 24px; animation: fadeUp 0.4s ease both; }
+.pipeline-panel.visible { display: block; }
+.pipeline-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 3px;
+  text-transform: uppercase; color: rgba(255,255,255,0.3);
+  margin-bottom: 20px; text-align: center;
+}
+.pipeline-track { position: relative; display: flex; align-items: flex-start; }
+.pipeline-track-line {
+  position: absolute; top: 22px; left: 10%; right: 10%;
+  height: 2px; background: rgba(255,255,255,0.07); z-index: 0;
+  border-radius: 2px; overflow: hidden;
+}
+.pipeline-track-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--blue), var(--blue-light));
+  transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+.agents-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; width: 100%; position: relative; z-index: 1; }
+.agent-card {
+  border-radius: 12px; padding: 14px 12px 12px;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.02);
+  transition: all 0.4s; position: relative;
+  overflow: hidden; display: flex;
+  flex-direction: column; align-items: center; text-align: center;
+}
+.agent-card.running { border-color: rgba(74,111,165,0.5); background: rgba(74,111,165,0.08); box-shadow: 0 0 18px rgba(74,111,165,0.08); }
+.agent-card.done    { border-color: rgba(74,111,165,0.4); background: rgba(74,111,165,0.06); }
+.agent-card.paused  { border-color: rgba(74,111,165,0.4); background: rgba(74,111,165,0.07); }
+.agent-card.error   { border-color: rgba(192,57,43,0.35); background: rgba(192,57,43,0.06); }
+.agent-card-shimmer {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+  transform: translateX(-100%); animation: shimmer 1.5s infinite;
+  pointer-events: none; display: none;
+}
+.agent-card.running .agent-card-shimmer { display: block; }
+@keyframes shimmer { to { transform: translateX(100%); } }
+.agent-flag {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 10px; font-size: 13px;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  transition: all 0.4s; flex-shrink: 0;
+}
+.agent-card.running .agent-flag { background: rgba(74,111,165,0.2); border-color: rgba(74,111,165,0.6); animation: flagPulse 1.2s ease-in-out infinite; }
+.agent-card.done    .agent-flag { background: rgba(74,111,165,0.2); border-color: var(--blue-light); color: var(--blue-light); }
+.agent-card.paused  .agent-flag { background: rgba(74,111,165,0.15); border-color: rgba(74,111,165,0.5); }
+.agent-card.error   .agent-flag { background: rgba(192,57,43,0.15); border-color: var(--danger); }
+@keyframes flagPulse {
+  0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(74,111,165,0.3); }
+  50%      { transform: scale(1.08); box-shadow: 0 0 0 5px rgba(74,111,165,0); }
+}
+.agent-num { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.2); margin-bottom: 5px; }
+.agent-name { font-family: 'Playfair Display', serif; font-size: 12px; color: rgba(255,255,255,0.55); margin-bottom: 5px; line-height: 1.3; }
+.agent-status { font-size: 10px; color: rgba(255,255,255,0.28); display: flex; align-items: center; gap: 4px; justify-content: center; min-height: 14px; }
+.agent-status-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.15); flex-shrink: 0; transition: background 0.3s; }
+.agent-card.running .agent-status-dot { background: var(--blue-light); animation: pulse 1s infinite; }
+.agent-card.done    .agent-status-dot { background: var(--blue-light); animation: none; }
+.agent-card.error   .agent-status-dot { background: var(--danger); animation: none; }
+.agent-card.paused  .agent-status-dot { background: #4a6fa5; animation: none; }
+.agent-card.running .agent-status { color: var(--blue-light); }
+.agent-card.done    .agent-name   { color: var(--white); }
+.agent-card.done    .agent-status { color: var(--blue-light); }
+.agent-card.paused  .agent-status { color: #7b9fd4; }
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(107,143,192,0.4); }
+  70%  { box-shadow: 0 0 0 4px rgba(107,143,192,0); }
+  100% { box-shadow: 0 0 0 0 rgba(107,143,192,0); }
+}
+@media (max-width: 768px) {
+  .agents-row { grid-template-columns: repeat(3, 1fr); }
+  .pipeline-track-line { display: none; }
+}
+
+/* ═══════════════════ RESULTS ═══════════════════ */
+.results-section { display: none; margin-top: 40px; animation: fadeUp 0.5s ease; }
+.results-section.visible { display: block; }
+
+.results-header { text-align: center; margin-bottom: 36px; }
+.results-diagnosis-name {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 4vw, 40px); font-weight: 700;
+  color: var(--white); margin-bottom: 8px;
+}
+.results-aka {
+  font-size: 13px; color: var(--text-dim);
+  margin-bottom: 14px;
+}
+.results-takeaway {
+  font-family: 'Crimson Pro', serif;
+  font-size: 18px; color: rgba(255,255,255,0.8);
+  font-style: italic; line-height: 1.6;
+  max-width: 650px; margin: 0 auto 20px;
+  padding: 16px 24px;
+  background: rgba(74,111,165,0.08);
+  border-left: 3px solid var(--blue);
+  border-radius: 0 10px 10px 0;
+  text-align: left;
+}
+.results-meta {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  justify-content: center; margin-bottom: 12px;
+}
+.results-meta-chip {
+  font-size: 11px; padding: 5px 12px; border-radius: 100px;
+  background: rgba(74,111,165,0.1);
+  border: 1px solid rgba(74,111,165,0.2);
+  color: rgba(255,255,255,0.5);
+}
+.agent-note {
+  font-size: 11px; color: rgba(255,255,255,0.25);
+  text-align: center; margin-bottom: 32px;
+}
+
+/* Section tabs */
+.section-tabs {
+  display: flex; gap: 4px; margin-bottom: 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  overflow-x: auto; padding-bottom: 0;
+}
+.section-tab {
+  padding: 12px 20px; font-size: 13px; font-weight: 600;
+  color: rgba(255,255,255,0.4); cursor: pointer; white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s; background: none; border-top: none;
+  border-left: none; border-right: none;
+  font-family: 'DM Sans', sans-serif;
+}
+.section-tab:hover  { color: rgba(255,255,255,0.7); }
+.section-tab.active { color: var(--white); border-bottom-color: var(--blue-light); }
+.section-tab .tab-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 50%;
+  font-size: 10px; font-weight: 700;
+  background: rgba(74,111,165,0.2);
+  margin-right: 6px; vertical-align: middle;
+}
+.section-tab.active .tab-num { background: var(--blue); color: white; }
+
+.section-pane { display: none; animation: fadeUp 0.3s ease; }
+.section-pane.active { display: block; }
+
+/* Section 1 — Understanding */
+.s1-block { margin-bottom: 28px; }
+.s1-block-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--blue-light);
+  margin-bottom: 12px;
+}
+.s1-text {
+  font-family: 'Crimson Pro', serif;
+  font-size: 17px; line-height: 1.75;
+  color: rgba(255,255,255,0.82);
+}
+.diagnosis-methods-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+.method-card {
+  padding: 16px 18px; border-radius: 12px;
+  border: 1px solid rgba(74,111,165,0.2);
+  background: rgba(74,111,165,0.05);
+}
+.method-name { font-size: 14px; font-weight: 700; color: var(--white); margin-bottom: 6px; }
+.method-desc { font-size: 13px; color: var(--text-dim); line-height: 1.5; margin-bottom: 6px; }
+.method-when { font-size: 11px; color: rgba(74,111,165,0.9); font-weight: 600; }
+.treatment-card {
+  border-radius: 14px; margin-bottom: 12px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.02);
+}
+.treatment-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; cursor: pointer; gap: 12px;
+}
+.treatment-header:hover { background: rgba(255,255,255,0.02); }
+.treatment-title { font-size: 15px; font-weight: 700; color: var(--white); }
+.treatment-summary { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.evidence-badge {
+  font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 100px;
+  flex-shrink: 0;
+}
+.evidence-high     { background: rgba(10,124,110,0.15); color: #13c0ac; border: 1px solid rgba(10,124,110,0.3); }
+.evidence-moderate { background: rgba(184,147,42,0.15); color: var(--gold);  border: 1px solid rgba(184,147,42,0.3); }
+.evidence-low      { background: rgba(107,107,107,0.15); color: #aaa;        border: 1px solid rgba(107,107,107,0.3); }
+.treatment-body { padding: 0 20px 18px; display: none; }
+.treatment-body.open { display: block; }
+.treatment-desc {
+  font-family: 'Crimson Pro', serif;
+  font-size: 16px; color: rgba(255,255,255,0.75);
+  line-height: 1.7; margin-bottom: 14px;
+}
+.treatment-considerations {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.tc-item { font-size: 13px; color: var(--text-dim); display: flex; gap: 8px; }
+.tc-dot { color: var(--blue-light); flex-shrink: 0; }
+
+/* Section 2 — Advances */
+.advances-timeline { display: flex; flex-direction: column; gap: 20px; }
+.advance-card {
+  display: grid; grid-template-columns: 72px 1fr;
+  gap: 20px; align-items: start;
+  padding: 20px 22px; border-radius: 14px;
+  border: 1px solid rgba(74,111,165,0.15);
+  background: rgba(74,111,165,0.04);
+  transition: border-color 0.2s;
+}
+.advance-card:hover { border-color: rgba(74,111,165,0.3); }
+.advance-year {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 700;
+  color: var(--blue-light); text-align: center;
+  padding-top: 2px;
+}
+.advance-title { font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 6px; }
+.advance-desc {
+  font-family: 'Crimson Pro', serif;
+  font-size: 16px; color: rgba(255,255,255,0.72); line-height: 1.65; margin-bottom: 8px;
+}
+.advance-significance {
+  font-size: 12px; font-weight: 600; color: var(--blue-light);
+  display: flex; align-items: center; gap: 6px;
+}
+.s2-summary {
+  font-family: 'Crimson Pro', serif;
+  font-size: 17px; color: rgba(255,255,255,0.75);
+  line-height: 1.7; margin-bottom: 28px;
+  padding: 18px 22px;
+  background: rgba(74,111,165,0.06);
+  border-radius: 12px;
+}
+
+/* Section 3 — Trials */
+.s3-overview {
+  font-family: 'Crimson Pro', serif;
+  font-size: 17px; color: rgba(255,255,255,0.75);
+  line-height: 1.7; margin-bottom: 24px;
+}
+.trials-grid { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
+.trial-card {
+  padding: 18px 22px; border-radius: 14px;
+  border: 1px solid rgba(184,147,42,0.15);
+  background: rgba(184,147,42,0.04);
+}
+.trial-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.trial-title { font-size: 14px; font-weight: 700; color: var(--white); line-height: 1.4; }
+.trial-phase {
+  font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 100px;
+  background: rgba(184,147,42,0.15); color: var(--gold);
+  border: 1px solid rgba(184,147,42,0.3); flex-shrink: 0;
+  white-space: nowrap;
+}
+.trial-focus { font-size: 13px; color: var(--text-dim); margin-bottom: 8px; line-height: 1.5; }
+.trial-footer { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.trial-eligibility { font-size: 12px; color: rgba(255,255,255,0.4); }
+.trial-registry {
+  font-size: 11px; font-weight: 600; color: var(--gold);
+  background: rgba(184,147,42,0.08); padding: 3px 8px;
+  border-radius: 6px; border: 1px solid rgba(184,147,42,0.2);
+}
+.research-areas { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.research-tag {
+  font-size: 12px; padding: 5px 12px; border-radius: 100px;
+  background: rgba(74,111,165,0.1); border: 1px solid rgba(74,111,165,0.2);
+  color: rgba(255,255,255,0.6);
+}
+.trials-cta {
+  padding: 16px 20px; border-radius: 12px;
+  background: rgba(184,147,42,0.07);
+  border: 1px solid rgba(184,147,42,0.2);
+  font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.6;
+}
+.trials-cta strong { color: var(--gold); }
+.trials-cta a { color: var(--gold); text-decoration: none; font-weight: 600; }
+.trials-cta a:hover { text-decoration: underline; }
+
+/* Section 4 — Experts */
+.specialists-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px; margin-bottom: 28px;
+}
+.specialist-card {
+  padding: 18px 20px; border-radius: 14px;
+  border: 1px solid rgba(155,89,182,0.2);
+  background: rgba(155,89,182,0.04);
+  transition: border-color 0.2s;
+}
+.specialist-card:hover { border-color: rgba(155,89,182,0.35); }
+.specialist-name { font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 3px; }
+.specialist-inst { font-size: 12px; color: var(--text-dim); margin-bottom: 10px; }
+.specialist-location { font-size: 11px; color: rgba(155,89,182,0.9); font-weight: 600; margin-bottom: 8px; }
+.specialist-known-for { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.5; }
+.centers-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+.center-card {
+  padding: 18px 20px; border-radius: 14px;
+  border: 1px solid rgba(155,89,182,0.15);
+  background: rgba(155,89,182,0.03);
+}
+.center-name { font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 3px; }
+.center-location { font-size: 11px; color: var(--text-dim); margin-bottom: 6px; }
+.center-distinction {
+  display: inline-block; font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 100px;
+  background: rgba(155,89,182,0.15); color: #c39bd3;
+  border: 1px solid rgba(155,89,182,0.3); margin-bottom: 8px;
+}
+.center-why { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.5; }
+.s4-overview {
+  font-family: 'Crimson Pro', serif;
+  font-size: 17px; color: rgba(255,255,255,0.75);
+  line-height: 1.7; margin-bottom: 24px;
+}
+.section-sublabel {
+  font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--text-dim);
+  margin: 22px 0 12px;
+}
+
+/* Doctor questions bar */
+.doctor-questions {
+  margin-top: 36px; padding: 24px 28px;
+  border-radius: 16px;
+  background: rgba(74,111,165,0.07);
+  border: 1px solid rgba(74,111,165,0.2);
+}
+.dq-header {
+  font-size: 13px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--blue-light);
+  margin-bottom: 16px;
+}
+.doctor-q {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.5;
+}
+.doctor-q:last-child { border-bottom: none; }
+.doctor-q-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(74,111,165,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: var(--blue-light);
+  flex-shrink: 0; margin-top: 2px;
+}
+
+/* Reset button */
+.reset-btn {
+  display: flex; align-items: center; gap: 8px;
+  margin: 32px auto 0; padding: 12px 28px;
+  background: rgba(74,111,165,0.1);
+  border: 1px solid rgba(74,111,165,0.25);
+  border-radius: 100px; color: rgba(255,255,255,0.5);
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  cursor: pointer; transition: all 0.2s;
+}
+.reset-btn:hover { background: rgba(74,111,165,0.2); color: rgba(255,255,255,0.8); }
+
+/* Footer */
+footer {
+  margin-top: 80px; padding: 32px 48px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  text-align: center;
+  font-size: 11px; color: rgba(255,255,255,0.2);
+  line-height: 1.7;
+}
+
+/* ── Salus User Status Bar ── */
+#salusUserBar{
+  position:fixed;top:96px;left:0;right:0;z-index:99;
+  background:rgba(7,16,32,0.98);
+  border-bottom:1px solid rgba(255,255,255,0.055);
+  padding:0 48px;height:38px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-family:'DM Sans',sans-serif;font-size:12px;
+  backdrop-filter:blur(8px);
+}
 .subs-left{display:flex;align-items:center;gap:10px;}
-.subs-avatar{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.08);
-  display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;
-  color:rgba(255,255,255,0.6);}
+.subs-avatar{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,0.6);flex-shrink:0;}
 .subs-email{color:rgba(255,255,255,0.38);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .subs-right{display:flex;align-items:center;gap:10px;}
-.subs-signout{padding:4px 9px;border-radius:6px;background:none;border:1px solid rgba(255,255,255,0.06);
-  color:rgba(255,255,255,0.22);cursor:pointer;font-size:11px;}
+.subs-records{display:flex;align-items:center;gap:5px;padding:4px 11px;border-radius:100px;text-decoration:none;transition:all .2s;white-space:nowrap;}
+.subs-records-on{background:rgba(58,158,106,0.12);border:1px solid rgba(58,158,106,0.3);color:#52c488;}
+.subs-records-off{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.3);}
+.subs-records-off:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.55);}
+.subs-rdot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.subs-rdot-on{background:#52c488;animation:subsDotPulse 2.2s infinite;}
+.subs-rdot-off{background:rgba(255,255,255,0.18);}
+@keyframes subsDotPulse{0%{box-shadow:0 0 0 0 rgba(82,196,136,.5);}70%{box-shadow:0 0 0 5px rgba(82,196,136,0);}100%{box-shadow:0 0 0 0 rgba(82,196,136,0);}}
+.subs-signout{padding:4px 9px;border-radius:6px;background:none;border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.22);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;transition:all .2s;}
 .subs-signout:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.5);}
+@media(max-width:768px){#salusUserBar{padding:0 16px;}.subs-email{display:none;}.subs-records span{display:none;}}
 
-/* PAGE */
-.page-wrap{max-width:900px;margin:0 auto;padding:178px 24px 80px;}
-.page-header{text-align:center;margin-bottom:52px;}
-.page-eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:11px;font-weight:700;
-  letter-spacing:3px;text-transform:uppercase;color:var(--blue-light);margin-bottom:18px;}
-.eyebrow-line{width:28px;height:1px;background:linear-gradient(90deg,transparent,var(--blue-light));}
-.page-title{font-family:'Playfair Display',serif;font-size:clamp(32px,5vw,48px);font-weight:600;
-  line-height:1.15;color:var(--white);margin-bottom:16px;}
-.page-title em{font-style:italic;color:var(--blue-light);}
-.page-sub{font-family:'Crimson Pro',serif;font-size:19px;color:var(--text-dim);
-  line-height:1.6;max-width:600px;margin:0 auto;}
-.page-disclaimer{font-size:11px;color:rgba(255,255,255,0.28);margin-top:12px;}
 
-/* INPUT */
-.input-card{border-radius:20px;border:1px solid rgba(74,111,165,0.2);
-  background:rgba(255,255,255,0.03);backdrop-filter:blur(12px);margin-bottom:28px;
-  animation:fadeUp 0.5s ease 0.1s both;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
-.input-card-header{padding:24px 28px 0;display:flex;align-items:center;gap:12px;}
-.input-card-icon{font-size:24px;}
-.input-card-label{font-family:'Playfair Display',serif;font-size:18px;}
-.input-card-sub{font-size:12px;color:var(--text-dim);margin-top:2px;}
-.input-area{padding:20px 28px 8px;}
-.diagnosis-input-wrap{display:flex;gap:12px;align-items:flex-end;}
-.diagnosis-input{flex:1;padding:16px 20px;background:rgba(255,255,255,0.05);
-  border:1px solid rgba(74,111,165,0.2);border-radius:12px;font-family:'DM Sans',sans-serif;
-  font-size:16px;color:var(--white);outline:none;transition:all 0.3s;
-  resize:none;min-height:56px;max-height:120px;}
-.diagnosis-input:focus{border-color:rgba(74,111,165,0.6);background:rgba(74,111,165,0.08);
-  box-shadow:0 0 0 3px rgba(74,111,165,0.1);}
-.diagnosis-input::placeholder{color:rgba(255,255,255,0.2);}
-.submit-btn{padding:16px 28px;border-radius:12px;
-  background:linear-gradient(135deg,var(--blue),var(--navy-mid));color:white;
-  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;
-  border:1px solid rgba(74,111,165,0.4);cursor:pointer;transition:all 0.25s;white-space:nowrap;}
-.submit-btn:hover:not(:disabled){background:linear-gradient(135deg,#5a7fbf,var(--blue));
-  transform:translateY(-1px);box-shadow:0 6px 20px rgba(74,111,165,0.3);}
-.submit-btn:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
-.hint-chips{display:flex;flex-wrap:wrap;gap:8px;padding:14px 28px 22px;}
-.hint-chip{font-size:12px;padding:6px 12px;border-radius:100px;
-  border:1px solid rgba(74,111,165,0.25);color:rgba(255,255,255,0.45);
-  cursor:pointer;background:rgba(74,111,165,0.06);transition:all 0.2s;}
-.hint-chip:hover{border-color:rgba(74,111,165,0.55);color:rgba(255,255,255,0.75);
-  background:rgba(74,111,165,0.12);}
-
-/* CLARIFY */
-.clarify-panel{border-radius:16px;margin-bottom:20px;border:1px solid rgba(74,111,165,0.3);
-  background:rgba(74,111,165,0.07);display:none;overflow:hidden;animation:fadeUp 0.35s ease;}
-.clarify-panel.visible{display:block;}
-.clarify-header{display:flex;align-items:flex-start;gap:14px;padding:22px 24px 16px;}
-.clarify-icon{font-size:22px;}
-.clarify-title{font-family:'Playfair Display',serif;font-size:17px;margin-bottom:4px;}
-.clarify-sub{font-size:13px;color:var(--text-dim);}
-.clarify-questions{padding:0 24px;}
-.clarify-q{margin-bottom:16px;}
-.clarify-q-label{font-size:13px;font-weight:500;color:rgba(255,255,255,0.7);margin-bottom:8px;}
-.clarify-q-input{width:100%;padding:11px 14px;border-radius:8px;
-  background:rgba(255,255,255,0.06);border:1px solid rgba(74,111,165,0.25);
-  font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none;}
-.clarify-q-input:focus{border-color:rgba(74,111,165,0.6);}
-.clarify-submit{display:block;width:calc(100% - 48px);margin:14px 24px 22px;
-  padding:13px;border-radius:10px;background:rgba(74,111,165,0.7);color:white;
-  font-weight:700;border:none;cursor:pointer;font-size:14px;}
-.clarify-submit:hover{background:var(--blue);}
-
-/* PIPELINE */
-.pipeline-panel{display:none;margin-top:24px;animation:fadeUp 0.4s ease both;}
-.pipeline-panel.visible{display:block;}
-.pipeline-title{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
-  color:rgba(255,255,255,0.3);margin-bottom:20px;text-align:center;}
-.pipeline-track{position:relative;display:flex;align-items:flex-start;}
-.pipeline-track-line{position:absolute;top:24px;left:10%;right:10%;
-  height:2px;background:rgba(255,255,255,0.07);z-index:0;
-  border-radius:2px;overflow:hidden;}
-.pipeline-track-fill{height:100%;width:0%;
-  background:linear-gradient(90deg,var(--blue),var(--blue-light));
-  transition:width 0.7s cubic-bezier(0.4,0,0.2,1);
-  box-shadow:0 0 8px rgba(107,143,192,0.4);}
-@media(max-width:768px){.pipeline-track-line{display:none;}}
-.agents-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;width:100%;position:relative;z-index:1;}
-.agent-card{border-radius:12px;padding:14px 10px 12px;
-  border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.02);
-  transition:all 0.4s;position:relative;overflow:hidden;
-  display:flex;flex-direction:column;align-items:center;text-align:center;}
-.agent-card.running{border-color:rgba(74,111,165,0.5);background:rgba(74,111,165,0.08);
-  box-shadow:0 0 18px rgba(74,111,165,0.08);}
-.agent-card.done{border-color:rgba(74,111,165,0.4);background:rgba(74,111,165,0.06);}
-.agent-card.paused{border-color:rgba(74,111,165,0.4);background:rgba(74,111,165,0.07);}
-.agent-card.error{border-color:rgba(192,57,43,0.35);background:rgba(192,57,43,0.06);}
-.agent-card-shimmer{position:absolute;inset:0;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent);
-  transform:translateX(-100%);animation:shimmer 1.5s infinite;display:none;pointer-events:none;}
-.agent-card.running .agent-card-shimmer{display:block;}
-@keyframes shimmer{to{transform:translateX(100%);}}
-.agent-flag{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  margin:0 auto 8px;font-size:13px;background:rgba(255,255,255,0.05);
-  border:1.5px solid rgba(255,255,255,0.1);transition:all 0.4s;}
-.agent-card.running .agent-flag{background:rgba(74,111,165,0.2);border-color:rgba(74,111,165,0.6);
-  animation:flagPulse 1.2s ease-in-out infinite;}
-.agent-card.done .agent-flag{background:rgba(74,111,165,0.2);border-color:var(--blue-light);color:var(--blue-light);}
-.agent-card.paused .agent-flag{background:rgba(74,111,165,0.15);}
-.agent-card.error .agent-flag{background:rgba(192,57,43,0.15);border-color:var(--danger);}
-@keyframes flagPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
-.agent-num{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
-  color:rgba(255,255,255,0.2);margin-bottom:4px;}
-.agent-name{font-family:'Playfair Display',serif;font-size:11px;color:rgba(255,255,255,0.55);
-  margin-bottom:6px;line-height:1.25;min-height:28px;display:flex;align-items:center;}
-.agent-status{font-size:9px;color:rgba(255,255,255,0.28);display:flex;align-items:center;gap:4px;
-  justify-content:center;min-height:14px;}
-.agent-status-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.15);transition:background 0.3s;}
-.agent-card.running .agent-status-dot{background:var(--blue-light);animation:pulse 1s infinite;}
-.agent-card.done .agent-status-dot{background:var(--blue-light);}
-.agent-card.error .agent-status-dot{background:var(--danger);}
-.agent-card.running .agent-status{color:var(--blue-light);}
-.agent-card.done .agent-name{color:var(--white);}
-.agent-card.done .agent-status{color:var(--blue-light);}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(107,143,192,0.4);}70%{box-shadow:0 0 0 4px rgba(107,143,192,0);}100%{box-shadow:0 0 0 0 rgba(107,143,192,0);}}
-@media(max-width:768px){.agents-row{grid-template-columns:repeat(3,1fr);gap:8px;}.agent-name{font-size:10px;min-height:24px;}}
-
-/* TIMER */
-.elapsed-badge{display:inline-flex;align-items:center;gap:6px;margin-top:16px;
-  padding:6px 14px;border-radius:100px;background:rgba(74,111,165,0.08);
-  font-size:11px;color:var(--text-dim);}
-.elapsed-badge.done{background:rgba(58,158,106,0.1);color:#7bcf9e;}
-
-/* RESULTS */
-.results-section{display:none;margin-top:40px;animation:fadeUp 0.5s ease;}
-.results-section.visible{display:block;}
-.results-header{text-align:center;margin-bottom:36px;}
-.results-diagnosis-name{font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,40px);
-  font-weight:700;color:var(--white);margin-bottom:8px;}
-.results-aka{font-size:13px;color:var(--text-dim);margin-bottom:14px;}
-.results-takeaway{font-family:'Crimson Pro',serif;font-size:18px;color:rgba(255,255,255,0.85);
-  font-style:italic;line-height:1.6;max-width:680px;margin:0 auto 20px;
-  padding:16px 24px;background:rgba(74,111,165,0.08);border-left:3px solid var(--blue);
-  border-radius:0 10px 10px 0;text-align:left;}
-.results-meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:12px;}
-.results-meta-chip{font-size:11px;padding:5px 12px;border-radius:100px;
-  background:rgba(74,111,165,0.1);color:rgba(255,255,255,0.55);
-  border:1px solid rgba(74,111,165,0.2);}
-
-/* TABS */
-.section-tabs{display:flex;gap:6px;margin-bottom:24px;padding:6px;
-  background:rgba(255,255,255,0.03);border-radius:14px;
-  border:1px solid rgba(255,255,255,0.06);}
-.section-tab{flex:1;padding:12px 14px;border:none;background:transparent;cursor:pointer;
-  color:rgba(255,255,255,0.45);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
-  border-radius:10px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
-.section-tab:hover{color:rgba(255,255,255,0.75);}
-.section-tab.active{background:rgba(74,111,165,0.18);color:var(--white);}
-.tab-num{font-size:10px;font-weight:700;background:rgba(255,255,255,0.07);
-  width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;}
-.section-tab.active .tab-num{background:var(--blue);color:white;}
-
-.section-pane{display:none;animation:fadeUp 0.3s ease;}
-.section-pane.active{display:block;}
-
-/* SECTION CONTENT */
-.block{margin-bottom:28px;}
-.block-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;
-  color:var(--white);margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.07);padding-bottom:8px;}
-.block-text{font-size:15px;line-height:1.65;color:rgba(255,255,255,0.78);}
-
-.dx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
-.dx-card{padding:14px 16px;border-radius:10px;background:rgba(255,255,255,0.03);
-  border:1px solid rgba(255,255,255,0.06);}
-.dx-name{font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px;}
-.dx-desc{font-size:13px;color:rgba(255,255,255,0.65);line-height:1.5;margin-bottom:6px;}
-.dx-when{font-size:11px;color:var(--blue-light);font-weight:600;}
-
-.tx-card{padding:16px 20px;border-radius:12px;margin-bottom:10px;
-  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
-  transition:border-color 0.2s;}
-.tx-card:hover{border-color:rgba(74,111,165,0.3);}
-.tx-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px;}
-.tx-name{font-size:15px;font-weight:700;color:var(--white);}
-.tx-evidence{font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;flex-shrink:0;}
-.ev-high{background:rgba(58,158,106,0.15);color:#7bcf9e;border:1px solid rgba(58,158,106,0.3);}
-.ev-moderate{background:rgba(184,147,42,0.12);color:#e8c84a;border:1px solid rgba(184,147,42,0.3);}
-.ev-low{background:rgba(155,89,182,0.12);color:#c39bd3;border:1px solid rgba(155,89,182,0.3);}
-.tx-desc{font-size:13px;color:rgba(255,255,255,0.7);line-height:1.55;margin-bottom:8px;}
-.tx-meta{font-size:11px;color:rgba(255,255,255,0.4);}
-
-.advance-card{display:flex;gap:16px;padding:14px 18px;margin-bottom:10px;
-  background:rgba(255,255,255,0.03);border-left:3px solid var(--blue);border-radius:0 10px 10px 0;}
-.advance-year{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;
-  color:var(--blue-light);min-width:60px;}
-.advance-title{font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px;}
-.advance-desc{font-size:13px;color:rgba(255,255,255,0.65);line-height:1.55;margin-bottom:6px;}
-.advance-sig{font-size:12px;color:rgba(74,111,165,0.9);font-weight:600;}
-
-.trial-card{padding:14px 18px;margin-bottom:10px;border-radius:10px;
-  background:rgba(184,147,42,0.04);border:1px solid rgba(184,147,42,0.18);}
-.trial-top{display:flex;justify-content:space-between;gap:12px;margin-bottom:6px;}
-.trial-title{font-size:14px;font-weight:700;color:var(--white);}
-.trial-phase{font-size:10px;font-weight:700;background:rgba(184,147,42,0.15);
-  color:var(--gold);padding:3px 8px;border-radius:6px;border:1px solid rgba(184,147,42,0.3);flex-shrink:0;}
-.trial-focus{font-size:13px;color:rgba(255,255,255,0.7);line-height:1.55;margin-bottom:6px;}
-.trial-meta{font-size:11px;color:rgba(255,255,255,0.45);}
-.trials-cta{padding:14px 18px;border-radius:10px;background:rgba(184,147,42,0.06);
-  border:1px solid rgba(184,147,42,0.18);font-size:13px;color:rgba(255,255,255,0.65);
-  line-height:1.6;margin-top:12px;}
-.trials-cta a{color:var(--gold);text-decoration:none;font-weight:600;}
-.trials-cta a:hover{text-decoration:underline;}
-
-.specialist-card,.center-card{padding:14px 18px;border-radius:10px;margin-bottom:10px;
-  background:rgba(155,89,182,0.04);border:1px solid rgba(155,89,182,0.18);}
-.specialist-name,.center-name{font-size:15px;font-weight:700;color:var(--white);margin-bottom:3px;}
-.specialist-inst,.center-location{font-size:12px;color:var(--text-dim);margin-bottom:8px;}
-.specialist-known,.center-why{font-size:13px;color:rgba(255,255,255,0.65);line-height:1.55;}
-
-/* QUESTIONS FOR DR */
-.doctor-questions{margin-top:36px;padding:24px 28px;border-radius:16px;
-  background:rgba(74,111,165,0.07);border:1px solid rgba(74,111,165,0.2);}
-.dq-header{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
-  color:var(--blue-light);margin-bottom:14px;}
-.doctor-q{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);
-  font-size:14px;color:rgba(255,255,255,0.78);line-height:1.55;}
-.doctor-q:last-child{border-bottom:none;}
-.doctor-q-num{width:22px;height:22px;border-radius:50%;background:rgba(74,111,165,0.2);
-  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;
-  color:var(--blue-light);flex-shrink:0;margin-top:2px;}
-
-/* RESET + BUTTONS */
-.reset-btn{display:flex;align-items:center;gap:8px;margin:32px auto 0;padding:12px 28px;
-  background:rgba(74,111,165,0.1);border:1px solid rgba(74,111,165,0.25);border-radius:100px;
-  color:rgba(255,255,255,0.5);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;
-  transition:all 0.2s;}
-.reset-btn:hover{background:rgba(74,111,165,0.2);color:rgba(255,255,255,0.8);}
-
-.print-bar{display:flex;gap:12px;justify-content:flex-end;margin-top:24px;padding-top:24px;
-  border-top:1px solid rgba(255,255,255,0.07);}
-.print-btn{display:flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;
-  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border:none;}
+/* ── Print/Download bar ── */
+.print-bar{display:flex;gap:12px;justify-content:flex-end;margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.07);}
+.print-btn{display:flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;border:none;}
 .print-btn-download{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.7);}
 .print-btn-download:hover{background:rgba(255,255,255,0.12);color:white;}
-.print-btn-print{background:rgba(19,160,144,0.15);color:#13c0ac;
-  border:1px solid rgba(19,160,144,0.3);}
+.print-btn-print{background:rgba(19,160,144,0.15);color:#13c0ac;border:1px solid rgba(19,160,144,0.3);}
 .print-btn-print:hover{background:rgba(19,160,144,0.25);color:white;}
-
-footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0.06);
-  text-align:center;font-size:11px;color:rgba(255,255,255,0.2);line-height:1.7;}
-
 @media print{
   nav,#salusUserBar,.print-bar,.pipeline-panel,.input-card,.clarify-panel,
-  .section-tabs,.reset-btn{display:none!important;}
+  .section-tabs,.filter-tabs,.reset-btn,.records-banner,.records-connected-bar{display:none!important;}
   body{background:white!important;color:#111!important;}
   .results-section,.results-section.visible{display:block!important;}
   .section-pane{display:block!important;margin-bottom:24px;}
 }
+
 </style>
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
+
+<div class="progress-bar"><div class="progress-fill" id="ppFill"></div></div>
 
 <!-- NAV -->
 <nav>
@@ -323,7 +690,7 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
       <img src="salusAI-logo.jpg" class="logo-img" alt="Salus AI">
     </a>
   </div>
-  <div class="nav-actions">
+    <div class="nav-actions">
     <a href="precision-medicine3.html"  class="nav-mini btn1">Precision Medicine</a>
     <a href="health-decisions4.html"    class="nav-mini btn2">Health Decisions</a>
     <a href="determine-diagnosis.html"  class="nav-mini btn4">Determine Diagnosis</a>
@@ -343,8 +710,14 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
       <div class="eyebrow-line" style="transform:scaleX(-1)"></div>
     </div>
     <h1 class="page-title">Understand Any<br><em>Diagnosis</em></h1>
-    <p class="page-sub">Enter a diagnosis. Five AI agents clarify ambiguity, summarize the clinical picture, surface trials and centers, then review for scope and clarity.</p>
-    <p class="page-disclaimer">For clinician reference. Not personalized medical advice.</p>
+    <p class="page-sub">Enter a diagnosis and our AI research pipeline will explain what it means, how it's treated, what's new, where trials are happening, and who the leading specialists are.</p>
+    <p class="page-disclaimer">For educational purposes only. Does not constitute medical advice. Always consult your physician.</p>
+  </div>
+
+  <!-- API KEY BANNER -->
+      </div>
+    </div>
+<span>API key active — ready to research.</span>
   </div>
 
   <!-- INPUT CARD -->
@@ -353,23 +726,27 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
       <div class="input-card-icon">🔍</div>
       <div>
         <div class="input-card-label">Enter a diagnosis</div>
-        <div class="input-card-sub">Official name, common name, or abbreviation — e.g. "OCD of medial femoral condyle", "HER2+ breast cancer", "AFib"</div>
+        <div class="input-card-sub">Use the official name, common name, or abbreviation — e.g. "Type 2 Diabetes", "COPD", "HER2+ breast cancer"</div>
       </div>
     </div>
     <div class="input-area">
       <div class="diagnosis-input-wrap">
         <textarea id="diagnosisInput" class="diagnosis-input" rows="1"
-          placeholder="e.g. Osteochondral defect, Type 2 diabetes, atrial fibrillation…"></textarea>
-        <button class="submit-btn" id="submitBtn" onclick="runAnalysis()">Research →</button>
+          placeholder="e.g. Atrial fibrillation, Osteoporosis, Parkinson's disease…"></textarea>
+        <button class="submit-btn" id="submitBtn" onclick="runAnalysis()">
+          Research This →
+        </button>
       </div>
     </div>
     <div class="hint-chips">
-      <span class="hint-chip" onclick="setHint(this)">Osteochondral defect</span>
+      <span class="hint-chip" onclick="setHint(this)">Atrial Fibrillation</span>
       <span class="hint-chip" onclick="setHint(this)">Type 2 Diabetes</span>
-      <span class="hint-chip" onclick="setHint(this)">Hip dysplasia (DDH)</span>
-      <span class="hint-chip" onclick="setHint(this)">Rotator cuff tear</span>
-      <span class="hint-chip" onclick="setHint(this)">Atrial fibrillation</span>
-      <span class="hint-chip" onclick="setHint(this)">Heart failure</span>
+      <span class="hint-chip" onclick="setHint(this)">Osteoporosis</span>
+      <span class="hint-chip" onclick="setHint(this)">COPD</span>
+      <span class="hint-chip" onclick="setHint(this)">Prostate Cancer</span>
+      <span class="hint-chip" onclick="setHint(this)">Rheumatoid Arthritis</span>
+      <span class="hint-chip" onclick="setHint(this)">Heart Failure</span>
+      <span class="hint-chip" onclick="setHint(this)">Alzheimer's Disease</span>
     </div>
   </div>
 
@@ -378,10 +755,11 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
     <div class="clarify-header">
       <div class="clarify-icon">💬</div>
       <div>
-        <div class="clarify-title">Quick clarification</div>
-        <div class="clarify-sub">Helps tailor the research to the right variant.</div>
+        <div class="clarify-title">One quick clarification</div>
+        <div class="clarify-sub">This will help tailor the research to the most relevant context.</div>
       </div>
     </div>
+    <div id="clarifyRoundBadge"></div>
     <div class="clarify-questions" id="clarifyQuestions"></div>
     <button class="clarify-submit" onclick="submitClarifications()">Continue →</button>
   </div>
@@ -396,21 +774,21 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
           <div class="agent-card-shimmer"></div>
           <div class="agent-flag" id="agentFlag1">💬</div>
           <div class="agent-num">Agent 01</div>
-          <div class="agent-name">Clarifier</div>
+          <div class="agent-name">Clarifying Assistant</div>
           <div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus1">Waiting</span></div>
         </div>
         <div class="agent-card" id="agentCard2">
           <div class="agent-card-shimmer"></div>
-          <div class="agent-flag" id="agentFlag2">🩺</div>
+          <div class="agent-flag" id="agentFlag2">🔬</div>
           <div class="agent-num">Agent 02</div>
-          <div class="agent-name">Clinical Summary</div>
+          <div class="agent-name">Clinical Researcher</div>
           <div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus2">Waiting</span></div>
         </div>
         <div class="agent-card" id="agentCard3">
           <div class="agent-card-shimmer"></div>
-          <div class="agent-flag" id="agentFlag3">🔬</div>
+          <div class="agent-flag" id="agentFlag3">✓</div>
           <div class="agent-num">Agent 03</div>
-          <div class="agent-name">Trials &amp; Centers</div>
+          <div class="agent-name">Accuracy Review</div>
           <div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus3">Waiting</span></div>
         </div>
         <div class="agent-card" id="agentCard4">
@@ -424,17 +802,11 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
           <div class="agent-card-shimmer"></div>
           <div class="agent-flag" id="agentFlag5">✦</div>
           <div class="agent-num">Agent 05</div>
-          <div class="agent-name">Clarity Polish</div>
-          <div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus5">Waiting</span></div>
-        </div>
+          <div class="agent-name">Clarity</div>
+          <div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus5">Waiting</span>
       </div>
     </div>
-    <div style="text-align:center;">
-      <div class="elapsed-badge" id="elapsedBadge">⏱ <span id="elapsedTime">0.0s</span></div>
-    </div>
-  </div>
-
-  <!-- RESULTS -->
+<!-- RESULTS -->
   <div class="results-section" id="resultsSection">
 
     <div class="results-header">
@@ -443,65 +815,65 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
       <div class="results-takeaway" id="resultsTakeaway"></div>
       <div class="results-meta" id="resultsMeta"></div>
     </div>
+    <div class="agent-note" id="agentNote"></div>
 
+    <!-- Section Tabs -->
     <div class="section-tabs">
-      <button class="section-tab active" onclick="switchTab(0,this)"><span class="tab-num">1</span>Clinical Summary</button>
-      <button class="section-tab" onclick="switchTab(1,this)"><span class="tab-num">2</span>Recent Research</button>
-      <button class="section-tab" onclick="switchTab(2,this)"><span class="tab-num">3</span>Trials &amp; Centers</button>
+      <button class="section-tab active" onclick="switchTab(0, this)"><span class="tab-num">1</span>Understanding</button>
+      <button class="section-tab"        onclick="switchTab(1, this)"><span class="tab-num">2</span>Recent Advances</button>
+      <button class="section-tab"        onclick="switchTab(2, this)"><span class="tab-num">3</span>Research &amp; Trials</button>
+      <button class="section-tab"        onclick="switchTab(3, this)"><span class="tab-num">4</span>Experts &amp; Centers</button>
     </div>
 
-    <!-- PANE 0: Clinical Summary -->
+    <!-- Pane 0: Understanding -->
     <div class="section-pane active" id="pane0">
-      <div class="block">
-        <div class="block-title">What it is</div>
-        <div class="block-text" id="s1WhatItIs"></div>
+      <div class="s1-block">
+        <div class="s1-block-title">What It Is</div>
+        <div class="s1-text" id="s1WhatItIs"></div>
       </div>
-      <div class="block">
-        <div class="block-title">Diagnosis</div>
-        <div class="dx-grid" id="s1Diagnosis"></div>
+      <div class="s1-block">
+        <div class="s1-block-title">Who It Affects</div>
+        <div class="s1-text" id="s1WhoItAffects"></div>
       </div>
-      <div class="block">
-        <div class="block-title">Treatment</div>
+      <div class="s1-block">
+        <div class="s1-block-title">How It's Diagnosed</div>
+        <div class="diagnosis-methods-grid" id="s1Methods"></div>
+      </div>
+      <div class="s1-block">
+        <div class="s1-block-title">Treatment Alternatives</div>
         <div id="s1Treatments"></div>
       </div>
     </div>
 
-    <!-- PANE 1: Recent Research -->
+    <!-- Pane 1: Recent Advances -->
     <div class="section-pane" id="pane1">
-      <div class="block">
-        <div class="block-title">New research — last 6 months</div>
-        <div class="block-text" id="s2Summary" style="margin-bottom:18px;"></div>
-        <div id="s2Advances"></div>
-      </div>
+      <div class="s2-summary" id="s2Summary"></div>
+      <div class="advances-timeline" id="s2Advances"></div>
     </div>
 
-    <!-- PANE 2: Trials & Centers -->
+    <!-- Pane 2: Research & Trials -->
     <div class="section-pane" id="pane2">
-      <div class="block">
-        <div class="block-title">Active clinical trials</div>
-        <div class="block-text" id="s3TrialsOverview" style="margin-bottom:14px;"></div>
-        <div id="s3Trials"></div>
-        <div class="trials-cta" id="s3Cta"></div>
-      </div>
-      <div class="block">
-        <div class="block-title">Leading specialists</div>
-        <div id="s3Specialists"></div>
-      </div>
-      <div class="block">
-        <div class="block-title">Centers of excellence</div>
-        <div id="s3Centers"></div>
-      </div>
+      <div class="s3-overview" id="s3Overview"></div>
+      <div class="s1-block-title" style="margin-bottom:12px;">Active Research Areas</div>
+      <div class="research-areas" id="s3ResearchAreas"></div>
+      <div class="s1-block-title" style="margin:20px 0 12px;">Active Clinical Trials</div>
+      <div class="trials-grid" id="s3Trials"></div>
+      <div class="trials-cta" id="s3Cta"></div>
     </div>
 
-    <!-- DOCTOR Qs -->
+    <!-- Pane 3: Experts & Centers -->
+    <div class="section-pane" id="pane3">
+      <div class="s4-overview" id="s4Overview"></div>
+      <div class="section-sublabel">Leading Specialists</div>
+      <div class="specialists-grid" id="s4Specialists"></div>
+      <div class="section-sublabel">Centers of Excellence</div>
+      <div class="centers-grid" id="s4Centers"></div>
+    </div>
+
+    <!-- Questions for doctor -->
     <div class="doctor-questions">
-      <div class="dq-header">Questions to ask the treating physician</div>
+      <div class="dq-header">Questions to ask your doctor</div>
       <div id="doctorQuestions"></div>
-    </div>
-
-    <div class="print-bar">
-      <button class="print-btn print-btn-download" onclick="downloadResults()">⬇ Download HTML</button>
-      <button class="print-btn print-btn-print" onclick="window.print()">🖨 Print</button>
     </div>
 
     <button class="reset-btn" onclick="resetToInput()">← Research another diagnosis</button>
@@ -511,611 +883,709 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
 </div><!-- /page-wrap -->
 
 <footer>
-  <p>salusai.health · Understand Diagnosis</p>
+  <p>salusai.health · Understand Diagnosis — Educational reference powered by Salus AI</p>
   <p style="margin-top:8px;max-width:700px;margin-left:auto;margin-right:auto;">
-    Clinician-facing reference generated by AI. Not personalized medical advice. Verify named trials at <strong>ClinicalTrials.gov</strong> and verify named specialists at institutional sources.
+    This tool is for informational and educational purposes only. It does not constitute medical advice, diagnosis, or treatment. Information about clinical trials and specialists reflects AI-generated research and may not be current or complete. Always consult a qualified healthcare provider. Visit <strong>ClinicalTrials.gov</strong> for authoritative trial information.
   </p>
 </footer>
 
 <script>
-/* AUTH */
+
+/* ══════════════════════════════════════════════════════
+   SALUS AUTH — shared state (localStorage-backed)
+══════════════════════════════════════════════════════ */
 const SalusAuth = {
-  getUser:()=>{try{return JSON.parse(localStorage.getItem('salus_user')||'null');}catch(_){return null;}},
-  logout:()=>{localStorage.removeItem('salus_user');sessionStorage.clear();window.location.href='login.html';},
-  isRecordsConnected:()=>localStorage.getItem('salus_records_connected')==='true'
+  getUser:             ()  => { try{ return JSON.parse(localStorage.getItem('salus_user')||'null'); }catch(_){return null;} },
+  logout:              ()  => { localStorage.removeItem('salus_user'); sessionStorage.clear(); window.location.href='login.html'; },
+  isRecordsConnected:  ()  => localStorage.getItem('salus_records_connected') === 'true',
+  setRecordsConnected: (v) => v ? localStorage.setItem('salus_records_connected','true') : localStorage.removeItem('salus_records_connected')
 };
-function salusInitUserBar(){
-  const bar=document.getElementById('salusUserBar');if(!bar)return;
-  const user=SalusAuth.getUser()||{};
-  const initials=(user.email||'?')[0].toUpperCase();
-  bar.innerHTML='<div class="subs-left"><div class="subs-avatar">'+initials+'</div><span class="subs-email">'+(user.email||'')+'</span></div>'+
-    '<div class="subs-right"><button class="subs-signout" onclick="SalusAuth.logout()">Sign out</button></div>';
-}
-window.addEventListener('DOMContentLoaded',salusInitUserBar);
-
-/* STATE */
-let lastDiagnosis='';
-let clarifications={};
-let pipelineStart=0;
-let elapsedTimer=null;
-
-function setHint(el){
-  document.getElementById('diagnosisInput').value=el.textContent;
-  document.getElementById('diagnosisInput').focus();
+function salusInitUserBar() {
+  const bar = document.getElementById('salusUserBar');
+  if (!bar) return;
+  const user=SalusAuth.getUser()||{}, rc=SalusAuth.isRecordsConnected();
+  const initials=(user.email||'?')[0].toUpperCase(), email=user.email||'';
+  bar.innerHTML=
+    '<div class="subs-left"><div class="subs-avatar">'+initials+'</div><span class="subs-email">'+email+'</span></div>'+
+    '<div class="subs-right">'+
+    (rc?'<div class="subs-records subs-records-on"><div class="subs-rdot subs-rdot-on"></div><span>Records Linked</span></div>':
+        '<a href="health-decisions4.html" class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Link Medical Records</span></a>')+
+    '<button class="subs-signout" onclick="SalusAuth.logout()">Sign out</button></div>';
 }
 
-/* AGENT STATE UI */
-const AGENT_ICONS={1:'💬',2:'🩺',3:'🔬',4:'⚖️',5:'✦'};
-const TRACK_STEPS={1:20,2:50,3:50,4:75,5:100};
-function setAgentState(n,state,msg){
-  const card=document.getElementById('agentCard'+n);
-  const status=document.getElementById('agentStatus'+n);
-  const flag=document.getElementById('agentFlag'+n);
-  if(!card)return;
-  card.className='agent-card'+(state?' '+state:'');
-  status.textContent=msg;
-  if(state==='done'){
-    flag.textContent='✓';
-    const tf=document.getElementById('trackFill');
-    if(tf){
-      const cur=parseInt(tf.style.width)||0;
-      if(TRACK_STEPS[n]>cur)tf.style.width=TRACK_STEPS[n]+'%';
-    }
-  }
-  else if(state==='running')flag.textContent=AGENT_ICONS[n]||'⟳';
-  else if(state==='paused')flag.textContent='⏸';
-  else if(state==='error')flag.textContent='✕';
-  else flag.textContent=AGENT_ICONS[n]||'○';
-}
-function showPipeline(){
-  document.getElementById('pipelinePanel').classList.add('visible');
-  pipelineStart=Date.now();
-  if(elapsedTimer)clearInterval(elapsedTimer);
-  elapsedTimer=setInterval(()=>{
-    const s=((Date.now()-pipelineStart)/1000).toFixed(1);
-    const el=document.getElementById('elapsedTime');
-    if(el)el.textContent=s+'s';
-  },100);
-}
-function hidePipeline(){
-  if(elapsedTimer){clearInterval(elapsedTimer);elapsedTimer=null;}
-  document.getElementById('pipelinePanel').classList.remove('visible');
-}
-function freezePipelineTimer(){
-  if(elapsedTimer){clearInterval(elapsedTimer);elapsedTimer=null;}
-  document.getElementById('elapsedBadge').classList.add('done');
-}
+/* ══════════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════════ */
+let lastDiagnosis       = '';
+let clarifyingHistory   = [];
+let clarifyRound        = 0;
+const MAX_CLARIFY_ROUNDS = 1;   // Diagnosis queries need less back-and-forth
+let finalClarifications = {};
+const SalusState = {
+  isRecordsConnected:  () => SalusAuth.isRecordsConnected(),
+  setRecordsConnected: (v) => SalusAuth.setRecordsConnected(v)
+};
 
-/* API */
-async function callClaude({systemPrompt,userContent,maxTokens=2500,useWebSearch=false,model='claude-sonnet-4-6'},_retry=0){
-  const body={
-    model:model,
-    max_tokens:maxTokens,
-    system:systemPrompt,
-    messages:[{role:'user',content:userContent}]
+window.addEventListener('DOMContentLoaded', () => {
+  salusInitUserBar();});
+
+/* ══════════════════════════════════════════════════════
+   SCROLL PROGRESS
+══════════════════════════════════════════════════════ */
+window.addEventListener('scroll', () => {
+  const d = document.documentElement;
+  const pct = d.scrollHeight - d.clientHeight;
+  document.getElementById('ppFill').style.width =
+    pct > 0 ? (d.scrollTop / pct * 100) + '%' : '0%';
+});
+
+/* ══════════════════════════════════════════════════════
+   API KEY
+══════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════
+   PIPELINE TRACK
+══════════════════════════════════════════════════════ */
+const TRACK_STEPS = { 1: 0, 2: 25, 3: 50, 4: 75, 5: 100 };
+const AGENT_ICONS = { 1:'💬', 2:'🔬', 3:'✓', 4:'⚖️', 5:'✦' };
+
+function setAgentState(n, state, msg) {
+  const card   = document.getElementById('agentCard' + n);
+  const status = document.getElementById('agentStatus' + n);
+  const flag   = document.getElementById('agentFlag' + n);
+  if (!card) return;
+  card.className = 'agent-card' + (state ? ' ' + state : '');
+  status.textContent = msg;
+  if      (state === 'done')    { flag.textContent = '✓'; document.getElementById('trackFill').style.width = TRACK_STEPS[n] + '%'; }
+  else if (state === 'running') flag.textContent = AGENT_ICONS[n] || '⟳';
+  else if (state === 'paused')  flag.textContent = '⏸';
+  else if (state === 'error')   flag.textContent = '✕';
+  else                          flag.textContent = AGENT_ICONS[n] || '○';
+}
+function showPipeline() { document.getElementById('pipelinePanel').classList.add('visible'); }
+function hidePipeline() { document.getElementById('pipelinePanel').classList.remove('visible'); }
+
+/* ══════════════════════════════════════════════════════
+   API CALL (with retry on 529)
+══════════════════════════════════════════════════════ */
+async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebSearch = false, model = 'claude-sonnet-4-6' }, _retry = 0) {
+  const body = {
+    model: model,
+    max_tokens: maxTokens,
+    system: systemPrompt,
+    messages: [{ role: 'user', content: userContent }]
   };
-  if(useWebSearch){
-    body.tools=[{type:'web_search_20250305',name:'web_search'}];
+  if (useWebSearch) {
+    body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
   }
-  const ctrl=new AbortController();
-  const timeoutId=setTimeout(()=>ctrl.abort(),90000);
-  let res;
-  try{
-    res=await fetch('/api/claude',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(body),
-      signal:ctrl.signal
-    });
-  }catch(e){
-    clearTimeout(timeoutId);
-    if(e.name==='AbortError')throw new Error('Request timed out after 90s. Serverless function likely exceeded its limit.');
-    throw e;
+  const res = await fetch('/api/claude', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if ((res.status === 529 || res.status === 503) && _retry < 3) {
+    await new Promise(r => setTimeout(r, (_retry + 1) * 2000));
+    return callClaude({ systemPrompt, userContent, maxTokens, useWebSearch, model }, _retry + 1);
   }
-  clearTimeout(timeoutId);
-  if((res.status===529||res.status===503)&&_retry<2){
-    await new Promise(r=>setTimeout(r,(_retry+1)*2000));
-    return callClaude({systemPrompt,userContent,maxTokens,useWebSearch,model},_retry+1);
-  }
-  if(!res.ok){
-    const err=await res.text();
-    throw new Error('API '+res.status+': '+err.substring(0,200));
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error('API error ' + res.status + ': ' + err);
   }
   return await res.json();
 }
 
-function extractText(data){
-  return (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
-}
-function safeParseJSON(text){
-  if(!text||!text.trim())throw new Error('Empty response');
-  let clean=text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
-  try{return JSON.parse(clean);}catch(_){}
-  const m=clean.match(/\{[\s\S]*\}/);
-  if(m){try{return JSON.parse(m[0]);}catch(_){}}
-  throw new Error('JSON parse failed. Preview: '+clean.substring(0,200));
+function extractText(data) {
+  return (data.content || [])
+    .filter(b => b.type === 'text')
+    .map(b => b.text)
+    .join('\n');
 }
 
-/* AGENT 1 — CLARIFIER */
-const CLARIFY_SYSTEM=`You are a clinical clarifier. Decide whether the diagnosis term is specific enough to research, or whether ONE clarifying question would meaningfully sharpen the research.
+function safeParseJSON(text) {
+  if (!text || !text.trim()) throw new Error('Empty response from API');
+  let clean = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+  try { return JSON.parse(clean); } catch(_) {}
+  const objMatch = clean.match(/\{[\s\S]*\}/);
+  if (objMatch) { try { return JSON.parse(objMatch[0]); } catch(_) {} }
+  throw new Error('Could not parse JSON from response. Preview: ' + clean.substring(0, 300));
+}
 
-Respond with ONLY valid JSON, no preamble, no markdown:
+/* ══════════════════════════════════════════════════════
+   AGENT 1 — CLARIFYING ASSISTANT
+══════════════════════════════════════════════════════ */
+const AGENT_CLARIFY_SYSTEM = `You are Salus AI's Clarifying Assistant for diagnosis research. Your ONLY job is to determine if the diagnosis name provided is specific enough to generate a precise, useful report.
+
+Respond with ONLY this JSON — no other text:
 {
-  "needs_question": true,
-  "question": "Which joint is the osteochondral defect in (e.g. knee, ankle, elbow)?",
-  "reason": "Anatomic location dramatically changes treatment options"
+  "needs_questions": false,
+  "questions": [],
+  "clarification_complete": true
 }
 
-Or if no question needed:
-{
-  "needs_question": false,
-  "question": "",
-  "reason": ""
-}
+Ask at most 1–2 questions. Only ask if GENUINELY needed:
+- If the diagnosis is ambiguous (e.g. "cancer" → ask what type; "arthritis" → ask what type)
+- If a stage or variant would significantly change the report (e.g. "breast cancer" → ask HER2 status or stage if relevant)
+- If the abbreviation could mean multiple things (e.g. "MS" → multiple sclerosis or mitral stenosis?)
 
-Ask ONLY when truly necessary. Examples:
-- "diabetes" → ask Type 1 vs Type 2
-- "osteochondral defect" → ask which joint
-- "cancer" → ask which cancer
-- "MS" → ask multiple sclerosis vs mitral stenosis
-- "labral tear" → ask hip vs shoulder
-- "arthritis" → ask which joint and OA vs inflammatory
+DO NOT ask if:
+- The diagnosis is already specific enough (e.g. "atrial fibrillation", "Type 2 diabetes", "Parkinson's disease")
+- The user provided a full diagnosis name
+- Prior answers have already clarified it
 
-Do NOT ask when the diagnosis is already specific:
-- "atrial fibrillation", "Type 2 diabetes", "Parkinson's disease", "rotator cuff tear", "HER2+ breast cancer"
+Return ONLY valid JSON. No preamble, no markdown.`;
 
-Return ONLY the JSON.`;
+/* ══════════════════════════════════════════════════════
+   AGENT 2 — CLINICAL RESEARCHER (web search enabled)
+══════════════════════════════════════════════════════ */
+const AGENT_RESEARCH_SYSTEM = `You are Salus AI's Clinical Research Agent. You generate comprehensive, evidence-based educational content about medical diagnoses for patients and caregivers.
 
-/* AGENT 2 — CLINICAL SUMMARY */
-const CLINICAL_SYSTEM=`You are a clinical research agent producing a CLINICIAN-FACING summary of a diagnosis. Your audience is physicians, not patients.
+CRITICAL INSTRUCTIONS:
+- Use web search silently to gather information. Do NOT narrate your search process.
+- Do NOT write any text like "I'll research..." or "Let me search..." or "Now let me..."
+- Do NOT explain what you are doing. Just do it and output the JSON.
+- Your ENTIRE response must be a single valid JSON object and nothing else.
+- No preamble, no explanation, no markdown fences, no commentary before or after the JSON.
+- Start your response with { and end with } — nothing else.
 
-Use web search to verify current guidelines, treatment evidence, and findings from the last 6 months.
+Use web search to find:
+1. Current treatment guidelines and options
+2. Advances from the last 5 years (2020-2025)
+3. Active clinical trials
+4. Leading specialists and medical centers in the United States
 
-Output ONLY this JSON. No preamble. No markdown fences. Start with { and end with }:
+Then output ONLY this JSON:
 {
   "diagnosis_name": "Official medical name",
-  "also_known_as": ["abbreviation", "common name"],
-  "key_takeaway": "Single most clinically important point — one direct sentence for a colleague",
-  "what_it_is": "Clinically-pitched explanation: pathophysiology, presentation, natural history (3-5 sentences)",
-  "diagnosis": [
-    {"method": "e.g. AP/lateral radiographs", "description": "What it shows / detects", "when_used": "First-line / confirmatory / staging"}
-  ],
-  "treatments": [
-    {
-      "name": "Treatment name",
-      "summary": "One-line summary",
-      "description": "What it involves, mechanism, typical outcomes (2-3 sentences)",
-      "evidence_level": "high|moderate|low",
-      "evidence_basis": "Guideline name or study type",
-      "best_for": "Patient profile",
-      "considerations": ["Key tradeoff 1", "Key tradeoff 2"]
-    }
-  ],
-  "recent_research_summary": "2-3 sentence overview of what has shifted in the last 6 months",
-  "recent_advances": [
-    {"date": "e.g. Mar 2026", "title": "Brief title", "description": "What the finding/publication showed (2 sentences)", "significance": "Clinical impact"}
-  ],
-  "questions_for_doctor": ["Specific clinical question 1", "Specific clinical question 2", "Specific clinical question 3", "Specific clinical question 4"]
-}
-
-RULES:
-- 4-6 treatments, 3-5 recent advances (LAST 6 MONTHS prioritized — older items only if foundational)
-- Evidence levels: high=guideline/RCT; moderate=observational/consensus; low=emerging/case series
-- Clinician tone — assume the reader knows anatomy and pharmacology
-- No drug doses or prescriptive language
-- Return ONLY valid JSON`;
-
-/* AGENT 3 — TRIALS & CENTERS */
-const TRIALS_SYSTEM=`You are a clinical research agent identifying active CLINICAL TRIALS and LEADING CENTERS/SPECIALISTS for a diagnosis.
-
-Use web search to find verifiable trials and specialists. Prefer named institutions and real principal investigators where you can verify them.
-
-Output ONLY this JSON. No preamble. No markdown:
-{
-  "trials_overview": "Current state of trial activity for this diagnosis — 2 sentences",
-  "active_trials": [
-    {
-      "title": "Descriptive trial title",
-      "phase": "Phase I|II|III|IV|N/A",
-      "focus": "What is being tested",
-      "sponsor": "Sponsor or lead institution",
-      "eligibility": "Typical inclusion criteria (1 sentence)",
-      "registry_query": "Suggested ClinicalTrials.gov search terms"
-    }
-  ],
-  "how_to_find_trials": "Specific guidance for finding trials for this diagnosis (1-2 sentences)",
-  "specialists": [
-    {
-      "name": "Dr. [Full Name] OR named program",
-      "institution": "Institution name",
-      "location": "City, State",
-      "known_for": "Specific clinical/research focus and why notable for this diagnosis"
-    }
-  ],
-  "centers": [
-    {
-      "name": "Center or program name",
-      "location": "City, State",
-      "distinction": "Designation, ranking, or certification",
-      "why_notable": "What makes this center stand out for this specific diagnosis"
-    }
+  "also_known_as": ["common name", "abbreviation"],
+  "key_takeaway": "The single most important thing to understand about this diagnosis — one direct sentence",
+  "section1": {
+    "what_it_is": "Plain-language explanation of what the condition is and how it affects the body (3-5 sentences)",
+    "who_it_affects": "Epidemiology: who gets it, how common, risk factors (2-3 sentences)",
+    "how_diagnosed": [
+      {
+        "method": "Method name",
+        "description": "How it works and what it detects",
+        "when_used": "At what stage of the diagnostic process"
+      }
+    ],
+    "treatment_alternatives": [
+      {
+        "name": "Treatment name",
+        "summary": "One-sentence summary",
+        "description": "What it involves, how it works, typical outcomes (2-4 sentences)",
+        "evidence_level": "high|moderate|low",
+        "evidence_basis": "Source: guideline or study type",
+        "best_for": "Patient profile this suits best",
+        "considerations": ["Key consideration 1", "Key consideration 2"]
+      }
+    ]
+  },
+  "section2": {
+    "summary": "2-3 sentence overview of how this field has advanced recently",
+    "advances": [
+      {
+        "year": "2020–2025 year or range",
+        "title": "Name of advance",
+        "description": "What changed and why it matters (2-3 sentences)",
+        "significance": "Clinical impact: how this changes patient care"
+      }
+    ]
+  },
+  "section3": {
+    "overview": "Current state of research — what are scientists focusing on and why (2-3 sentences)",
+    "research_areas": ["Research area 1", "Research area 2", "Research area 3"],
+    "active_trials": [
+      {
+        "title": "Descriptive trial title",
+        "phase": "Phase I|II|III|IV|N/A",
+        "focus": "What the trial is studying",
+        "eligibility": "Who typically qualifies",
+        "registry": "ClinicalTrials.gov search: [search terms]"
+      }
+    ],
+    "how_to_find_trials": "Specific guidance on finding trials for this diagnosis"
+  },
+  "section4": {
+    "overview": "Why specialist choice matters for this diagnosis (1-2 sentences)",
+    "specialists": [
+      {
+        "name": "Dr. [Name] or [Team/Program name]",
+        "institution": "Hospital or medical center",
+        "location": "City, State",
+        "known_for": "Their specific area of expertise and why they are notable"
+      }
+    ],
+    "centers": [
+      {
+        "name": "Center or program name",
+        "location": "City, State",
+        "distinction": "NCI designation / ranking / certification",
+        "why_notable": "What makes this center stand out for this specific diagnosis"
+      }
+    ]
+  },
+  "questions_for_doctor": [
+    "Specific question 1 a patient should ask",
+    "Specific question 2",
+    "Specific question 3",
+    "Specific question 4"
   ]
 }
 
 RULES:
-- 3-5 trials, 4-6 specialists, 3-5 centers
-- ONLY name real, verifiable specialists/centers. If uncertain, describe the type of program instead of inventing a name.
-- US-focused for centers and specialists unless the diagnosis is best treated internationally
+- Include 3-6 treatment alternatives, 3-5 recent advances, 3-5 active trials, 4-6 specialists, 3-5 centers
+- Only name real, verifiable specialists and institutions — if uncertain, describe the type of specialist/program instead
+- Evidence levels: high = major guideline / RCT; moderate = observational / consensus; low = emerging / case series
+- This is NOT personalized to any patient — provide general population-level guidance
+- Never prescribe or recommend specific drugs/doses — describe options
 - Return ONLY valid JSON`;
 
-/* AGENT 4 — LEGAL REVIEW */
-const LEGAL_SYSTEM=`You are a legal and scope-of-practice reviewer for clinician-facing diagnosis reference content.
+/* ══════════════════════════════════════════════════════
+   AGENT 3 — ACCURACY REVIEW
+══════════════════════════════════════════════════════ */
+const AGENT_ACCURACY_SYSTEM = `You are Salus AI's Medical Accuracy Reviewer for diagnosis education content.
 
-Review the provided JSON and respond with ONLY this JSON:
+Review the JSON from the Clinical Research Agent and respond with ONLY:
+{
+  "approved": true,
+  "accuracy_score": 9,
+  "corrections_needed": [],
+  "flagged_statements": [],
+  "citation_issues": [],
+  "specialist_verification": "Note on whether named specialists/centers appear real and verifiable",
+  "reviewer_note": "Brief summary for display"
+}
+
+CHECK FOR:
+1. Factual accuracy of medical claims
+2. Named specialists/doctors — are they real, at the stated institution?
+3. Named clinical trials — do they make sense and match real trial types?
+4. Evidence level accuracy — is the stated evidence strength accurate?
+5. Invented statistics or hallucinated study citations
+6. Missing major treatment options that patients should know about
+7. Any advances dated outside 2020-2025
+
+Set approved=false only if there are critical safety or accuracy issues.
+Return ONLY valid JSON.`;
+
+/* ══════════════════════════════════════════════════════
+   AGENT 4 — LEGAL REVIEW
+══════════════════════════════════════════════════════ */
+const AGENT_LEGAL_SYSTEM = `You are Salus AI's Legal & Scope-of-Practice Reviewer for patient education content.
+
+Review the JSON and respond with ONLY:
 {
   "scope_appropriate": true,
   "issues_found": [],
-  "required_changes": ["Specific instruction for the polish agent on what to fix"],
-  "legal_note": "Brief summary (1 sentence)"
+  "required_changes": [],
+  "legal_note": "Brief summary"
 }
 
 FLAG if the content:
-- Prescribes specific drug doses, schedules, or routes of administration
-- Diagnoses or makes treatment recommendations for any specific patient
-- Says "you should" / "take" / "start" — prescriptive language directed at a reader
-- Guarantees outcomes ("will cure", "always works")
-- Recommends a specific clinical trial enrollment instead of presenting trials as options to discuss
-- Recommends a specific physician/center as the right choice for a specific patient (vs describing them as resources)
+- Prescribes specific drug doses or schedules
+- Diagnoses a specific patient
+- Says a patient "should" take a specific action without physician involvement
+- Makes guarantees about treatment outcomes
+- Presents clinical trial enrollment as a recommendation rather than an option to discuss with a doctor
 
-ACCEPTABLE for a clinician audience:
-- Describing mechanism, indications, contraindications generally
-- Discussing evidence levels and guideline recommendations by name
-- Listing trials, specialists, and centers as reference resources
-- Describing typical outcomes from published literature
-- Suggesting questions a treating physician might consider
+ACCEPTABLE:
+- Explaining what treatments exist and how they work
+- Describing evidence levels
+- Listing clinical trials as options to discuss with a doctor
+- Naming specialists and centers as resources
+- Recommending questions to ask a physician
 
-Set scope_appropriate=false ONLY if there are concrete issues. Be specific in required_changes — name the field and the fix.
+Return ONLY valid JSON.`;
 
-Return ONLY valid JSON. No preamble.`;
+/* ══════════════════════════════════════════════════════
+   AGENT 5 — CLARITY
+══════════════════════════════════════════════════════ */
+const AGENT_CLARITY_SYSTEM = `You are Salus AI's Clarity Editor for patient diagnosis education content.
 
-/* AGENT 5 — CLARITY POLISH */
-const CLARITY_SYSTEM=`You are a clarity editor for clinician-facing diagnosis reference content.
+Apply all corrections from the Accuracy and Legal reviewers, then polish for an adult reader:
+- Aim for ~8th grade reading level without losing clinical precision
+- Make the key_takeaway genuinely useful and direct — not a generic disclaimer
+- Ensure treatment descriptions are specific enough to be meaningful
+- Make the "recent advances" section feel current and exciting, not dry
+- Ensure clinical trial descriptions give patients a real sense of what's being tested
+- Ensure specialist/center descriptions explain WHY they are notable, not just who they are
+- Remove redundant hedging phrases
 
-You will be given:
-1. The combined research JSON (from agents 2 and 3)
-2. Legal reviewer findings with required_changes (from agent 4)
+Return the FINAL polished version of the exact same JSON schema from Agent 2.
+Same fields, same structure. No extra fields. Return ONLY valid JSON — no preamble, no markdown.`;
 
-Your job:
-1. APPLY every required_change from the legal reviewer
-2. POLISH the prose throughout for a clinician reader:
-   - Tight, declarative sentences. Cut hedging ("may potentially help" → "improves")
-   - Specific, not vague ("better outcomes" → "30-40% reduction in revision rate at 5 years")
-   - Active voice. Cut throat-clearing phrases.
-   - Each section should earn its space. If something is generic, sharpen it or cut it.
-3. Ensure the key_takeaway is genuinely useful — the single most actionable point, not a disclaimer
+/* ══════════════════════════════════════════════════════
+   ENTRY
+══════════════════════════════════════════════════════ */
+async function runAnalysis() {
+  const q = document.getElementById('diagnosisInput').value.trim();
+  if (!q) { document.getElementById('diagnosisInput').focus(); return; }
 
-Return the SAME JSON schema you were given (every field), polished. Same structure, same fields, no additions, no removals.
+  lastDiagnosis       = q;
+  clarifyingHistory   = [];
+  clarifyRound        = 0;
+  finalClarifications = {};
 
-Output ONLY the polished JSON. No preamble. No markdown fences. Start with { and end with }.`;
-
-/* ENTRY */
-async function runAnalysis(){
-  const q=document.getElementById('diagnosisInput').value.trim();
-  if(!q){document.getElementById('diagnosisInput').focus();return;}
-
-  lastDiagnosis=q;
-  clarifications={};
-
-  document.getElementById('submitBtn').disabled=true;
-  document.getElementById('diagnosisInput').disabled=true;
+  document.getElementById('submitBtn').disabled            = true;
+  document.getElementById('diagnosisInput').disabled       = true;
   document.getElementById('clarifyPanel').classList.remove('visible');
   document.getElementById('resultsSection').classList.remove('visible');
-  document.getElementById('resultsSection').style.display='none';
+  document.getElementById('resultsSection').style.display = 'none';
 
-  const prevErr=document.getElementById('pipelineErrorMsg');
-  if(prevErr)prevErr.remove();
+  const prevErr = document.getElementById('pipelineErrorMsg');
+  if (prevErr) prevErr.remove();
 
-  [1,2,3,4,5].forEach(n=>setAgentState(n,'','Waiting'));
-  document.getElementById('trackFill').style.width='0%';
-  document.getElementById('elapsedBadge').classList.remove('done');
+  [1,2,3,4,5].forEach(n => setAgentState(n, '', 'Waiting'));
+  document.getElementById('trackFill').style.width = '0%';
   showPipeline();
 
-  try{
-    await runClarify();
-  }catch(err){
-    handleError(err);
-  }
+  await runClarifyAgent();
 }
 
-/* AGENT 1 RUN */
-async function runClarify(){
-  setAgentState(1,'running','Reviewing query…');
-  const r=await callClaude({
-    systemPrompt:CLARIFY_SYSTEM,
-    userContent:`Diagnosis: "${lastDiagnosis}"`,
-    maxTokens:300,
-    model:'claude-haiku-4-5-20251001'
-  });
-  let parsed;
-  try{parsed=safeParseJSON(extractText(r));}
-  catch(_){parsed={needs_question:false};}
+/* ══════════════════════════════════════════════════════
+   CLARIFYING AGENT
+══════════════════════════════════════════════════════ */
+async function runClarifyAgent() {
+  setAgentState(1, 'running', 'Reading your query…');
 
-  if(parsed.needs_question&&parsed.question){
-    setAgentState(1,'paused','Awaiting answer');
-    showClarifyPanel(parsed.question);
-  }else{
-    setAgentState(1,'done','No clarification needed');
-    await runResearchInParallel();
-  }
-}
-
-function showClarifyPanel(question){
-  document.getElementById('clarifyQuestions').innerHTML=
-    '<div class="clarify-q"><div class="clarify-q-label">'+esc(question)+
-    '</div><input class="clarify-q-input" id="clarifyInput" type="text" placeholder="Your answer (or leave blank to skip)" autofocus></div>';
-  const panel=document.getElementById('clarifyPanel');
-  panel.classList.add('visible');
-  panel.scrollIntoView({behavior:'smooth',block:'center'});
-  setTimeout(()=>document.getElementById('clarifyInput').focus(),300);
-  document.getElementById('clarifyInput').addEventListener('keydown',e=>{
-    if(e.key==='Enter')submitClarifications();
-  });
-}
-
-async function submitClarifications(){
-  const inp=document.getElementById('clarifyInput');
-  if(inp&&inp.value.trim()){
-    clarifications.answer=inp.value.trim();
-  }
-  document.getElementById('clarifyPanel').classList.remove('visible');
-  setAgentState(1,'done','Complete');
-  try{
-    await runResearchInParallel();
-  }catch(err){
-    handleError(err);
-  }
-}
-
-/* AGENTS 2+3 PARALLEL, THEN 4, THEN 5 */
-async function runResearchInParallel(){
-  let userMsg=`Research this diagnosis: "${lastDiagnosis}"`;
-  if(clarifications.answer){
-    userMsg+=`\n\nAdditional context from user: ${clarifications.answer}`;
-  }
-  userMsg+='\n\nReturn ONLY the JSON object. No preamble.';
-
-  setAgentState(2,'running','Summarizing…');
-  setAgentState(3,'running','Searching trials & centers…');
-
-  const [clin,trials]=await Promise.allSettled([
-    callClaude({systemPrompt:CLINICAL_SYSTEM,userContent:userMsg,maxTokens:3500,useWebSearch:true}),
-    callClaude({systemPrompt:TRIALS_SYSTEM,userContent:userMsg,maxTokens:2500,useWebSearch:true})
-  ]);
-
-  let clinData=null,trialsData=null;
-
-  if(clin.status==='fulfilled'){
-    try{clinData=safeParseJSON(extractText(clin.value));setAgentState(2,'done','Complete');}
-    catch(e){setAgentState(2,'error','Parse error');console.error('Agent 2 parse:',e);}
-  }else{
-    setAgentState(2,'error','Failed');console.error('Agent 2 fetch:',clin.reason);
-  }
-
-  if(trials.status==='fulfilled'){
-    try{trialsData=safeParseJSON(extractText(trials.value));setAgentState(3,'done','Complete');}
-    catch(e){setAgentState(3,'error','Parse error');console.error('Agent 3 parse:',e);}
-  }else{
-    setAgentState(3,'error','Failed');console.error('Agent 3 fetch:',trials.reason);
-  }
-
-  if(!clinData&&!trialsData){
-    throw new Error('Both research agents failed. Check console (F12) for details.');
-  }
-
-  let merged={...(clinData||{}),...(trialsData||{})};
-
-  /* AGENT 4: Legal Review */
-  setAgentState(4,'running','Checking scope…');
-  let legalFindings={scope_appropriate:true,issues_found:[],required_changes:[],legal_note:'Reviewed.'};
-  try{
-    const r4=await callClaude({
-      systemPrompt:LEGAL_SYSTEM,
-      userContent:JSON.stringify(merged),
-      maxTokens:600,
-      model:'claude-haiku-4-5-20251001'
+  let msg = `The user is researching this diagnosis: "${lastDiagnosis}"\n`;
+  if (clarifyingHistory.length > 0) {
+    msg += `\nPrevious clarification:\n`;
+    clarifyingHistory.forEach(r => {
+      r.questions.forEach(q => { msg += `  Q: ${q}\n  A: ${r.answers[q] || '(no answer)'}\n`; });
     });
-    try{legalFindings=safeParseJSON(extractText(r4));}catch(_){}
-    const flagCount=(legalFindings.issues_found||[]).length;
-    setAgentState(4,'done',flagCount?`${flagCount} flag${flagCount>1?'s':''}`:'Approved ✓');
-  }catch(e){
-    setAgentState(4,'error','Skipped');
-    console.warn('Agent 4 legal review failed (continuing):',e);
+  }
+  if (clarifyRound >= MAX_CLARIFY_ROUNDS) {
+    msg += `\nMax clarification rounds reached. Set needs_questions=false.`;
   }
 
-  /* AGENT 5: Clarity Polish */
-  setAgentState(5,'running','Polishing…');
-  let finalResult=merged;
-  try{
-    const r5=await callClaude({
-      systemPrompt:CLARITY_SYSTEM,
-      userContent:`Research JSON:\n${JSON.stringify(merged)}\n\nLegal review findings:\n${JSON.stringify(legalFindings)}\n\nApply the required_changes and polish for clinician readability. Return the same JSON schema, polished.`,
-      maxTokens:6000
-    });
-    try{
-      finalResult=safeParseJSON(extractText(r5));
-      setAgentState(5,'done','Polished ✓');
-    }catch(e){
-      setAgentState(5,'error','Skipped polish');
-      console.warn('Agent 5 parse failed, using un-polished merge:',e);
-      finalResult=merged;
+  try {
+    const r = await callClaude({ systemPrompt: AGENT_CLARIFY_SYSTEM, userContent: msg, maxTokens: 400 });
+    let parsed;
+    try { parsed = safeParseJSON(extractText(r)); }
+    catch(_) { parsed = { needs_questions: false, clarification_complete: true }; }
+
+    if (parsed.needs_questions && parsed.questions?.length > 0 && clarifyRound < MAX_CLARIFY_ROUNDS) {
+      clarifyRound++;
+      setAgentState(1, 'paused', `Awaiting answers`);
+      showClarifyPanel(parsed.questions, clarifyRound);
+    } else {
+      clarifyingHistory.forEach(r => Object.assign(finalClarifications, r.answers));
+      setAgentState(1, 'done', 'Complete');
+      await runMainPipeline();
     }
-  }catch(e){
-    setAgentState(5,'error','Skipped polish');
-    console.warn('Agent 5 polish failed, using un-polished merge:',e);
-    finalResult=merged;
+  } catch(err) {
+    setAgentState(1, 'error', 'Error');
+    handlePipelineError(new Error('Agent 1 (Clarifying): ' + err.message));
   }
-
-  freezePipelineTimer();
-
-  setTimeout(()=>{
-    hidePipeline();
-    renderResults(finalResult,legalFindings);
-    document.getElementById('submitBtn').disabled=false;
-    document.getElementById('diagnosisInput').disabled=false;
-  },600);
 }
 
-/* RENDER */
-function renderResults(c,legal){
-  const sec=document.getElementById('resultsSection');
-  sec.style.display='block';
+function showClarifyPanel(questions, round) {
+  const badge = document.getElementById('clarifyRoundBadge');
+  badge.innerHTML = round > 1 ? `<div class="clarify-round-badge"><div class="clarify-round-dot"></div>Follow-up · Round ${round}</div>` : '';
+  const container = document.getElementById('clarifyQuestions');
+  container.innerHTML = questions.map((q, i) => `
+    <div class="clarify-q">
+      <div class="clarify-q-label">${i+1}. ${q}</div>
+      <input class="clarify-q-input" type="text"
+        placeholder="Your answer (or leave blank)"
+        data-question="${encodeURIComponent(q)}">
+    </div>`).join('');
+  document.getElementById('clarifyPanel').classList.add('visible');
+  document.getElementById('clarifyPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function submitClarifications() {
+  const inputs  = document.querySelectorAll('.clarify-q-input');
+  const answers = {};
+  inputs.forEach(inp => { answers[decodeURIComponent(inp.dataset.question)] = inp.value.trim(); });
+  clarifyingHistory.push({
+    round: clarifyRound,
+    questions: Array.from(inputs).map(i => decodeURIComponent(i.dataset.question)),
+    answers
+  });
+  document.getElementById('clarifyPanel').classList.remove('visible');
+  runClarifyAgent();
+}
+
+/* ══════════════════════════════════════════════════════
+   MAIN PIPELINE (Agents 2–5)
+══════════════════════════════════════════════════════ */
+async function runMainPipeline() {
+  let userMsg = `Research this diagnosis comprehensively: "${lastDiagnosis}"`;
+  const hasClarifications = Object.values(finalClarifications).some(v => v);
+  if (hasClarifications) {
+    userMsg += '\n\nAdditional context provided:\n';
+    Object.entries(finalClarifications).forEach(([q, a]) => { if (a) userMsg += `Q: ${q}\nA: ${a}\n`; });
+  }
+  userMsg += '\n\nSearch for this information silently, then output ONLY the JSON object. No narration. No explanations. Start your response with {';
+
+  try {
+    /* ── Agent 2: Clinical Researcher ── */
+    setAgentState(2, 'running', 'Researching…');
+    const r2 = await callClaude({
+      systemPrompt: AGENT_RESEARCH_SYSTEM,
+      userContent:  userMsg,
+      maxTokens:    12000,
+      useWebSearch: true
+    });
+    let parsed2;
+    try { parsed2 = safeParseJSON(extractText(r2)); }
+    catch(e) { throw new Error('Clinical Research JSON parse failed: ' + e.message); }
+    setAgentState(2, 'done', 'Complete');
+
+        /* ── Agents 3 + 4: parallel with Haiku (5× faster) ── */
+    setAgentState(3, 'running', 'Verifying…');
+    setAgentState(4, 'running', 'Checking scope…');
+    const [r3, r4] = await Promise.all([
+      callClaude({ systemPrompt: AGENT_ACCURACY_SYSTEM, userContent: JSON.stringify(parsed2), maxTokens: 600, model: 'claude-haiku-4-5-20251001' }),
+      callClaude({ systemPrompt: AGENT_LEGAL_SYSTEM,    userContent: JSON.stringify(parsed2), maxTokens: 500, model: 'claude-haiku-4-5-20251001' })
+    ]);
+    let parsed3, parsed4;
+    try { parsed3 = safeParseJSON(extractText(r3)); } catch(e) { parsed3 = { approved:true, accuracy_score:8, reviewer_note:'Reviewed.', corrections_needed:[], citation_issues:[] }; }
+    try { parsed4 = safeParseJSON(extractText(r4)); } catch(e) { parsed4 = { scope_appropriate:true, issues_found:[], legal_note:'Reviewed.' }; }
+    setAgentState(3, 'done', 'Score ' + (parsed3.accuracy_score||8) + '/10');
+    setAgentState(4, 'done', parsed4.scope_appropriate ? 'Approved ✓' : 'Issues flagged');
+
+        /* ── Agent 5: only run if issues found (saves 4-5s in clean cases) ── */
+    let finalResult = parsed2;
+    const hasIssues = (parsed3.corrections_needed||[]).length > 0 || (parsed4.issues_found||[]).length > 0;
+    if (hasIssues) {
+      setAgentState(5, 'running', 'Applying corrections…');
+      const r5 = await callClaude({ systemPrompt: AGENT_CLARITY_SYSTEM, userContent: `Analysis:
+${JSON.stringify(parsed2)}
+
+Accuracy:
+${JSON.stringify(parsed3)}
+
+Legal:
+${JSON.stringify(parsed4)}`, maxTokens: 4000 });
+      try { finalResult = safeParseJSON(extractText(r5)); } catch(e) { finalResult = parsed2; }
+      setAgentState(5, 'done', 'Corrections applied');
+    } else {
+      setAgentState(5, 'done', 'No changes needed');
+    }
+
+    setTimeout(() => {
+      hidePipeline();
+      renderResults(finalResult, parsed3, lastDiagnosis);
+      document.getElementById('submitBtn').disabled      = false;
+      document.getElementById('diagnosisInput').disabled = false;
+    }, 700);
+
+  } catch(err) {
+    handlePipelineError(err);
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER
+══════════════════════════════════════════════════════ */
+function renderResults(r, accuracy, originalQuery) {
+  const sec = document.getElementById('resultsSection');
+  sec.style.display = 'block';
   sec.classList.add('visible');
 
-  document.getElementById('resultsDiagnosisName').textContent=c.diagnosis_name||lastDiagnosis;
-  const aka=(c.also_known_as||[]).filter(Boolean);
-  document.getElementById('resultsAka').textContent=aka.length?'Also known as: '+aka.join(' · '):'';
-  document.getElementById('resultsTakeaway').textContent=c.key_takeaway||'';
+  /* Header */
+  document.getElementById('resultsDiagnosisName').textContent = r.diagnosis_name || originalQuery;
+  const aka = (r.also_known_as || []).filter(Boolean);
+  document.getElementById('resultsAka').textContent = aka.length ? 'Also known as: ' + aka.join(' · ') : '';
+  document.getElementById('resultsTakeaway').textContent = r.key_takeaway || '';
 
-  const now=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  const elapsed=((Date.now()-pipelineStart)/1000).toFixed(1);
-  const legalChip=legal&&legal.scope_appropriate?'<div class="results-meta-chip">⚖️ Scope reviewed</div>':'';
-  document.getElementById('resultsMeta').innerHTML=
-    '<div class="results-meta-chip">📅 '+now+'</div>'+
-    '<div class="results-meta-chip">🩺 Clinician reference</div>'+
-    '<div class="results-meta-chip">⚡ '+elapsed+'s · 5 agents</div>'+
-    '<div class="results-meta-chip">🔍 Web-searched</div>'+
-    legalChip;
+  const now = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  document.getElementById('resultsMeta').innerHTML = `
+    <div class="results-meta-chip">📅 ${now}</div>
+    <div class="results-meta-chip">📚 General reference — not personalized</div>
+    <div class="results-meta-chip">✓ 5-Agent Review</div>
+    <div class="results-meta-chip">🔍 Web-searched</div>
+  `;
+  document.getElementById('agentNote').textContent = accuracy?.reviewer_note || 'Reviewed by Salus AI 5-agent pipeline.';
 
-  /* PANE 0 — Clinical Summary */
-  document.getElementById('s1WhatItIs').textContent=c.what_it_is||'';
-  document.getElementById('s1Diagnosis').innerHTML=(c.diagnosis||[]).map(m=>
-    '<div class="dx-card"><div class="dx-name">'+esc(m.method)+'</div>'+
-    '<div class="dx-desc">'+esc(m.description)+'</div>'+
-    '<div class="dx-when">'+esc(m.when_used||'')+'</div></div>').join('');
-  document.getElementById('s1Treatments').innerHTML=(c.treatments||[]).map(tx=>{
-    const lvl=tx.evidence_level||'moderate';
-    const badge=lvl==='high'?'ev-high':lvl==='moderate'?'ev-moderate':'ev-low';
-    const label=lvl==='high'?'High Evidence':lvl==='moderate'?'Moderate':'Emerging';
-    return '<div class="tx-card">'+
-      '<div class="tx-header"><div><div class="tx-name">'+esc(tx.name)+'</div></div>'+
-      '<span class="tx-evidence '+badge+'">'+label+'</span></div>'+
-      '<div class="tx-desc">'+esc(tx.description)+'</div>'+
-      (tx.evidence_basis?'<div class="tx-meta"><strong>Evidence:</strong> '+esc(tx.evidence_basis)+'</div>':'')+
-      (tx.best_for?'<div class="tx-meta"><strong>Best for:</strong> '+esc(tx.best_for)+'</div>':'')+
-      '</div>';
+  /* Section 1 */
+  const s1 = r.section1 || {};
+  document.getElementById('s1WhatItIs').textContent     = s1.what_it_is || '';
+  document.getElementById('s1WhoItAffects').textContent = s1.who_it_affects || '';
+
+  document.getElementById('s1Methods').innerHTML = (s1.how_diagnosed || []).map(m => `
+    <div class="method-card">
+      <div class="method-name">${esc(m.method)}</div>
+      <div class="method-desc">${esc(m.description)}</div>
+      <div class="method-when">Used: ${esc(m.when_used)}</div>
+    </div>`).join('');
+
+  document.getElementById('s1Treatments').innerHTML = (s1.treatment_alternatives || []).map((t, i) => {
+    const lvl = t.evidence_level || 'moderate';
+    const badge = lvl === 'high' ? 'evidence-high' : lvl === 'moderate' ? 'evidence-moderate' : 'evidence-low';
+    const label = lvl === 'high' ? '● High Evidence' : lvl === 'moderate' ? '◉ Moderate' : '○ Emerging';
+    return `
+    <div class="treatment-card">
+      <div class="treatment-header" onclick="toggleTreatment(this)">
+        <div>
+          <div class="treatment-title">${esc(t.name)}</div>
+          <div class="treatment-summary">${esc(t.summary || '')}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="evidence-badge ${badge}">${label}</span>
+          <span style="color:rgba(255,255,255,0.3);font-size:16px;">${i===0?'▾':'▸'}</span>
+        </div>
+      </div>
+      <div class="treatment-body ${i===0?'open':''}">
+        <div class="treatment-desc">${esc(t.description)}</div>
+        ${t.evidence_basis ? `<div style="font-size:12px;color:rgba(74,111,165,0.9);margin-bottom:10px;font-weight:600;">Evidence: ${esc(t.evidence_basis)}</div>` : ''}
+        ${t.best_for ? `<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:12px;">Best for: ${esc(t.best_for)}</div>` : ''}
+        <div class="treatment-considerations">
+          ${(t.considerations || []).map(c => `<div class="tc-item"><span class="tc-dot">·</span>${esc(c)}</div>`).join('')}
+        </div>
+      </div>
+    </div>`;
   }).join('');
 
-  /* PANE 1 — Recent Research */
-  document.getElementById('s2Summary').textContent=c.recent_research_summary||'';
-  document.getElementById('s2Advances').innerHTML=(c.recent_advances||[]).map(a=>
-    '<div class="advance-card">'+
-    '<div class="advance-year">'+esc(a.date||a.year||'')+'</div>'+
-    '<div><div class="advance-title">'+esc(a.title)+'</div>'+
-    '<div class="advance-desc">'+esc(a.description)+'</div>'+
-    (a.significance?'<div class="advance-sig">▶ '+esc(a.significance)+'</div>':'')+
-    '</div></div>').join('');
+  /* Section 2 */
+  const s2 = r.section2 || {};
+  document.getElementById('s2Summary').textContent = s2.summary || '';
+  document.getElementById('s2Advances').innerHTML = (s2.advances || []).map(a => `
+    <div class="advance-card">
+      <div class="advance-year">${esc(String(a.year || ''))}</div>
+      <div>
+        <div class="advance-title">${esc(a.title)}</div>
+        <div class="advance-desc">${esc(a.description)}</div>
+        <div class="advance-significance">▶ ${esc(a.significance)}</div>
+      </div>
+    </div>`).join('');
 
-  /* PANE 2 — Trials & Centers */
-  document.getElementById('s3TrialsOverview').textContent=c.trials_overview||'';
-  document.getElementById('s3Trials').innerHTML=(c.active_trials||[]).map(tr=>
-    '<div class="trial-card">'+
-    '<div class="trial-top"><div class="trial-title">'+esc(tr.title)+'</div>'+
-    '<span class="trial-phase">'+esc(tr.phase||'N/A')+'</span></div>'+
-    '<div class="trial-focus">'+esc(tr.focus)+'</div>'+
-    '<div class="trial-meta">'+(tr.sponsor?'<strong>'+esc(tr.sponsor)+'</strong> · ':'')+
-    'Eligibility: '+esc(tr.eligibility||'Varies')+'</div></div>').join('');
-  document.getElementById('s3Cta').innerHTML=
-    '<strong>Verify trials:</strong> Visit <a href="https://clinicaltrials.gov" target="_blank">ClinicalTrials.gov</a> and search '+
-    '<strong>"'+esc(c.diagnosis_name||lastDiagnosis)+'"</strong>. '+
-    (c.how_to_find_trials?esc(c.how_to_find_trials):'');
+  /* Section 3 */
+  const s3 = r.section3 || {};
+  document.getElementById('s3Overview').textContent = s3.overview || '';
+  document.getElementById('s3ResearchAreas').innerHTML = (s3.research_areas || [])
+    .map(a => `<span class="research-tag">${esc(a)}</span>`).join('');
+  document.getElementById('s3Trials').innerHTML = (s3.active_trials || []).map(t => `
+    <div class="trial-card">
+      <div class="trial-top">
+        <div class="trial-title">${esc(t.title)}</div>
+        <span class="trial-phase">${esc(t.phase || 'N/A')}</span>
+      </div>
+      <div class="trial-focus">${esc(t.focus)}</div>
+      <div class="trial-footer">
+        <span class="trial-eligibility">Who qualifies: ${esc(t.eligibility || 'Varies')}</span>
+        ${t.registry ? `<span class="trial-registry">${esc(t.registry)}</span>` : ''}
+      </div>
+    </div>`).join('');
+  document.getElementById('s3Cta').innerHTML = `
+    <strong>Find verified trials:</strong> Visit
+    <a href="https://clinicaltrials.gov" target="_blank">ClinicalTrials.gov</a> and search for
+    <strong>"${esc(r.diagnosis_name || originalQuery)}"</strong>. You can filter by location, phase, and eligibility.
+    ${s3.how_to_find_trials ? '<br><br>' + esc(s3.how_to_find_trials) : ''}`;
 
-  document.getElementById('s3Specialists').innerHTML=(c.specialists||[]).map(s=>
-    '<div class="specialist-card">'+
-    '<div class="specialist-name">'+esc(s.name)+'</div>'+
-    '<div class="specialist-inst">'+esc(s.institution)+' · '+esc(s.location)+'</div>'+
-    '<div class="specialist-known">'+esc(s.known_for)+'</div></div>').join('');
-  document.getElementById('s3Centers').innerHTML=(c.centers||[]).map(ct=>
-    '<div class="center-card">'+
-    '<div class="center-name">'+esc(ct.name)+'</div>'+
-    '<div class="center-location">'+esc(ct.location)+(ct.distinction?' · '+esc(ct.distinction):'')+'</div>'+
-    '<div class="center-why">'+esc(ct.why_notable)+'</div></div>').join('');
+  /* Section 4 */
+  const s4 = r.section4 || {};
+  document.getElementById('s4Overview').textContent = s4.overview || '';
+  document.getElementById('s4Specialists').innerHTML = (s4.specialists || []).map(s => `
+    <div class="specialist-card">
+      <div class="specialist-name">${esc(s.name)}</div>
+      <div class="specialist-inst">${esc(s.institution)}</div>
+      <div class="specialist-location">📍 ${esc(s.location)}</div>
+      <div class="specialist-known-for">${esc(s.known_for)}</div>
+    </div>`).join('');
+  document.getElementById('s4Centers').innerHTML = (s4.centers || []).map(c => `
+    <div class="center-card">
+      <div class="center-name">${esc(c.name)}</div>
+      <div class="center-location">📍 ${esc(c.location)}</div>
+      ${c.distinction ? `<span class="center-distinction">${esc(c.distinction)}</span>` : ''}
+      <div class="center-why">${esc(c.why_notable)}</div>
+    </div>`).join('');
 
-  /* Doctor Qs */
-  document.getElementById('doctorQuestions').innerHTML=(c.questions_for_doctor||[]).map((q,i)=>
-    '<div class="doctor-q"><div class="doctor-q-num">'+(i+1)+'</div><span>'+esc(q)+'</span></div>').join('');
+  /* Doctor Questions */
+  document.getElementById('doctorQuestions').innerHTML = (r.questions_for_doctor || []).map((q, i) => `
+    <div class="doctor-q">
+      <div class="doctor-q-num">${i+1}</div>
+      <span>${esc(q)}</span>
+    </div>`).join('');
 
-  document.querySelectorAll('.section-tab').forEach((t,i)=>t.classList.toggle('active',i===0));
-  document.querySelectorAll('.section-pane').forEach((p,i)=>p.classList.toggle('active',i===0));
+  /* Reset tabs */
+  document.querySelectorAll('.section-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
+  document.querySelectorAll('.section-pane').forEach((p, i) => p.classList.toggle('active', i === 0));
 
-  setTimeout(()=>sec.scrollIntoView({behavior:'smooth',block:'start'}),100);
+  setTimeout(() => sec.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 }
 
-/* UI HELPERS */
-function switchTab(idx,btn){
-  document.querySelectorAll('.section-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.section-pane').forEach(p=>p.classList.remove('active'));
+/* ══════════════════════════════════════════════════════
+   UI HELPERS
+══════════════════════════════════════════════════════ */
+function switchTab(idx, btn) {
+  document.querySelectorAll('.section-tab').forEach(t  => t.classList.remove('active'));
+  document.querySelectorAll('.section-pane').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('pane'+idx).classList.add('active');
+  document.getElementById('pane' + idx).classList.add('active');
 }
 
-function resetToInput(){
-  document.getElementById('resultsSection').style.display='none';
+function toggleTreatment(headerEl) {
+  const body = headerEl.nextElementSibling;
+  const chevron = headerEl.querySelector('span:last-child');
+  body.classList.toggle('open');
+  chevron.textContent = body.classList.contains('open') ? '▾' : '▸';
+}
+
+function resetToInput() {
+  document.getElementById('resultsSection').style.display = 'none';
   document.getElementById('resultsSection').classList.remove('visible');
-  document.getElementById('diagnosisInput').value='';
-  document.getElementById('diagnosisInput').disabled=false;
-  document.getElementById('submitBtn').disabled=false;
+  document.getElementById('diagnosisInput').value    = '';
+  document.getElementById('diagnosisInput').disabled = false;
+  document.getElementById('submitBtn').disabled      = false;
   document.getElementById('clarifyPanel').classList.remove('visible');
   hidePipeline();
-  document.getElementById('inputCard').scrollIntoView({behavior:'smooth',block:'center'});
-  setTimeout(()=>document.getElementById('diagnosisInput').focus(),400);
+  document.getElementById('inputCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setTimeout(() => document.getElementById('diagnosisInput').focus(), 400);
 }
 
-function handleError(err){
-  console.error('Pipeline error:',err);
-  const msg=err.message||String(err);
-  [1,2,3,4,5].forEach(n=>{
-    const c=document.getElementById('agentCard'+n);
-    if(c&&c.classList.contains('running'))setAgentState(n,'error','Error');
+function handlePipelineError(err) {
+  console.error('Pipeline error:', err);
+  const msg = err.message || String(err);
+  [1,2,3,4,5].forEach(n => {
+    const card = document.getElementById('agentCard' + n);
+    if (card && card.classList.contains('running')) setAgentState(n, 'error', 'Error');
   });
-  freezePipelineTimer();
-  setTimeout(()=>{
+  setTimeout(() => {
     hidePipeline();
-    document.getElementById('submitBtn').disabled=false;
-    document.getElementById('diagnosisInput').disabled=false;
-    const e=document.createElement('div');
-    e.id='pipelineErrorMsg';
-    e.style.cssText='margin-top:16px;padding:16px 20px;background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.3);border-radius:12px;font-size:13px;color:#e07070;line-height:1.5;';
-    e.innerHTML='<strong style="color:#e88;">⚠ Error:</strong> '+esc(msg)+'<br><span style="opacity:0.6;font-size:12px;">Open browser console (F12) for details.</span>';
-    document.getElementById('inputCard').after(e);
-  },600);
+    document.getElementById('submitBtn').disabled      = false;
+    document.getElementById('diagnosisInput').disabled = false;
+    const errDiv = document.createElement('div');
+    errDiv.id = 'pipelineErrorMsg';
+    errDiv.style.cssText = 'margin-top:16px;padding:16px 20px;background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.3);border-radius:12px;font-size:13px;color:#e07070;font-family:DM Sans,sans-serif;line-height:1.5;';
+    errDiv.innerHTML = '<strong style="color:#e88;">⚠ Error:</strong> ' + msg + '<br><span style="opacity:0.6;font-size:12px;">Check your API key and try again. Open the browser console (F12) for details.</span>';
+    document.getElementById('inputCard').after(errDiv);
+  }, 800);
 }
 
-function esc(str){
-  if(str===null||str===undefined)return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function esc(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-document.getElementById('diagnosisInput').addEventListener('keydown',e=>{
-  if((e.ctrlKey||e.metaKey)&&e.key==='Enter')runAnalysis();
+document.getElementById('diagnosisInput').addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') runAnalysis();
 });
-document.getElementById('diagnosisInput').addEventListener('input',function(){
-  this.style.height='auto';
-  this.style.height=Math.min(120,this.scrollHeight)+'px';
+document.getElementById('diagnosisInput').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(120, this.scrollHeight) + 'px';
 });
 
-function downloadResults(){
-  const title=document.getElementById('resultsDiagnosisName')?.textContent||'Salus AI Results';
-  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+title+'</title>'+
-    '<style>body{font-family:Georgia,serif;max-width:800px;margin:40px auto;color:#111;line-height:1.6;}'+
-    'h1{font-size:28px;}h2{font-size:20px;margin-top:32px;border-bottom:1px solid #ccc;padding-bottom:6px;}'+
-    'p,li{font-size:15px;}.block{margin-bottom:32px;}</style></head><body>'+
-    document.getElementById('resultsSection').innerHTML+'</body></html>';
-  const blob=new Blob([html],{type:'text/html'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=title.replace(/[^a-z0-9]/gi,'_').toLowerCase()+'_salus.html';
+function downloadResults() {
+  const title = document.getElementById('resultsDiagnosisName')?.textContent ||
+                document.getElementById('resultQuestionEcho')?.textContent || 'Salus AI Results';
+  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+title+'</title>' +
+    '<style>body{font-family:Georgia,serif;max-width:800px;margin:40px auto;color:#111;line-height:1.6;}' +
+    'h1{font-size:28px;}h2{font-size:20px;margin-top:32px;border-bottom:1px solid #ccc;padding-bottom:6px;}' +
+    'p,li{font-size:15px;}.section{margin-bottom:32px;}</style></head><body>' +
+    document.getElementById("resultsSection").innerHTML + '</body></html>';
+  const blob = new Blob([html], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = title.replace(/[^a-z0-9]/gi,'_').toLowerCase() + '_salus_ai.html';
   a.click();
 }
+
 </script>
 </body>
 </html>
