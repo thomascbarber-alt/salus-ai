@@ -767,7 +767,7 @@ Output ONLY this JSON. No preamble. No markdown fences. Start with { and end wit
   "diagnosis_name": "Official medical name",
   "also_known_as": ["abbreviation", "common name"],
   "key_takeaway": "Single most clinically important point — one direct sentence for a colleague",
-  "what_it_is": "Clinically-pitched explanation: pathophysiology, presentation, natural history (3-5 sentences)",
+  "what_it_is": "Plain-language explanation a patient can understand — what is happening in the body, how it typically develops, and what it means for daily life (3-5 sentences, no jargon)",
   "diagnosis": [
     {"method": "e.g. AP/lateral radiographs", "description": "What it shows / detects", "when_used": "First-line / confirmatory / staging"}
   ],
@@ -782,7 +782,7 @@ Output ONLY this JSON. No preamble. No markdown fences. Start with { and end wit
       "considerations": ["Key tradeoff 1", "Key tradeoff 2"]
     }
   ],
-  "recent_research_summary": "2-3 sentence overview of what has shifted in the last 6 months",
+  "recent_research_summary": "Plain-language summary of what has changed or been discovered recently — written for a patient, not a researcher (2-3 sentences)",
   "recent_advances": [
     {"date": "e.g. Mar 2026", "title": "Brief title", "description": "What the finding/publication showed (2 sentences)", "significance": "Clinical impact"}
   ],
@@ -878,22 +878,31 @@ Return ONLY valid JSON. No preamble.`;
    AGENT 5 — CLARITY POLISH (Sonnet, no web search)
    Applies legal corrections + tightens clinician prose
 ════════════════════════════════════ */
-const CLARITY_SYSTEM=`You are a clarity editor for clinician-facing diagnosis reference content.
+const CLARITY_SYSTEM=`You are a clarity editor for diagnosis reference content that is read by BOTH clinicians and patients.
 
 You will be given:
 1. The combined research JSON (from agents 2 and 3)
 2. Legal reviewer findings with required_changes (from agent 4)
 
 Your job:
-1. APPLY every required_change from the legal reviewer
-2. POLISH the prose throughout for a clinician reader:
-   - Tight, declarative sentences. Cut hedging ("may potentially help" → "improves")
-   - Specific, not vague ("better outcomes" → "30-40% reduction in revision rate at 5 years")
-   - Active voice. Cut throat-clearing phrases.
-   - Each section should earn its space. If something is generic, sharpen it or cut it.
-3. Ensure the key_takeaway is genuinely useful — the single most actionable point, not a disclaimer
+1. APPLY every required_change from the legal reviewer.
 
-Return the SAME JSON schema you were given (every field), polished. Same structure, same fields, no additions, no removals.
+2. For "what_it_is" — rewrite entirely in plain, warm, conversational language for a patient with no medical background:
+   - Replace every medical term with an everyday equivalent (e.g. "inflammation" → "swelling and irritation", "pathophysiology" → "what's happening in your body", "etiology" → "cause", "presents with" → "causes")
+   - Write as if a trusted friend who happens to be a doctor is explaining it at the kitchen table
+   - Short sentences. Active voice. No Latin. No clinical shorthand.
+   - Aim for a reading level a 16-year-old could follow comfortably
+
+3. For "recent_research_summary" — same plain-language rules as above. Explain what changed and why it matters to the patient, not what the study methodology was.
+
+4. For all OTHER fields (key_takeaway, diagnosis methods, treatments, recent_advances, trials, specialists, questions_for_doctor) — keep clinician-appropriate precision:
+   - Tight, declarative sentences. Cut hedging.
+   - Specific over vague ("better outcomes" → "30–40% reduction in revision rate at 5 years")
+   - Active voice. Cut throat-clearing phrases.
+
+5. Ensure key_takeaway is the single most actionable clinical point — not a disclaimer.
+
+Return the SAME JSON schema you were given (every field). Same structure, same fields, no additions, no removals.
 
 Output ONLY the polished JSON. No preamble. No markdown fences. Start with { and end with }.`;
 
