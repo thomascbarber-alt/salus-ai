@@ -299,7 +299,15 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
     <div class="notice-text"><strong>Important:</strong> If you are experiencing chest pain, difficulty breathing, sudden severe headache, signs of stroke, or any emergency symptoms — <strong>call 911 or go to the nearest emergency room immediately.</strong> Do not use this tool in an emergency.
       </div>
     </div>
-<span>API key active.</span>
+  </div>
+
+  <!-- API Key Entry -->
+  <div id="apiKeyBar" style="margin-bottom:16px;padding:14px 20px;background:rgba(155,89,182,0.07);border:1px solid rgba(155,89,182,0.2);border-radius:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;animation:fadeUp .5s ease both;">
+    <span style="font-size:12px;color:rgba(255,255,255,0.4);white-space:nowrap;">🔑 Anthropic API Key</span>
+    <input id="apiKeyInput" type="password" placeholder="sk-ant-..." autocomplete="off"
+      style="flex:1;min-width:220px;padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(155,89,182,0.2);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--white);outline:none;"
+      oninput="saveApiKey(this.value)">
+    <span id="apiKeyStatus" style="font-size:11px;color:rgba(255,255,255,0.25);">Enter your key to enable analysis</span>
   </div>
 
   <div class="input-card" id="inputCard">
@@ -359,9 +367,11 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
         <div class="agent-card" id="agentCard2"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag2">🩺</div><div class="agent-num">Agent 02</div><div class="agent-name">Differential Analyst</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus2">Waiting</span></div></div>
         <div class="agent-card" id="agentCard3"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag3">🔬</div><div class="agent-num">Agent 03</div><div class="agent-name">Accuracy Review</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus3">Waiting</span></div></div>
         <div class="agent-card" id="agentCard4"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag4">⚖️</div><div class="agent-num">Agent 04</div><div class="agent-name">Legal Review</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus4">Waiting</span></div></div>
-        <div class="agent-card" id="agentCard5"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag5">✦</div><div class="agent-num">Agent 05</div><div class="agent-name">Clarity</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus5">Waiting</span>
-      </div>
-    </div>
+        <div class="agent-card" id="agentCard5"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag5">✦</div><div class="agent-num">Agent 05</div><div class="agent-name">Clarity</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus5">Waiting</span></div></div>
+      </div><!-- /.agents-row -->
+    </div><!-- /.pipeline-track -->
+  </div><!-- /.pipeline-panel -->
+
 <div class="results-section" id="resultsSection">
     <div class="urgency-banner" id="urgencyBanner">
       <div class="urgency-icon" id="urgencyIcon"></div>
@@ -422,14 +432,34 @@ const SalusState = {
   setRecordsConnected: (v) => SalusAuth.setRecordsConnected(v)
 };
 
+function saveApiKey(val){
+  _apiKey=val.trim();
+  const status=document.getElementById('apiKeyStatus');
+  if(!status)return;
+  if(_apiKey.startsWith('sk-ant-')&&_apiKey.length>20){
+    status.textContent='✓ Key ready';status.style.color='rgba(82,196,136,0.9)';
+  } else if(_apiKey.length>0){
+    status.textContent='Key looks invalid';status.style.color='rgba(255,140,80,0.9)';
+  } else {
+    status.textContent='Enter your key to enable analysis';status.style.color='rgba(255,255,255,0.25)';
+  }
+}
+
 window.addEventListener('DOMContentLoaded',()=>{
-  salusInitUserBar();});
+  salusInitUserBar();
+  const stored=sessionStorage.getItem('salus_api_key')||'';
+  if(stored){const inp=document.getElementById('apiKeyInput');if(inp){inp.value=stored;saveApiKey(stored);}}
+});
+document.addEventListener('input',e=>{if(e.target.id==='apiKeyInput'){sessionStorage.setItem('salus_api_key',e.target.value.trim());}});
 window.addEventListener('scroll',()=>{const d=document.documentElement;const p=d.scrollHeight-d.clientHeight;document.getElementById('ppFill').style.width=p>0?(d.scrollTop/p*100)+'%':'0%';});
 
 function showPipeline(){document.getElementById('pipelinePanel').classList.add('visible');}
 function hidePipeline(){document.getElementById('pipelinePanel').classList.remove('visible');}
 
 async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebSearch = false, model = 'claude-sonnet-4-6' }, _retry = 0) {
+  if (!_apiKey || !_apiKey.startsWith('sk-ant-')) {
+    throw new Error('Please enter a valid Anthropic API key above before running the analysis.');
+  }
   const body = {
     model: model,
     max_tokens: maxTokens,
@@ -439,9 +469,14 @@ async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebS
   if (useWebSearch) {
     body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
   }
-  const res = await fetch('/api/claude', {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': _apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
     body: JSON.stringify(body)
   });
   if ((res.status === 529 || res.status === 503) && _retry < 3) {
