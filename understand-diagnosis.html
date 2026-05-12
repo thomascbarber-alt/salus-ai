@@ -714,11 +714,6 @@ footer {
     <p class="page-disclaimer">For educational purposes only. Does not constitute medical advice. Always consult your physician.</p>
   </div>
 
-  <!-- API KEY BANNER -->
-      </div>
-    </div>
-<span>API key active — ready to research.</span>
-  </div>
 
   <!-- INPUT CARD -->
   <div class="input-card" id="inputCard">
@@ -798,14 +793,11 @@ footer {
           <div class="agent-name">Legal Review</div>
           <div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus4">Waiting</span></div>
         </div>
-        <div class="agent-card" id="agentCard5">
-          <div class="agent-card-shimmer"></div>
-          <div class="agent-flag" id="agentFlag5">✦</div>
-          <div class="agent-num">Agent 05</div>
-          <div class="agent-name">Clarity</div>
-          <div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus5">Waiting</span>
+          <div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus5">Waiting</span></div>
+        </div>
       </div>
     </div>
+  </div>
 <!-- RESULTS -->
   <div class="results-section" id="resultsSection">
 
@@ -1326,7 +1318,7 @@ async function runMainPipeline() {
     const r2 = await callClaude({
       systemPrompt: AGENT_RESEARCH_SYSTEM,
       userContent:  userMsg,
-      maxTokens:    12000,
+      maxTokens:    6000,
       useWebSearch: true
     });
     let parsed2;
