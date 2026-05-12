@@ -396,6 +396,17 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
       <div class="dq-header">Questions to ask your doctor</div>
       <div id="doctorQuestions"></div>
     </div>
+
+    <div class="clinical-summary-section" id="clinicalSummarySection" style="display:none;margin-top:28px;padding:24px 28px;border-radius:16px;background:rgba(10,124,110,0.07);border:1px solid rgba(10,124,110,0.2);">
+      <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--teal-light);margin-bottom:14px;">⚕ Clinical Summary</div>
+      <div id="clinicalSummaryText" style="font-family:'Crimson Pro',serif;font-size:17px;color:rgba(255,255,255,0.8);line-height:1.75;white-space:pre-wrap;"></div>
+    </div>
+
+    <div class="recent-research-section" id="recentResearchSection" style="display:none;margin-top:16px;padding:20px 28px;border-radius:16px;background:rgba(74,111,165,0.07);border:1px solid rgba(74,111,165,0.2);">
+      <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#7b9fd4;margin-bottom:12px;">🔬 Recent Research Context</div>
+      <div id="recentResearchText" style="font-family:'Crimson Pro',serif;font-size:16px;color:rgba(255,255,255,0.7);line-height:1.7;"></div>
+    </div>
+
     <button class="reset-btn" onclick="resetToInput()">← Describe different symptoms</button>
   </div>
 </div>
@@ -540,7 +551,9 @@ Respond with ONLY this JSON:
   ],
   "red_flag_symptoms": ["Specific symptom requiring immediate care 1","Symptom 2"],
   "tests_likely_ordered": ["Test 1","Test 2"],
-  "questions_for_doctor": ["Specific question 1","Question 2","Question 3","Question 4","Question 5"]
+  "questions_for_doctor": ["Specific question 1","Question 2","Question 3","Question 4","Question 5"],
+  "clinical_summary": "A 2-3 paragraph plain-language summary of the overall clinical picture: what the symptom pattern suggests, how the most likely diagnoses relate to each other, and what a clinician would be thinking about. Write as if explaining to an intelligent patient preparing to see their doctor.",
+  "recent_research": "2-3 sentences describing any clinically relevant recent developments, updated guidelines, or emerging understanding related to the top 1-2 differential diagnoses. Focus on information that would be useful context for a patient conversation. If nothing notable, note that standard guidelines apply."
 }
 
 RULES:
@@ -549,6 +562,7 @@ RULES:
 - Only include diagnoses a real clinician would genuinely consider
 - Be honest about uncertainty — medicine is probabilistic
 - NEVER say "you have X" — always frame as "this could be" or "a possible explanation is"
+- clinical_summary and recent_research must always be populated strings, never null or empty
 - Return ONLY valid JSON`;
 
 const AGENT_ACCURACY_SYSTEM=`Review the differential diagnosis JSON for accuracy. Respond ONLY:
@@ -559,7 +573,7 @@ const AGENT_LEGAL_SYSTEM=`Review the differential diagnosis JSON for scope-of-pr
 {"scope_appropriate":true,"issues_found":[],"legal_note":"Brief note"}
 FLAG if content: diagnoses the patient definitively, recommends specific medications or doses, creates false urgency, or minimizes symptoms that could be serious.`;
 
-const AGENT_CLARITY_SYSTEM=`Apply all corrections from Accuracy and Legal reviewers. Then rewrite for a worried patient: be clear, direct, and reassuring where appropriate — not alarmist, not dismissive. Make "why_it_fits" explanations feel connected to what THEY described. Return the exact same JSON schema, polished. ONLY valid JSON.`;
+const AGENT_CLARITY_SYSTEM=`Apply all corrections from Accuracy and Legal reviewers. Then rewrite for a worried patient: be clear, direct, and reassuring where appropriate — not alarmist, not dismissive. Make "why_it_fits" explanations feel connected to what THEY described. Ensure clinical_summary and recent_research are well-written, complete paragraphs — never empty. Return the exact same JSON schema, polished. ONLY valid JSON.`;
 
 async function runAnalysis(){
   const symptoms=document.getElementById('symptomInput').value.trim();
@@ -692,6 +706,18 @@ function renderResults(r,accuracy){
 
   // Doctor questions
   document.getElementById('doctorQuestions').innerHTML=(r.questions_for_doctor||[]).map((q,i)=>`<div class="doctor-q"><div class="doctor-q-num">${i+1}</div><span>${esc(q)}</span></div>`).join('');
+
+  // Clinical summary
+  const cs=r.clinical_summary||'';
+  const csSection=document.getElementById('clinicalSummarySection');
+  if(cs){document.getElementById('clinicalSummaryText').textContent=cs;csSection.style.display='block';}
+  else{csSection.style.display='none';}
+
+  // Recent research
+  const rr=r.recent_research||'';
+  const rrSection=document.getElementById('recentResearchSection');
+  if(rr){document.getElementById('recentResearchText').textContent=rr;rrSection.style.display='block';}
+  else{rrSection.style.display='none';}
 
   setTimeout(()=>sec.scrollIntoView({behavior:'smooth',block:'start'}),100);
 }
