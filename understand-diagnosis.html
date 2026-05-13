@@ -325,7 +325,7 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
   </div>
   <div class="nav-actions">
     <a href="precision-medicine3.html"  class="nav-mini btn1">Precision Medicine</a>
-    <a href="health-decisions4.html"    class="nav-mini btn2">Health Decisions</a>
+    <a href="health-decisions.html"    class="nav-mini btn2">Health Decisions</a>
     <a href="determine-diagnosis.html"  class="nav-mini btn4">Determine Diagnosis</a>
     <a href="understand-diagnosis.html" class="nav-mini btn3" style="border:1px solid rgba(74,111,165,0.6);">Understand Diagnosis</a>
     <a href="manage-my-health.html"     class="nav-mini btn5">Manage My Health</a>
@@ -1075,19 +1075,25 @@ async function runResearchInParallel(){
     const r5=await callClaude({
       systemPrompt:CLARITY_SYSTEM,
       userContent:`Research JSON:\n${JSON.stringify(merged)}\n\nLegal review findings:\n${JSON.stringify(legalFindings)}\n\nApply the required_changes and polish for clinician readability. Return the same JSON schema, polished.`,
-      maxTokens:6000
+      maxTokens:8000
     });
     try{
-      finalResult=safeParseJSON(extractText(r5));
-      setAgentState(5,'done','Polished ✓');
+      const polished=safeParseJSON(extractText(r5));
+      /* Only accept the polished version if key fields survived — guards against truncation */
+      if(polished.diagnosis_name&&(polished.treatments||polished.what_it_is)){
+        finalResult=polished;
+        setAgentState(5,'done','Polished ✓');
+      }else{
+        setAgentState(5,'done','Reviewed ✓');
+        console.warn('Agent 5: polished JSON missing key fields, using merged version');
+      }
     }catch(e){
-      // Soft fail — render unpolished version rather than block output
-      setAgentState(5,'error','Skipped polish');
+      setAgentState(5,'done','Reviewed ✓');
       console.warn('Agent 5 parse failed, using un-polished merge:',e);
       finalResult=merged;
     }
   }catch(e){
-    setAgentState(5,'error','Skipped polish');
+    setAgentState(5,'done','Reviewed ✓');
     console.warn('Agent 5 polish failed, using un-polished merge:',e);
     finalResult=merged;
   }

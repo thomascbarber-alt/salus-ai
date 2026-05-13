@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+(function(){
+  var u=null;try{u=JSON.parse(localStorage.getItem('salus_user')||'null');}catch(_){}
+  if(!u||!u.email){var t=encodeURIComponent(window.location.href);window.location.replace('login.html?redirect='+t);}
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salus AI — Connect My Records</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0c1e3a; --navy-mid:#162d52; --teal:#0a7c6e; --teal-light:#13a090;
+  --gold:#b8932a; --gold-light:#d4aa3a; --white:#ffffff; --text:#1a2e4a;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);min-height:100vh;overflow-x:hidden;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;padding:0 48px;height:96px;background:rgba(12,30,58,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(184,147,42,0.2);}
+.nav-logo{display:flex;align-items:center;}
+.logo-img{height:90px;width:auto;object-fit:contain;}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:20px;}
+.back-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:20px;font-size:13px;font-weight:600;text-decoration:none;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);transition:all .2s;}
+.back-btn:hover{background:rgba(255,255,255,0.1);color:white;}
+.nav-actions{display:flex;gap:10px;}
+.nav-mini{padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.btn-gold{background:linear-gradient(135deg,#d4aa3a,#b8932a);color:#0c1e3a;}
+.btn-teal{background:linear-gradient(135deg,#13a090,#0a7c6e);color:white;}
+.btn-blue{background:linear-gradient(135deg,#4a6fa5,#162d52);color:white;}
+.btn-plum{background:linear-gradient(135deg,#9b59b6,#6b7a8d);color:white;}
+.btn-green{background:linear-gradient(135deg,#3a9e6a,#2d7a52);color:white;}
+
+/* USER BAR */
+#salusUserBar{position:fixed;top:96px;left:0;right:0;z-index:99;background:rgba(7,16,32,0.98);border-bottom:1px solid rgba(255,255,255,0.055);padding:0 48px;height:38px;display:flex;align-items:center;justify-content:space-between;font-family:'DM Sans',sans-serif;font-size:12px;backdrop-filter:blur(8px);}
+.subs-left{display:flex;align-items:center;gap:10px;}
+.subs-avatar{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,0.6);flex-shrink:0;}
+.subs-email{color:rgba(255,255,255,0.38);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.subs-right{display:flex;align-items:center;gap:10px;}
+.subs-rdot{width:5px;height:5px;border-radius:50%;}
+.subs-records{display:flex;align-items:center;gap:5px;padding:4px 11px;border-radius:100px;text-decoration:none;transition:all .2s;font-size:12px;}
+.subs-records-on{background:rgba(58,158,106,0.12);border:1px solid rgba(58,158,106,0.3);color:#52c488;}
+.subs-records-off{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.3);}
+.subs-rdot-on{background:#52c488;}
+.subs-rdot-off{background:rgba(255,255,255,0.18);}
+.subs-signout{padding:4px 9px;border-radius:6px;background:none;border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.22);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;transition:all .2s;}
+.subs-signout:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.5);}
+@media(max-width:768px){#salusUserBar{padding:0 16px;}.subs-email{display:none;}}
+
+/* BACKGROUND */
+.bg-layer{position:fixed;inset:0;pointer-events:none;}
+.bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(184,147,42,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(184,147,42,0.03) 1px,transparent 1px);background-size:60px 60px;}
+.bg-glow{position:absolute;top:10%;left:50%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(ellipse,rgba(10,124,110,0.1) 0%,transparent 70%);}
+
+/* PAGE */
+.page-wrap{max-width:900px;margin:0 auto;padding:180px 24px 80px;}
+
+/* HEADER */
+.page-header{text-align:center;margin-bottom:56px;animation:fadeUp .6s ease;}
+.page-eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold-light);margin-bottom:20px;}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,44px);font-weight:600;color:var(--white);line-height:1.2;margin-bottom:16px;}
+.page-title em{font-style:italic;color:var(--gold-light);}
+.page-sub{font-family:'Crimson Pro',serif;font-size:18px;color:rgba(255,255,255,0.6);line-height:1.65;max-width:620px;margin:0 auto;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+
+/* STATUS BANNER */
+.status-banner{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.09);border-radius:16px;padding:18px 24px;margin-bottom:36px;animation:fadeUp .6s ease .05s both;}
+.status-banner.connected{background:rgba(58,158,106,0.08);border-color:rgba(58,158,106,0.3);}
+.status-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.15);flex-shrink:0;}
+.status-dot.connected{background:#52c488;animation:dotPulse 2.2s infinite;}
+@keyframes dotPulse{0%{box-shadow:0 0 0 0 rgba(82,196,136,.5);}70%{box-shadow:0 0 0 6px rgba(82,196,136,0);}100%{box-shadow:0 0 0 0 rgba(82,196,136,0);}}
+.status-text{flex:1;}
+.status-title{font-size:14px;font-weight:600;color:rgba(255,255,255,0.8);margin-bottom:2px;}
+.status-sub{font-size:12px;color:rgba(255,255,255,0.35);}
+.status-action{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);transition:all .2s;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.status-action:hover{background:rgba(255,255,255,0.12);color:white;}
+
+/* RECORDS GRID */
+.records-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0;animation:fadeUp .6s ease .05s both;}
+@media(max-width:640px){.records-grid{grid-template-columns:repeat(2,1fr);}}
+.record-chip{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px 16px;}
+.record-chip-icon{font-size:18px;}
+.record-chip-label{font-size:13px;color:rgba(255,255,255,0.6);font-weight:500;}
+
+/* STEP CARDS */
+.steps-container{display:flex;flex-direction:column;gap:0;animation:fadeUp .6s ease .1s both;}
+.step-row{display:flex;gap:28px;padding:32px 0;border-bottom:1px solid rgba(255,255,255,0.07);}
+.step-row:last-child{border-bottom:none;}
+.step-num-wrap{flex-shrink:0;padding-top:2px;}
+.step-circle{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,rgba(10,124,110,0.3),rgba(10,124,110,0.1));border:1.5px solid rgba(19,160,144,0.4);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--teal-light);}
+.step-content{flex:1;}
+.step-tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold-light);margin-bottom:10px;}
+.step-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--white);margin-bottom:10px;}
+.step-body{font-family:'Crimson Pro',serif;font-size:16px;color:rgba(255,255,255,0.55);line-height:1.65;margin-bottom:18px;}
+.step-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+.step-action{display:inline-flex;align-items:center;padding:11px 22px;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.step-action-gold{background:linear-gradient(135deg,#d4aa3a,#b8932a);color:#0c1e3a;}
+.step-action-gold:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(212,170,58,0.3);}
+.step-action-teal{background:linear-gradient(135deg,#13a090,#0a7c6e);color:white;}
+.step-action-teal:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(10,124,110,0.3);}
+.step-action-outline{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);}
+.step-action-outline:hover{background:rgba(255,255,255,0.1);color:white;}
+.step-note{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:rgba(255,255,255,0.3);line-height:1.6;}
+.step-note-icon{flex-shrink:0;margin-top:1px;}
+.step-note a{color:var(--gold-light);text-decoration:underline;}
+
+/* DEV COMMENT CARD */
+.dev-note{background:rgba(22,45,82,0.8);border:1px solid rgba(184,147,42,0.15);border-radius:12px;padding:20px 24px;margin:16px 0;font-family:monospace;font-size:12px;color:rgba(255,255,255,0.35);line-height:1.7;overflow-x:auto;}
+.dev-note-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(212,170,58,0.5);margin-bottom:10px;font-family:'DM Sans',sans-serif;}
+
+/* PRIVACY SECTION */
+.privacy-card{background:rgba(10,124,110,0.07);border:1px solid rgba(10,124,110,0.2);border-radius:16px;padding:28px 32px;margin-top:40px;animation:fadeUp .6s ease .15s both;}
+.privacy-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--white);margin-bottom:16px;}
+.privacy-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:640px){.privacy-grid{grid-template-columns:1fr;}}
+.privacy-item{display:flex;gap:10px;align-items:flex-start;}
+.privacy-item-icon{font-size:16px;flex-shrink:0;}
+.privacy-item-text{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.5;}
+.privacy-item-text strong{color:rgba(255,255,255,0.75);}
+
+/* BACK BUTTON ROW */
+.back-row{text-align:center;margin-top:48px;animation:fadeUp .6s ease .2s both;}
+.back-to-pm{display:inline-flex;align-items:center;gap:10px;padding:14px 36px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;text-decoration:none;transition:all .2s;}
+.back-to-pm:hover{background:rgba(255,255,255,0.09);color:white;}
+</style>
+<script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+<div class="bg-layer"><div class="bg-grid"></div><div class="bg-glow"></div></div>
+
+<nav>
+  <div class="nav-logo">
+    <a href="index.html" style="display:flex;align-items:center;">
+      <img src="salusAI-logo.jpg" class="logo-img" alt="Salus AI Logo" onerror="this.style.display='none'">
+    </a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-actions">
+      <a href="precision-medicine3.html" class="nav-mini btn-gold">Precision Medicine</a>
+      <a href="health-decisions.html"    class="nav-mini btn-teal">Health Decisions</a>
+      <a href="determine-diagnosis.html" class="nav-mini btn-plum">Determine Diagnosis</a>
+      <a href="understand-diagnosis.html" class="nav-mini btn-blue">Understand Diagnosis</a>
+      <a href="manage-my-health.html"    class="nav-mini btn-green">Manage My Health</a>
+    </div>
+    <a href="precision-medicine3.html" class="back-btn">← Back to Precision Medicine</a>
+  </div>
+</nav>
+<div id="salusUserBar"></div>
+
+<div class="page-wrap">
+
+  <div class="page-header">
+    <div class="page-eyebrow">🔗 Medical Records</div>
+    <h1 class="page-title">Connect My <em>Medical Records</em></h1>
+    <p class="page-sub">Four steps. About five minutes. Works with virtually every major health system in the United States through HealthEx's FHIR-based secure connection.</p>
+  </div>
+
+  <!-- LIVE STATUS BANNER -->
+  <div class="status-banner" id="statusBanner">
+    <div class="status-dot" id="statusDot"></div>
+    <div class="status-text">
+      <div class="status-title" id="statusTitle">Records not yet connected</div>
+      <div class="status-sub" id="statusSub">Follow the steps below to link your medical records via HealthEx.</div>
+    </div>
+    <button class="status-action" id="statusToggle" onclick="toggleRecordsStatus()"></button>
+  </div>
+
+  <!-- WHAT GETS CONNECTED -->
+  <div class="records-grid">
+    <div class="record-chip"><span class="record-chip-icon">🧬</span><span class="record-chip-label">Lab Results</span></div>
+    <div class="record-chip"><span class="record-chip-icon">💊</span><span class="record-chip-label">Medications</span></div>
+    <div class="record-chip"><span class="record-chip-icon">📋</span><span class="record-chip-label">Visit Notes</span></div>
+    <div class="record-chip"><span class="record-chip-icon">🩺</span><span class="record-chip-label">Diagnoses</span></div>
+    <div class="record-chip"><span class="record-chip-icon">📸</span><span class="record-chip-label">Imaging Reports</span></div>
+    <div class="record-chip"><span class="record-chip-icon">🏥</span><span class="record-chip-label">Hospital Records</span></div>
+    <div class="record-chip"><span class="record-chip-icon">💉</span><span class="record-chip-label">Immunizations</span></div>
+    <div class="record-chip"><span class="record-chip-icon">🧪</span><span class="record-chip-label">Procedures</span></div>
+    <div class="record-chip"><span class="record-chip-icon">📝</span><span class="record-chip-label">Allergies</span></div>
+  </div>
+
+  <!-- STEPS -->
+  <div class="steps-container">
+
+    <div class="step-row">
+      <div class="step-num-wrap"><div class="step-circle">1</div></div>
+      <div class="step-content">
+        <span class="step-tag">Getting Started</span>
+        <div class="step-title">Create Your HealthEx Account</div>
+        <p class="step-body">HealthEx is the secure medical record platform that Salus AI uses to access your health data. Creating an account is free and takes under two minutes. Your records are encrypted end-to-end and you control exactly what is shared.</p>
+        <div class="step-actions">
+          <a href="https://www.healthex.io/#get-early-access" target="_blank" rel="noopener" class="step-action step-action-gold">Create Free Account →</a>
+          <a href="https://www.healthex.io/" target="_blank" rel="noopener" class="step-action step-action-outline">Learn About HealthEx</a>
+        </div>
+        <div class="step-note">
+          <span class="step-note-icon">🔒</span>
+          HealthEx is a HIPAA-compliant medical records platform. Salus AI has a signed Business Associate Agreement (BAA) with HealthEx — your health information is protected under federal law.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-row">
+      <div class="step-num-wrap"><div class="step-circle">2</div></div>
+      <div class="step-content">
+        <span class="step-tag">Connect Your Providers</span>
+        <div class="step-title">Link Your Medical Providers &amp; Insurers</div>
+        <p class="step-body">Inside your HealthEx account, search for your doctors, hospitals, labs, and insurance carriers. HealthEx connects to over 21,000 providers nationwide — including Epic, Cerner, athenahealth, Kaiser, and most major health systems. Once linked, your records sync automatically.</p>
+        <div class="step-actions">
+          <a href="https://app.healthex.io" target="_blank" rel="noopener" class="step-action step-action-teal">Link a Provider →</a>
+        </div>
+        <div class="step-note">
+          <span class="step-note-icon">💡</span>
+          You can link multiple providers — primary care, specialists, hospitals, and labs. The more records connected, the more complete the picture Salus AI can provide.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-row">
+      <div class="step-num-wrap"><div class="step-circle">3</div></div>
+      <div class="step-content">
+        <span class="step-tag">Authorize Access</span>
+        <div class="step-title">Grant Salus AI Access to Your Records</div>
+        <p class="step-body">Once your providers are linked in HealthEx, authorize Salus AI to read your health data. You choose exactly what Salus AI can see — and you can revoke access at any time. This one-time authorization activates your Precision Medicine tier.</p>
+        <div class="dev-note-title">Developer Implementation Note</div>
+        <div class="dev-note">
+          HealthEx OAuth 2.0 + PKCE Flow — this button requires a dynamic server-side authorization request.<br><br>
+          STEP A — Register Salus AI as OAuth client (one-time):<br>
+          &nbsp;&nbsp;POST https://api.healthex.io/oauth/register<br>
+          &nbsp;&nbsp;{ "client_name": "Salus AI", "redirect_uris": ["https://salusai.health/auth/healthex/callback"],<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;"scope": "patient/*.read offline_access" }<br><br>
+          STEP B — Backend route /auth/healthex:<br>
+          &nbsp;&nbsp;1. Generate code_verifier = base64url(32 random bytes)<br>
+          &nbsp;&nbsp;2. code_challenge = base64url(SHA256(code_verifier))<br>
+          &nbsp;&nbsp;3. Redirect → https://api.healthex.io/oauth/authorize?...<br><br>
+          STEP C — Callback /auth/healthex/callback:<br>
+          &nbsp;&nbsp;Exchange code for tokens, store encrypted (HIPAA).<br><br>
+          Docs: https://docs.healthex.io/mcp-server/oauth-flow
+        </div>
+        <div class="step-actions">
+          <a href="https://salusai.health/auth/healthex" class="step-action step-action-gold">Authorize Salus AI →</a>
+        </div>
+        <div class="step-note">
+          <span class="step-note-icon">🛡️</span>
+          Salus AI reads your records to provide personalized guidance. We never sell, share, or use your health data for any purpose other than powering your health coach. Full details in our <a href="#">Privacy Policy</a>.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-row">
+      <div class="step-num-wrap"><div class="step-circle">4</div></div>
+      <div class="step-content">
+        <span class="step-tag">Confirm Connection</span>
+        <div class="step-title">Mark Your Records as Connected</div>
+        <p class="step-body">Once you have authorized HealthEx and your records are linked, click below to activate the personalized features across Salus AI. This tells Salus AI to use your records when generating recommendations on Health Decisions, Determine Diagnosis, and Manage My Health.</p>
+        <div class="step-actions">
+          <button class="step-action step-action-teal" onclick="markConnected()">✓ My Records Are Connected</button>
+        </div>
+        <div class="step-note">
+          <span class="step-note-icon">ℹ️</span>
+          You can also disconnect at any time using the status banner at the top of this page.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /steps -->
+
+  <!-- PRIVACY -->
+  <div class="privacy-card">
+    <div class="privacy-title">🔒 Your Privacy &amp; Security</div>
+    <div class="privacy-grid">
+      <div class="privacy-item">
+        <span class="privacy-item-icon">🏥</span>
+        <div class="privacy-item-text"><strong>HIPAA-compliant.</strong> All data handling meets federal health privacy law requirements.</div>
+      </div>
+      <div class="privacy-item">
+        <span class="privacy-item-icon">🔐</span>
+        <div class="privacy-item-text"><strong>End-to-end encrypted.</strong> Your records are encrypted in transit and at rest.</div>
+      </div>
+      <div class="privacy-item">
+        <span class="privacy-item-icon">🚫</span>
+        <div class="privacy-item-text"><strong>Never sold.</strong> Your health data is never sold, shared, or used for advertising.</div>
+      </div>
+      <div class="privacy-item">
+        <span class="privacy-item-icon">✋</span>
+        <div class="privacy-item-text"><strong>You're in control.</strong> Revoke access at any time from your HealthEx account.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="back-row">
+    <a href="precision-medicine3.html" class="back-to-pm">← Return to Precision Medicine</a>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<script>
+const SalusAuth={
+  getUser:()=>{try{return JSON.parse(localStorage.getItem('salus_user')||'null');}catch(_){return null;}},
+  logout:()=>{localStorage.removeItem('salus_user');sessionStorage.clear();window.location.href='login.html';},
+  isRecordsConnected:()=>localStorage.getItem('salus_records_connected')==='true',
+  setRecordsConnected:(v)=>v?localStorage.setItem('salus_records_connected','true'):localStorage.removeItem('salus_records_connected')
+};
+
+function salusInitUserBar(){
+  const bar=document.getElementById('salusUserBar');if(!bar)return;
+  const user=SalusAuth.getUser()||{};
+  const initials=(user.email||'?')[0].toUpperCase();
+  const rc=SalusAuth.isRecordsConnected();
+  bar.innerHTML=
+    '<div class="subs-left"><div class="subs-avatar">'+initials+'</div><span class="subs-email">'+(user.email||'')+'</span></div>'+
+    '<div class="subs-right">'+
+      (rc?'<div class="subs-records subs-records-on"><div class="subs-rdot subs-rdot-on"></div><span>Records Linked</span></div>':'<div class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Not Connected</span></div>')+
+      '<button class="subs-signout" onclick="SalusAuth.logout()">Sign out</button>'+
+    '</div>';
+}
+
+function updateStatusBanner(){
+  const rc=SalusAuth.isRecordsConnected();
+  const banner=document.getElementById('statusBanner');
+  const dot=document.getElementById('statusDot');
+  const title=document.getElementById('statusTitle');
+  const sub=document.getElementById('statusSub');
+  const toggle=document.getElementById('statusToggle');
+  if(rc){
+    banner.classList.add('connected');
+    dot.classList.add('connected');
+    title.textContent='Records connected via HealthEx';
+    sub.textContent='Your Salus AI responses are personalized to your medical history.';
+    toggle.textContent='Disconnect';
+  }else{
+    banner.classList.remove('connected');
+    dot.classList.remove('connected');
+    title.textContent='Records not yet connected';
+    sub.textContent='Follow the steps below to link your medical records via HealthEx.';
+    toggle.textContent='Mark as Connected';
+  }
+}
+
+function markConnected(){
+  SalusAuth.setRecordsConnected(true);
+  updateStatusBanner();
+  salusInitUserBar();
+  const btn=event.target;
+  btn.textContent='✓ Connected!';
+  btn.style.background='linear-gradient(135deg,#1abfad,#0a9e8e)';
+}
+
+function toggleRecordsStatus(){
+  const rc=SalusAuth.isRecordsConnected();
+  SalusAuth.setRecordsConnected(!rc);
+  updateStatusBanner();
+  salusInitUserBar();
+}
+
+/* Handle return from HealthEx OAuth */
+(function(){
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('records')==='connected'){
+    SalusAuth.setRecordsConnected(true);
+    window.history.replaceState({},'',window.location.pathname);
+  }
+})();
+
+window.addEventListener('DOMContentLoaded',()=>{
+  salusInitUserBar();
+  updateStatusBanner();
+});
+</script>
+</body>
+</html>

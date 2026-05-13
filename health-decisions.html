@@ -867,7 +867,7 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
   </div>
     <div class="nav-actions">
     <a href="precision-medicine3.html"  class="nav-mini btn1">Precision Medicine</a>
-    <a href="health-decisions4.html"    class="nav-mini btn2" style="border:1px solid rgba(19,160,144,0.6);">Health Decisions</a>
+    <a href="health-decisions.html"    class="nav-mini btn2" style="border:1px solid rgba(19,160,144,0.6);">Health Decisions</a>
     <a href="determine-diagnosis.html"  class="nav-mini btn4">Determine Diagnosis</a>
     <a href="understand-diagnosis.html" class="nav-mini btn3">Understand Diagnosis</a>
     <a href="manage-my-health.html"     class="nav-mini btn5">Manage My Health</a>
@@ -1130,7 +1130,7 @@ function salusInitUserBar() {
     '<div class="subs-right">' +
       (rc
         ? '<div class="subs-records subs-records-on"><div class="subs-rdot subs-rdot-on"></div><span>Records Linked</span></div>'
-        : '<a href="health-decisions4.html" class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Link Medical Records</span></a>'
+        : '<a href="health-decisions.html" class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Link Medical Records</span></a>'
       ) +
       '<button class="subs-signout" onclick="SalusAuth.logout()">Sign out</button>' +
     '</div>';
@@ -1180,6 +1180,25 @@ function getSalusLifeContext(){
     if(ctx.living)    parts.push('Living situation: '+ctx.living);
     if(!parts.length) return '';
     return '\n\n---\nPersonal context about this patient:\n'+parts.join('\n')+'\n---';
+  }catch(_){return '';}
+}
+
+function getSalusHealthProfile(){
+  try{
+    const hp=JSON.parse(localStorage.getItem('salus_health_profile')||'null');
+    if(!hp)return '';
+    const parts=[];
+    if(hp.age)          parts.push('Age: '+hp.age);
+    if(hp.sex)          parts.push('Biological sex: '+hp.sex);
+    if(hp.smoking)      parts.push('Smoking status: '+hp.smoking);
+    if(hp.diabetes)     parts.push('Diabetes: '+hp.diabetes);
+    if(hp.heartDisease) parts.push('Heart disease: '+hp.heartDisease);
+    if(hp.conditions)   parts.push('Other conditions: '+hp.conditions);
+    if(hp.medications)  parts.push('Current medications: '+hp.medications);
+    if(hp.screenings)   parts.push('Recent screenings: '+hp.screenings);
+    if(hp.familyHistory)parts.push('Family history: '+hp.familyHistory);
+    if(!parts.length)return '';
+    return '\n\n---\nPatient health profile:\n'+parts.join('\n')+'\n---';
   }catch(_){return '';}
 }
 
@@ -1496,7 +1515,7 @@ async function runClarifyAgent() {
   setAgentState(1, 'running', 'Reading your question…');
 
   // Build clarify message with full history
-  let msg = `The patient's health question: "${lastQuestion}"\n${getSalusLifeContext()}`;
+  let msg = `The patient's health question: "${lastQuestion}"${getSalusHealthProfile()}${getSalusLifeContext()}`;
   if (clarifyingHistory.length > 0) {
     msg += `\nPrevious clarification rounds (${clarifyingHistory.length}):\n`;
     clarifyingHistory.forEach(r => {
@@ -1588,7 +1607,7 @@ function submitClarifications() {
 ══════════════════════════════════════════════════════ */
 async function runMainPipeline() {
   // Build analysis message
-  let userMsg = `The patient asks: "${lastQuestion}"${getSalusLifeContext()}`;
+  let userMsg = `The patient asks: "${lastQuestion}"${getSalusHealthProfile()}${getSalusLifeContext()}`;
   const hasClarifications = Object.keys(finalClarifications).some(k => finalClarifications[k]);
   if (hasClarifications) {
     userMsg += '\n\nClarifying information provided by the patient:\n';

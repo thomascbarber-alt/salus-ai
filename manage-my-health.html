@@ -264,7 +264,7 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
   </div>
     <div class="nav-actions">
     <a href="precision-medicine3.html"  class="nav-mini btn1">Precision Medicine</a>
-    <a href="health-decisions4.html"    class="nav-mini btn2">Health Decisions</a>
+    <a href="health-decisions.html"    class="nav-mini btn2">Health Decisions</a>
     <a href="determine-diagnosis.html"  class="nav-mini btn4">Determine Diagnosis</a>
     <a href="understand-diagnosis.html" class="nav-mini btn3">Understand Diagnosis</a>
     <a href="manage-my-health.html"     class="nav-mini btn5" style="border:1px solid rgba(58,158,106,0.6);">Manage My Health</a>
@@ -424,7 +424,7 @@ function salusInitUserBar() {
   const initials=(user.email||'?')[0].toUpperCase(), email=user.email||'';
   bar.innerHTML='<div class="subs-left"><div class="subs-avatar">'+initials+'</div><span class="subs-email">'+email+'</span></div>'+
     '<div class="subs-right">'+(rc?'<div class="subs-records subs-records-on"><div class="subs-rdot subs-rdot-on"></div><span>Records Linked</span></div>':
-    '<a href="health-decisions4.html" class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Link Medical Records</span></a>')+
+    '<a href="health-decisions.html" class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Link Medical Records</span></a>')+
     '<button class="subs-signout" onclick="SalusAuth.logout()">Sign out</button></div>';
 }
 
@@ -453,6 +453,21 @@ const SalusState = {
 window.addEventListener('DOMContentLoaded',()=>{
   salusInitUserBar();if(SalusState.isRecordsConnected()){recordsConnected=true;document.getElementById('recordsBanner').style.display='none';document.getElementById('recordsConnectedBar').classList.add('visible');}
   checkDueNotifications();
+  /* Pre-fill form from saved health profile */
+  try{
+    const hp=JSON.parse(localStorage.getItem('salus_health_profile')||'null');
+    if(hp){
+      if(hp.age)         document.getElementById('profileAge').value=hp.age;
+      if(hp.sex)         document.getElementById('profileSex').value=hp.sex;
+      if(hp.smoking)     document.getElementById('profileSmoking').value=hp.smoking;
+      if(hp.diabetes)    document.getElementById('profileDiabetes').value=hp.diabetes;
+      if(hp.heartDisease)document.getElementById('profileHeartDisease').value=hp.heartDisease;
+      if(hp.conditions)  document.getElementById('profileConditions').value=hp.conditions;
+      if(hp.medications) document.getElementById('profileMeds').value=hp.medications;
+      if(hp.screenings)  document.getElementById('profileScreenings').value=hp.screenings;
+      if(hp.familyHistory)document.getElementById('profileFamily').value=hp.familyHistory;
+    }
+  }catch(_){}
 });
 window.addEventListener('scroll',()=>{const d=document.documentElement;const p=d.scrollHeight-d.clientHeight;document.getElementById('ppFill').style.width=p>0?(d.scrollTop/p*100)+'%':'0%';});
 
@@ -660,12 +675,15 @@ async function generatePlan(){
     const hasIssues=(p3.corrections_needed||[]).length>0||(p4.issues_found||[]).length>0;
     if(hasIssues){
       setAgentState(5,'running','Applying corrections…');
-      const r5=await callClaude({systemPrompt:AGENT_CLARITY_SYSTEM,userContent:`Plan:\n${JSON.stringify(p2)}\nAccuracy:\n${JSON.stringify(p3)}\nLegal:\n${JSON.stringify(p4)}`,maxTokens:4000});
-      try{final=safeParseJSON(extractText(r5));}catch(_){final=p2;}
-      setAgentState(5,'done','Corrections applied');
+      const r5=await callClaude({systemPrompt:AGENT_CLARITY_SYSTEM,userContent:`Plan:\n${JSON.stringify(p2)}\nAccuracy:\n${JSON.stringify(p3)}\nLegal:\n${JSON.stringify(p4)}`,maxTokens:8000});
+      try{
+        const corrected=safeParseJSON(extractText(r5));
+        if(corrected.care_items&&corrected.care_items.length>0){final=corrected;}
+        setAgentState(5,'done','Corrections applied');
+      }catch(_){final=p2;}
     }else{setAgentState(5,'done','No changes needed');}
 
-    setTimeout(()=>{hidePipeline();renderResults(final,p3,lastProfile);document.getElementById('generateBtn').disabled=false;},400);
+    setTimeout(()=>{hidePipeline();if(final.care_items&&final.care_items.length>0){renderResults(final,p3,lastProfile);}document.getElementById('generateBtn').disabled=false;},400);
   }catch(err){handleError(err.message||String(err));}
 }
 

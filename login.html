@@ -180,7 +180,7 @@ footer{text-align:center;padding:20px;font-size:11px;color:rgba(255,255,255,0.2)
   if(user&&user.email){
     var params=new URLSearchParams(window.location.search);
     var redirect=params.get('redirect');
-    window.location.replace(redirect&&redirect.startsWith('http')?redirect:'health-decisions4.html');
+    window.location.replace(redirect&&redirect.startsWith('http')?redirect:'health-decisions.html');
   }
 })();
 
@@ -226,7 +226,7 @@ function doCreate(){
   setTimeout(()=>{
     var params=new URLSearchParams(window.location.search);
     var redirect=params.get('redirect');
-    window.location.href=redirect&&redirect.startsWith('http')?redirect:'health-decisions4.html';
+    window.location.href=redirect&&redirect.startsWith('http')?redirect:'health-decisions.html';
   },900);
 }
 
@@ -252,7 +252,7 @@ function doSignIn(){
   setTimeout(()=>{
     var params=new URLSearchParams(window.location.search);
     var redirect=params.get('redirect');
-    window.location.href=redirect&&redirect.startsWith('http')?redirect:'health-decisions4.html';
+    window.location.href=redirect&&redirect.startsWith('http')?redirect:'health-decisions.html';
   },900);
 }
 

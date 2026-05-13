@@ -431,6 +431,82 @@ h1 em { font-style: italic; color: var(--gold); }
 }
 
 /* ── HOW TO CONNECT SECTION ── */
+/* ── DATA HUB SECTION ── */
+.data-hub-section {
+  padding: 100px 48px;
+  background: var(--navy);
+  position: relative;
+  overflow: hidden;
+}
+.data-hub-section::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 50% 70% at 0% 50%, rgba(10,124,110,0.1) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 100% 30%, rgba(184,147,42,0.07) 0%, transparent 60%);
+  pointer-events: none;
+}
+.data-hub-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+.data-hub-section .section-sub { max-width: 620px; margin: 0 auto 56px; text-align: center; }
+
+/* HUB CARDS */
+.hub-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+@media(max-width: 900px) { .hub-cards { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; } }
+
+.hub-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 24px;
+  padding: 32px 28px 28px;
+  display: flex;
+  flex-direction: column;
+  transition: border-color .3s, transform .3s, box-shadow .3s;
+  position: relative;
+  overflow: hidden;
+}
+.hub-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(19,160,144,0.4), transparent);
+  opacity: 0;
+  transition: opacity .3s;
+}
+.hub-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.15); }
+.hub-card:hover::before { opacity: 1; }
+
+.hub-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+.hub-card-icon { font-size: 32px; }
+.hub-card-badge {
+  font-size: 11px; font-weight: 700; letter-spacing: .5px;
+  padding: 4px 10px; border-radius: 100px;
+  display: none;
+}
+.hub-card-badge.ready { display: inline-block; background: rgba(58,158,106,0.15); border: 1px solid rgba(58,158,106,0.35); color: #52c488; }
+.hub-card-badge.partial { display: inline-block; background: rgba(212,170,58,0.1); border: 1px solid rgba(212,170,58,0.25); color: #d4aa3a; }
+
+.hub-card-step { font-size: 10px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: rgba(255,255,255,0.25); margin-bottom: 10px; }
+.hub-card-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; color: var(--white); margin-bottom: 14px; line-height: 1.2; }
+.hub-card-desc { font-family: 'Crimson Pro', serif; font-size: 15px; color: rgba(255,255,255,0.5); line-height: 1.65; margin-bottom: 28px; flex: 1; }
+
+.hub-card-btn {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; border-radius: 12px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
+  text-decoration: none; transition: all .25s; margin-bottom: 14px;
+}
+.hub-btn-arrow { font-size: 16px; transition: transform .2s; }
+.hub-card-btn:hover .hub-btn-arrow { transform: translateX(4px); }
+.hub-btn-gold { background: linear-gradient(135deg, #d4aa3a, #b8932a); color: #0c1e3a; box-shadow: 0 4px 16px rgba(184,147,42,0.25); }
+.hub-btn-gold:hover { box-shadow: 0 6px 24px rgba(184,147,42,0.35); transform: translateY(-1px); }
+.hub-btn-teal { background: linear-gradient(135deg, #13a090, #0a7c6e); color: white; box-shadow: 0 4px 16px rgba(10,124,110,0.25); }
+.hub-btn-teal:hover { box-shadow: 0 6px 24px rgba(10,124,110,0.35); transform: translateY(-1px); }
+
+.hub-card-note { font-size: 11px; color: rgba(255,255,255,0.2); text-align: center; line-height: 1.5; }
+
 .connect-section {
   padding: 100px 48px;
   background: var(--navy);
@@ -1224,7 +1300,7 @@ footer p {
   </div>
     <div class="nav-actions">
     <a href="precision-medicine3.html"  class="nav-mini btn-gold" style="border:1px solid rgba(212,170,58,0.6);">Precision Medicine</a>
-    <a href="health-decisions4.html"    class="nav-mini btn-teal">Health Decisions</a>
+    <a href="health-decisions.html"    class="nav-mini btn-teal">Health Decisions</a>
     <a href="determine-diagnosis.html"  class="nav-mini btn-plum">Determine Diagnosis</a>
     <a href="understand-diagnosis.html" class="nav-mini btn-blue">Understand Diagnosis</a>
     <a href="manage-my-health.html"     class="nav-mini btn-green">Manage My Health</a>
@@ -1242,7 +1318,7 @@ footer p {
 <div class="salus-records-reminder" id="salusRecordsReminder">
   <span style="font-size:16px;">💡</span>
   <span class="salus-records-reminder-text">
-    A more informed response is possible if you <a href="health-decisions4.html">link your medical records</a>.
+    A more informed response is possible if you <a href="health-decisions.html">link your medical records</a>.
   </span>
   <button onclick="document.getElementById('salusRecordsReminder').classList.remove('visible')"
     style="background:none;border:none;color:rgba(255,255,255,0.3);font-size:16px;cursor:pointer;padding:0 4px;">✕</button>
@@ -1388,352 +1464,67 @@ footer p {
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════ HOW TO CONNECT -->
-<section class="connect-section" id="connect">
-  <div class="connect-inner">
-    <p class="section-label">Step-by-Step</p>
-    <h2 class="section-title" style="color:var(--white);">Connecting Your Records</h2>
-    <p class="section-sub">Four simple steps. Takes about five minutes. Works with virtually every major health system in the United States.</p>
+<!-- ══════════════════════════════════════════ MY DATA HUB -->
+<section class="data-hub-section" id="connect">
+  <div class="data-hub-inner">
+    <p class="section-label" style="color:var(--gold-light);">Your Precision Medicine Data</p>
+    <h2 class="section-title" style="color:var(--white);">Set Up Your <em style="color:var(--gold-light);">Personal Profile</em></h2>
+    <p class="section-sub" style="color:rgba(255,255,255,0.55);">Three steps — each takes just a few minutes. Together they give Salus AI the full picture it needs to give you truly personalized guidance.</p>
 
-    <div class="steps-container">
+    <div class="hub-cards">
 
-      <!-- STEP 1 -->
-      <div class="step-row" id="step1">
-        <div class="step-num-wrap">
-          <div class="step-circle">1</div>
+      <!-- CARD 1: Connect Records -->
+      <div class="hub-card" id="hubCardRecords">
+        <div class="hub-card-top">
+          <div class="hub-card-icon">🔗</div>
+          <div class="hub-card-badge" id="recordsBadge"></div>
         </div>
-        <div class="step-content">
-          <span class="step-tag">Getting Started</span>
-          <div class="step-title">Create Your HealthEx Account</div>
-          <p class="step-body">
-            HealthEx is the secure medical record platform that Salus AI uses to access your health data. 
-            Creating an account is free and takes under two minutes. Your records are encrypted end-to-end
-            and you control exactly what is shared.
-          </p>
-          <div class="step-actions">
-            <a href="https://www.healthex.io/#get-early-access" target="_blank" rel="noopener" class="step-action step-action-gold">
-              Create Free Account →
-            </a>
-            <a href="https://www.healthex.io/" target="_blank" rel="noopener" class="step-action step-action-outline">
-              Learn About HealthEx
-            </a>
-          </div>
-          <div class="step-note">
-            <span class="step-note-icon">🔒</span>
-            HealthEx is a HIPAA-compliant medical records platform. Salus AI has a signed Business Associate Agreement (BAA) with HealthEx — your health information is protected under federal law.
-          </div>
-        </div>
+        <div class="hub-card-step">Step 1</div>
+        <div class="hub-card-title">Connect My Records</div>
+        <div class="hub-card-desc">Link your medical records via HealthEx — labs, diagnoses, medications, imaging, visit notes, and immunizations. Powers the Precision Medicine tier.</div>
+        <a href="connect-records.html" class="hub-card-btn hub-btn-gold">
+          <span>Connect My Records</span>
+          <span class="hub-btn-arrow">→</span>
+        </a>
+        <div class="hub-card-note">HIPAA-compliant · Encrypted · You control access</div>
       </div>
 
-      <!-- STEP 2 -->
-      <div class="step-row" id="step2">
-        <div class="step-num-wrap">
-          <div class="step-circle">2</div>
+      <!-- CARD 2: Personal Details -->
+      <div class="hub-card" id="hubCardPersonal">
+        <div class="hub-card-top">
+          <div class="hub-card-icon">🙋</div>
+          <div class="hub-card-badge" id="personalBadge"></div>
         </div>
-        <div class="step-content">
-          <span class="step-tag">Connect Your Providers</span>
-          <div class="step-title">Link Your Medical Providers &amp; Insurers</div>
-          <p class="step-body">
-            Inside your HealthEx account, search for your doctors, hospitals, labs, and insurance carriers.
-            HealthEx connects to over 21,000 providers nationwide — including Epic, Cerner, athenahealth,
-            Kaiser, and most major health systems. Once linked, your records sync automatically.
-          </p>
-          <div class="step-actions">
-            <a href="https://app.healthex.io" target="_blank" rel="noopener" class="step-action step-action-teal">
-              Link a Provider →
-            </a>
-          </div>
-          <div class="step-note">
-            <span class="step-note-icon">💡</span>
-            You can link multiple providers — primary care, specialists, hospitals, and labs. The more records connected, the more complete the picture Salus AI can provide.
-          </div>
-        </div>
+        <div class="hub-card-step">Step 2</div>
+        <div class="hub-card-title">Add My Personal Details</div>
+        <div class="hub-card-desc">Tell us about your activities, values, caregiving responsibilities, and living situation. Salus AI uses this to make guidance practical for your actual life.</div>
+        <a href="personal-details.html" class="hub-card-btn hub-btn-teal">
+          <span>Add My Personal Details</span>
+          <span class="hub-btn-arrow">→</span>
+        </a>
+        <div class="hub-card-note">Used in Health Decisions · Determine Diagnosis · Manage My Health</div>
       </div>
 
-      <!-- STEP 3 -->
-      <div class="step-row" id="step3">
-        <div class="step-num-wrap">
-          <div class="step-circle">3</div>
+      <!-- CARD 3: Health Profile -->
+      <div class="hub-card" id="hubCardHealth">
+        <div class="hub-card-top">
+          <div class="hub-card-icon">🏥</div>
+          <div class="hub-card-badge" id="healthBadge"></div>
         </div>
-        <div class="step-content">
-          <span class="step-tag">Authorize Access</span>
-          <div class="step-title">Grant Salus AI Access to Your Records</div>
-          <p class="step-body">
-            Once your providers are linked in HealthEx, authorize Salus AI to read your health data.
-            You choose exactly what Salus AI can see — and you can revoke access at any time.
-            This one-time authorization activates your Precision Medicine tier.
-          </p>
-          <!--
-            DEVELOPER NOTE — HealthEx OAuth 2.0 + PKCE Flow
-            ─────────────────────────────────────────────────────────────────────
-            This button CANNOT be a static link to HealthEx directly.
-            The authorization request requires dynamic parameters generated
-            server-side. Implementation steps:
-
-            STEP A — Register Salus AI as an OAuth client (one-time setup):
-              POST https://api.healthex.io/oauth/register
-              {
-                "client_name": "Salus AI",
-                "redirect_uris": ["https://salusai.health/auth/healthex/callback"],
-                "token_endpoint_auth_method": "none",
-                "grant_types": ["authorization_code", "refresh_token"],
-                "scope": "patient/*.read offline_access"
-              }
-              → Store the returned client_id securely
-
-            STEP B — Salus AI backend route /auth/healthex (triggered by this button):
-              1. Generate code_verifier  = base64url(32 random bytes)
-              2. Compute code_challenge  = base64url(SHA256(code_verifier))
-              3. Generate random state   (CSRF protection)
-              4. Store code_verifier + state in user session
-              5. Redirect user to:
-                 https://api.healthex.io/oauth/authorize
-                   ?response_type=code
-                   &client_id={SALUS_CLIENT_ID}
-                   &redirect_uri=https://salusai.health/auth/healthex/callback
-                   &scope=patient/*.read%20offline_access
-                   &state={random_state}
-                   &code_challenge={code_challenge}
-                   &code_challenge_method=S256
-
-            STEP C — Callback route /auth/healthex/callback:
-              1. Verify returned state matches session state
-              2. Exchange code for tokens:
-                 POST https://api.healthex.io/oauth/token
-                 { grant_type, code, redirect_uri, client_id, code_verifier }
-              3. Store access_token + refresh_token (HIPAA — encrypt at rest)
-
-            ⚠ NOTE: Patient consent flow takes 10–30+ min. Design for long sessions.
-            Docs: https://docs.healthex.io/mcp-server/oauth-flow
-            ─────────────────────────────────────────────────────────────────────
-          -->
-          <div class="step-actions">
-            <a href="https://salusai.health/auth/healthex" target="_blank" rel="noopener" class="step-action step-action-gold">
-              Authorize Salus AI →
-            </a>
-          </div>
-          <div class="step-note">
-            <span class="step-note-icon">🛡️</span>
-            Salus AI reads your records to provide personalized guidance. We never sell, share, or use your health data for any purpose other than powering your health coach. Full details in our <a href="#" style="color: var(--gold); text-decoration: underline;">Privacy Policy</a>.
-          </div>
-        </div>
-      </div>
-
-      <!-- STEP 4: Apple Health (always visible, highlighted on mobile) -->
-      <div class="step-row" id="step4">
-        <div class="step-num-wrap">
-          <div class="step-circle">4</div>
-        </div>
-        <div class="step-content">
-          <span class="step-tag">Wellness Data</span>
-          <div class="step-title">
-            Connect Apple Health
-            <span class="mobile-badge" id="mobileRecommendedBadge" style="display:none;">📱 Recommended on Your Device</span>
-          </div>
-
-          <!-- Mobile highlight (shown only on iOS/mobile) -->
-          <div class="mobile-highlight" id="mobileHighlight">
-            <span class="mobile-highlight-icon">📱</span>
-            You're on a mobile device — you can connect Apple Health directly for real-time wellness data.
-          </div>
-
-          <p class="step-body">
-            Apple Health enriches your Salus AI profile with real-time wellness data — daily activity, 
-            heart rate, sleep, nutrition, and more. Combined with your medical records, this gives 
-            Salus AI the most complete view of your health available.
-          </p>
-          <div class="step-actions" id="appleActions">
-            <a href="#apple" class="step-action step-action-outline" id="appleScrollBtn">
-               Connect Apple Health ↓
-            </a>
-          </div>
-          <div class="step-note">
-            <span class="step-note-icon">ℹ️</span>
-            Apple Health connection requires the Salus AI iOS app. The iOS app is coming soon — join the waitlist below to be notified at launch.
-          </div>
-        </div>
+        <div class="hub-card-step">Step 3</div>
+        <div class="hub-card-title">Add My Health Profile</div>
+        <div class="hub-card-desc">Enter your age, sex, risk factors, conditions, medications, screening history, and family history. Drives personalized preventive care recommendations.</div>
+        <a href="health-profile.html" class="hub-card-btn hub-btn-teal">
+          <span>Add My Health Profile</span>
+          <span class="hub-btn-arrow">→</span>
+        </a>
+        <div class="hub-card-note">Used in Health Decisions · Determine Diagnosis · Manage My Health</div>
       </div>
 
     </div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════ HEALTHEX DEEP DIVE -->
-<section class="healthex-section" id="healthex">
-  <div class="healthex-inner">
-    <p class="section-label">Your Medical Records</p>
-    <h2 class="section-title">Linking Records via <em>HealthEx</em></h2>
-    <p class="section-sub">HealthEx is the trusted medical data platform that powers Salus AI's Precision Medicine tier — giving you control of your own health data.</p>
-
-    <div class="healthex-card">
-      <div class="healthex-card-header">
-        <div class="healthex-logo-wrap">🏥</div>
-        <div class="healthex-header-text">
-          <h3>HealthEx Medical Records</h3>
-          <p>Connect once. Your records stay current automatically.</p>
-        </div>
-      </div>
-      <div class="healthex-card-body">
-        <p class="healthex-what">
-          HealthEx pulls your records directly from your healthcare providers using secure, 
-          standards-based connections (FHIR / HL7). Once linked, Salus AI can see your 
-          diagnoses, medications, lab results, visit notes, imaging reports, and more — 
-          giving you personalized guidance that reflects your real clinical picture.
-        </p>
-
-        <div class="healthex-records-grid">
-          <div class="record-chip">
-            <span class="record-chip-icon">🧬</span>
-            <span class="record-chip-label">Lab Results</span>
-          </div>
-          <div class="record-chip">
-            <span class="record-chip-icon">💊</span>
-            <span class="record-chip-label">Medications</span>
-          </div>
-          <div class="record-chip">
-            <span class="record-chip-icon">📋</span>
-            <span class="record-chip-label">Visit Notes</span>
-          </div>
-          <div class="record-chip">
-            <span class="record-chip-icon">🩺</span>
-            <span class="record-chip-label">Diagnoses</span>
-          </div>
-          <div class="record-chip">
-            <span class="record-chip-icon">📸</span>
-            <span class="record-chip-label">Imaging Reports</span>
-          </div>
-          <div class="record-chip">
-            <span class="record-chip-icon">🏥</span>
-            <span class="record-chip-label">Hospital Records</span>
-          </div>
-          <div class="record-chip">
-            <span class="record-chip-icon">💉</span>
-            <span class="record-chip-label">Immunizations</span>
-          </div>
-          <div class="record-chip">
-            <span class="record-chip-icon">🧪</span>
-            <span class="record-chip-label">Procedures</span>
-          </div>
-          <div class="record-chip">
-            <span class="record-chip-icon">📝</span>
-            <span class="record-chip-label">Allergies</span>
-          </div>
-        </div>
-
-        <div class="healthex-connect-wrap">
-          <a href="https://www.healthex.io/#get-early-access" target="_blank" rel="noopener" class="healthex-btn healthex-btn-primary">
-            🔗 &nbsp; Connect My Medical Records via HealthEx
-          </a>
-          <a href="https://www.healthex.io/" target="_blank" rel="noopener" class="healthex-btn healthex-btn-secondary">
-            Learn more about HealthEx →
-          </a>
-          <div class="healthex-privacy-row">
-            <span class="privacy-icon">🔒</span>
-            HIPAA-compliant &nbsp;·&nbsp; End-to-end encrypted &nbsp;·&nbsp; You control your data
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════════ ABOUT YOU -->
-<section class="about-section" id="about-you">
-  <div class="about-inner">
-    <p class="section-label">Your Life Context</p>
-    <h2 class="section-title">Help Us <em>Know You</em></h2>
-    <p class="section-sub">The more Salus AI understands about your life, the more relevant its guidance becomes. Your answers are private, stored only on your device, and never shared.</p>
-
-    <div class="about-grid">
-
-      <div class="about-card">
-        <span class="about-saved" id="saved-activities">✓ Saved</span>
-        <span class="about-card-icon">🏃</span>
-        <div class="about-card-label">What are your favorite activities?</div>
-        <div class="about-card-hint">e.g. hiking, swimming, gardening, golf, yoga, cooking — anything you love or do regularly</div>
-        <textarea class="about-textarea" id="ctx-activities" placeholder="Tell us what you enjoy doing…" rows="3"></textarea>
-      </div>
-
-      <div class="about-card">
-        <span class="about-saved" id="saved-important">✓ Saved</span>
-        <span class="about-card-icon">💬</span>
-        <div class="about-card-label">What's important for us to know about you?</div>
-        <div class="about-card-hint">e.g. values, concerns, things that affect how you approach your health, anything that matters to you personally</div>
-        <textarea class="about-textarea" id="ctx-important" placeholder="Share what you'd want your doctor to know…" rows="3"></textarea>
-      </div>
-
-      <div class="about-card">
-        <span class="about-saved" id="saved-caregiver">✓ Saved</span>
-        <span class="about-card-icon">🤝</span>
-        <div class="about-card-label">Are you a caregiver to others?</div>
-        <div class="about-card-hint">e.g. caring for a parent, child with special needs, or a spouse — and how much time and energy that takes</div>
-        <textarea class="about-textarea" id="ctx-caregiver" placeholder="Describe your caregiving responsibilities, if any…" rows="3"></textarea>
-      </div>
-
-      <div class="about-card">
-        <span class="about-saved" id="saved-living">✓ Saved</span>
-        <span class="about-card-icon">🏡</span>
-        <div class="about-card-label">Anything important about your living situation?</div>
-        <div class="about-card-hint">e.g. live alone, rural area with limited specialist access, stairs in home, proximity to family support</div>
-        <textarea class="about-textarea" id="ctx-living" placeholder="Describe your home and living situation…" rows="3"></textarea>
-      </div>
-
-    </div>
-
-    <div class="about-footer">
-      <strong>Why we ask:</strong> Your activities, responsibilities, and living situation shape what health guidance is actually practical for you. Salus AI uses this context across all pages to give you more relevant, personalized answers.
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════════ APPLE HEALTH -->
-<section class="apple-section" id="apple">
-  <div class="apple-inner">
-    <p class="section-label">Wellness Data</p>
-    <h2 class="section-title" style="color:var(--white);">Connect <em style="color:var(--gold);">Apple Health</em></h2>
-    <p class="section-sub">Pair your medical records with real-time wellness data from your iPhone and Apple Watch for the most complete health picture possible.</p>
-
-    <div class="apple-card">
-      <div class="apple-card-top">
-        <div class="apple-visual">
-          <span class="apple-logo-big">🍎</span>
-          <div class="apple-tagline">Health &amp; Activity Data</div>
-        </div>
-        <div class="apple-copy">
-          <h3>Real-Time Wellness,<br>Meets Your Medical History</h3>
-          <p>
-            Apple Health captures the daily data your chart doesn't — steps, heart rate, sleep quality, 
-            exercise minutes, nutrition, blood oxygen, and more. When Salus AI combines this with your 
-            medical records, the result is a truly holistic view of your health.
-          </p>
-          <div class="apple-data-list">
-            <div class="apple-data-item">Activity &amp; step count</div>
-            <div class="apple-data-item">Heart rate &amp; HRV</div>
-            <div class="apple-data-item">Sleep stages &amp; duration</div>
-            <div class="apple-data-item">Nutrition &amp; hydration</div>
-            <div class="apple-data-item">Blood oxygen (SpO₂)</div>
-            <div class="apple-data-item">Mindfulness &amp; respiratory rate</div>
-          </div>
-          <div class="tooltip-wrap">
-            <a href="#" class="apple-connect-btn" onclick="handleAppleConnect(event)">
-              <span class="apple-icon"></span>
-              Connect Apple Health
-            </a>
-            <span class="tooltip" id="appleTooltip">Available in the Salus AI iOS app — coming soon!</span>
-          </div>
-        </div>
-      </div>
-      <div class="apple-card-bottom">
-        <span class="coming-soon-ribbon">iOS App — Coming Soon</span>
-        <p class="apple-notice">
-          Apple Health integration requires the native Salus AI iOS app. 
-          <a href="#waitlist" style="color: var(--gold); text-decoration: underline;">Join the waitlist</a> 
-          to be among the first to connect when we launch.
-        </p>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- ══════════════════════════════════════════ PRIVACY / TRUST -->
 <section class="privacy-section" id="privacy">
@@ -1801,7 +1592,7 @@ function salusInitUserBar() {
     '<div class="subs-right">' +
       (rc
         ? '<div class="subs-records subs-records-on"><div class="subs-rdot subs-rdot-on"></div><span>Records Linked</span></div>'
-        : '<a href="health-decisions4.html" class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Link Medical Records</span></a>'
+        : '<a href="health-decisions.html" class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Link Medical Records</span></a>'
       ) +
       '<button class="subs-signout" onclick="SalusAuth.logout()">Sign out</button>' +
     '</div>';
@@ -1873,7 +1664,34 @@ ctxFields.forEach(({id,savedId})=>{
   el.addEventListener('blur',()=>{saveLifeContext();flashSaved(savedId);});
 });
 
-window.addEventListener('DOMContentLoaded',loadLifeContext);
+function updateHubBadges(){
+  /* Records badge */
+  const rc=SalusAuth.isRecordsConnected();
+  const rb=document.getElementById('recordsBadge');
+  if(rb){rb.textContent=rc?'✓ Connected':'Not connected';rb.className='hub-card-badge '+(rc?'ready':'');}
+
+  /* Personal details badge */
+  try{
+    const ctx=JSON.parse(localStorage.getItem('salus_life_context')||'null');
+    const pb=document.getElementById('personalBadge');
+    if(pb){
+      const filled=ctx&&(ctx.activities||ctx.important||ctx.caregiver||ctx.living);
+      pb.textContent=filled?'✓ Saved':'Not added';pb.className='hub-card-badge '+(filled?'ready':'');
+    }
+  }catch(_){}
+
+  /* Health profile badge */
+  try{
+    const hp=JSON.parse(localStorage.getItem('salus_health_profile')||'null');
+    const hb=document.getElementById('healthBadge');
+    if(hb){
+      const filled=hp&&(hp.age||hp.sex);
+      hb.textContent=filled?(hp.age+' · '+hp.sex):'Not added';hb.className='hub-card-badge '+(filled?'ready':'');
+    }
+  }catch(_){}
+}
+
+window.addEventListener('DOMContentLoaded',()=>{loadLifeContext();updateHubBadges();salusInitUserBar();});
 
 /* ── Progress bar ── */
 window.addEventListener('scroll', () => {
