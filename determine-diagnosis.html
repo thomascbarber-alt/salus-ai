@@ -73,7 +73,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .input-card-icon{font-size:26px;margin-top:2px;}
 .input-card-label{font-family:'Playfair Display',serif;font-size:18px;color:var(--white);}
 .input-card-sub{font-size:12px;color:var(--text-dim);margin-top:3px;line-height:1.5;}
-.context-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 28px 0;}
 .ctx-group label{display:block;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:6px;}
 .ctx-select{width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(155,89,182,0.15);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none;appearance:none;cursor:pointer;}
 .ctx-select:focus{border-color:rgba(155,89,182,0.5);}
@@ -309,24 +308,7 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
         <div class="input-card-sub">Include: what you feel, where it is, when it started, how it has changed, and anything that makes it better or worse. The more detail, the better the analysis.</div>
       </div>
     </div>
-    <div class="context-row">
-      <div class="ctx-group">
-        <label>Age</label>
-        <select id="patientAge" class="ctx-select">
-          <option value="">Select age range</option>
-          <option>Under 18</option><option>18–29</option><option>30–39</option>
-          <option>40–49</option><option>50–59</option><option>60–69</option>
-          <option>70–79</option><option>80+</option>
-        </select>
-      </div>
-      <div class="ctx-group">
-        <label>Biological Sex</label>
-        <select id="patientSex" class="ctx-select">
-          <option value="">Select</option>
-          <option>Male</option><option>Female</option><option>Prefer not to say</option>
-        </select>
-      </div>
-    </div>
+
     <div class="symptom-area">
       <textarea id="symptomInput" class="symptom-input" placeholder="Example: I've had a dull aching pain in my lower right abdomen for 3 days. It started mildly and has gotten worse. I also have a low fever (99.8°F) and feel nauseous. The pain is worse when I move around. No vomiting. No changes in bowel habits..."></textarea>
     </div>
@@ -436,35 +418,6 @@ const SalusState = {
 
 window.addEventListener('DOMContentLoaded',()=>{
   salusInitUserBar();
-  /* Pre-fill age/sex from saved health profile */
-  try{
-    const hp=JSON.parse(localStorage.getItem('salus_health_profile')||'null');
-    if(hp){
-      const ageEl=document.getElementById('patientAge');
-      const sexEl=document.getElementById('patientSex');
-      if(ageEl&&hp.age){
-        /* Map exact age to the closest age-range option */
-        const age=parseInt(hp.age,10);
-        let range='';
-        if(age<18)range='Under 18';
-        else if(age<=29)range='18–29';
-        else if(age<=39)range='30–39';
-        else if(age<=49)range='40–49';
-        else if(age<=59)range='50–59';
-        else if(age<=69)range='60–69';
-        else if(age<=79)range='70–79';
-        else range='80+';
-        ageEl.value=range;
-      }
-      if(sexEl&&hp.sex){
-        /* Match stored value to the dropdown option */
-        const stored=hp.sex.toLowerCase();
-        if(stored==='male')sexEl.value='Male';
-        else if(stored==='female')sexEl.value='Female';
-        else sexEl.value='Prefer not to say';
-      }
-    }
-  }catch(_){}
 });
 window.addEventListener('scroll',()=>{const d=document.documentElement;const p=d.scrollHeight-d.clientHeight;document.getElementById('ppFill').style.width=p>0?(d.scrollTop/p*100)+'%':'0%';});
 
@@ -513,9 +466,9 @@ async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebS
     messages: [{ role: 'user', content: userContent }]
   };
   if (useWebSearch) body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
-  const res = await fetch('/api/claude', {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'x-api-key': (()=>{try{return localStorage.getItem('salus_api_key')||'';}catch(_){return '';}})(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
     body: JSON.stringify(body)
   });
   if ((res.status === 529 || res.status === 503) && _retry < 3) {
@@ -607,7 +560,8 @@ Ensure clinical_summary and recent_research are well-written, complete paragraph
 async function runAnalysis(){
   const symptoms=document.getElementById('symptomInput').value.trim();
   if(!symptoms){document.getElementById('symptomInput').focus();return;}
-  lastSymptoms=symptoms;lastAge=document.getElementById('patientAge').value;lastSex=document.getElementById('patientSex').value;
+  lastSymptoms=symptoms;
+  try{const hp=JSON.parse(localStorage.getItem('salus_health_profile')||'null');lastAge=hp?.age||'';lastSex=hp?.sex||'';}catch(_){}
   clarifyingHistory=[];clarifyRound=0;finalClarifications={};
   document.getElementById('submitBtn').disabled=true;document.getElementById('symptomInput').disabled=true;
   document.getElementById('clarifyPanel').classList.remove('visible');
@@ -656,9 +610,6 @@ async function runMainPipeline(){
     let p2;try{p2=safeParseJSON(extractText(r2));}catch(e){throw new Error('Differential Analyst JSON parse failed: '+e.message);}
     setAgentState(2,'done','Complete');
 
-    /* Show interim results immediately */
-    renderResults(p2,{reviewer_note:'Review in progress…'});
-
     /* Agents 3+4: parallel with Haiku */
     setAgentState(3,'running','Verifying…');
     setAgentState(4,'running','Checking scope…');
@@ -672,15 +623,15 @@ async function runMainPipeline(){
     setAgentState(3,'done','Score '+(p3.accuracy_score||8)+'/10');
     setAgentState(4,'done',p4.scope_appropriate?'Approved ✓':'Issues flagged');
 
-    /* Agent 5: only if issues found */
+    /* Agent 5: Clarity — always runs after full review */
     let final=p2;
-    const hasIssues=(p3.corrections_needed||[]).length>0||(p4.issues_found||[]).length>0;
-    if(hasIssues){
-      setAgentState(5,'running','Applying corrections…');
-      const r5=await callClaude({systemPrompt:AGENT_CLARITY_SYSTEM,userContent:`Analysis:\n${JSON.stringify(p2)}\nAccuracy:\n${JSON.stringify(p3)}\nLegal:\n${JSON.stringify(p4)}`,maxTokens:4000});
-      try{final=safeParseJSON(extractText(r5));}catch(_){final=p2;}
-      setAgentState(5,'done','Corrections applied');
-    }else{setAgentState(5,'done','No changes needed');}
+    setAgentState(5,'running','Polishing for clarity…');
+    const r5=await callClaude({systemPrompt:AGENT_CLARITY_SYSTEM,userContent:`Analysis:\n${JSON.stringify(p2)}\nAccuracy:\n${JSON.stringify(p3)}\nLegal:\n${JSON.stringify(p4)}`,maxTokens:6000});
+    try{
+      const corrected=safeParseJSON(extractText(r5));
+      if(corrected?.differential_diagnoses?.length>0){final=corrected;}
+      setAgentState(5,'done','Complete');
+    }catch(_){setAgentState(5,'done','Complete');}
 
     setTimeout(()=>{hidePipeline();renderResults(final,p3);document.getElementById('submitBtn').disabled=false;document.getElementById('symptomInput').disabled=false;},400);
   }catch(err){handleError(err.message||String(err));}

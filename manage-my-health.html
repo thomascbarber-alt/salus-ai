@@ -302,67 +302,15 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
     <button class="records-revoke" onclick="revokeRecords()">Unlink</button>
   </div>
 
-  <!-- HEALTH PROFILE FORM -->
-  <div class="profile-card" id="profileCard">
-    <div class="profile-card-title">Your health profile</div>
-    <div class="profile-card-sub">Fill in what you know — the more detail, the more precise your preventive plan. All fields are optional but age and sex are most important.</div>
-
-    <div class="profile-grid">
-      <div class="form-group">
-        <label>Age</label>
-        <input id="profileAge" class="form-input" type="number" min="1" max="120" placeholder="e.g. 58">
+  <!-- GENERATE PLAN CARD -->
+  <div class="profile-card" id="generateCard">
+    <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:220px;">
+        <div class="profile-card-title">Your preventive care plan</div>
+        <div class="profile-card-sub" id="profileSummaryText">Your health profile from Precision Medicine will be used to generate a personalized, evidence-based preventive care plan.</div>
       </div>
-      <div class="form-group">
-        <label>Biological Sex</label>
-        <select id="profileSex" class="form-select">
-          <option value="">Select</option>
-          <option>Female</option><option>Male</option>
-        </select>
-      </div>
+      <button class="generate-btn" id="generateBtn" onclick="generatePlan()" style="width:auto;min-width:220px;margin-top:0;">Generate My Care Plan →</button>
     </div>
-    <div class="profile-grid-3">
-      <div class="form-group">
-        <label>Smoker?</label>
-        <select id="profileSmoking" class="form-select">
-          <option value="">Select</option>
-          <option>Never</option><option>Former smoker</option><option>Current smoker</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Diabetes?</label>
-        <select id="profileDiabetes" class="form-select">
-          <option value="">Unknown</option>
-          <option>No</option><option>Pre-diabetes</option>
-          <option>Type 1</option><option>Type 2</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Heart Disease?</label>
-        <select id="profileHeartDisease" class="form-select">
-          <option value="">Unknown</option>
-          <option>No</option><option>Yes — diagnosed</option><option>Family history only</option>
-        </select>
-      </div>
-    </div>
-    <div class="profile-grid">
-      <div class="form-group">
-        <label>Other diagnosed conditions</label>
-        <input id="profileConditions" class="form-input" type="text" placeholder="e.g. hypertension, hypothyroidism, osteoporosis">
-      </div>
-      <div class="form-group">
-        <label>Current medications</label>
-        <input id="profileMeds" class="form-input" type="text" placeholder="e.g. lisinopril, levothyroxine, aspirin">
-      </div>
-    </div>
-    <div class="form-group" style="margin-bottom:20px;">
-      <label>Recent screenings (what and when)</label>
-      <textarea id="profileScreenings" class="form-textarea" placeholder="e.g. Colonoscopy 2022, Mammogram Jan 2024, Blood pressure checked 6 months ago, no recent cholesterol test..."></textarea>
-    </div>
-    <div class="form-group" style="margin-bottom:20px;">
-      <label>Family history</label>
-      <input id="profileFamily" class="form-input" type="text" placeholder="e.g. mother — breast cancer, father — colon cancer age 62, heart disease">
-    </div>
-    <button class="generate-btn" id="generateBtn" onclick="generatePlan()">Generate My Preventive Care Plan →</button>
   </div>
 
   <!-- PIPELINE -->
@@ -375,9 +323,11 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
         <div class="agent-card" id="agentCard2"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag2">📋</div><div class="agent-num">Agent 02</div><div class="agent-name">Care Planner</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus2">Waiting</span></div></div>
         <div class="agent-card" id="agentCard3"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag3">🔬</div><div class="agent-num">Agent 03</div><div class="agent-name">Accuracy Review</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus3">Waiting</span></div></div>
         <div class="agent-card" id="agentCard4"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag4">⚖️</div><div class="agent-num">Agent 04</div><div class="agent-name">Legal Review</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus4">Waiting</span></div></div>
-        <div class="agent-card" id="agentCard5"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag5">✦</div><div class="agent-num">Agent 05</div><div class="agent-name">Clarity</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus5">Waiting</span>
-      </div>
-    </div>
+        <div class="agent-card" id="agentCard5"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag5">✦</div><div class="agent-num">Agent 05</div><div class="agent-name">Clarity</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus5">Waiting</span></div></div>
+      </div><!-- /.agents-row -->
+    </div><!-- /.pipeline-track -->
+  </div><!-- /.pipeline-panel -->
+
 <!-- RESULTS -->
   <div class="results-section" id="resultsSection">
     <div class="results-header">
@@ -393,7 +343,7 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
     </div>
     <div class="filter-tabs" id="filterTabs"></div>
     <div class="care-list" id="careList"></div>
-    <button class="reset-btn" onclick="resetToForm()">← Update health profile</button>
+    <button class="reset-btn" onclick="resetToForm()">← Regenerate plan</button>
   </div>
 </div>
 
@@ -451,21 +401,19 @@ const SalusState = {
 };
 
 window.addEventListener('DOMContentLoaded',()=>{
-  salusInitUserBar();if(SalusState.isRecordsConnected()){recordsConnected=true;document.getElementById('recordsBanner').style.display='none';document.getElementById('recordsConnectedBar').classList.add('visible');}
+  salusInitUserBar();
+  if(SalusState.isRecordsConnected()){recordsConnected=true;document.getElementById('recordsBanner').style.display='none';document.getElementById('recordsConnectedBar').classList.add('visible');}
   checkDueNotifications();
-  /* Pre-fill form from saved health profile */
+  /* Show profile summary from Precision Medicine */
   try{
     const hp=JSON.parse(localStorage.getItem('salus_health_profile')||'null');
-    if(hp){
-      if(hp.age)         document.getElementById('profileAge').value=hp.age;
-      if(hp.sex)         document.getElementById('profileSex').value=hp.sex;
-      if(hp.smoking)     document.getElementById('profileSmoking').value=hp.smoking;
-      if(hp.diabetes)    document.getElementById('profileDiabetes').value=hp.diabetes;
-      if(hp.heartDisease)document.getElementById('profileHeartDisease').value=hp.heartDisease;
-      if(hp.conditions)  document.getElementById('profileConditions').value=hp.conditions;
-      if(hp.medications) document.getElementById('profileMeds').value=hp.medications;
-      if(hp.screenings)  document.getElementById('profileScreenings').value=hp.screenings;
-      if(hp.familyHistory)document.getElementById('profileFamily').value=hp.familyHistory;
+    if(hp&&(hp.age||hp.sex)){
+      const parts=[];
+      if(hp.age)parts.push(hp.age+' years old');
+      if(hp.sex)parts.push(hp.sex.toLowerCase());
+      if(hp.conditions)parts.push(hp.conditions);
+      if(hp.medications)parts.push('on '+hp.medications);
+      document.getElementById('profileSummaryText').textContent='Profile: '+parts.join(' · ')+' — click to generate your personalized preventive care plan.';
     }
   }catch(_){}
 });
@@ -494,9 +442,9 @@ async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebS
   if (useWebSearch) {
     body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
   }
-  const res = await fetch('/api/claude', {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'x-api-key': (()=>{try{return localStorage.getItem('salus_api_key')||'';}catch(_){return '';}})(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
     body: JSON.stringify(body)
   });
   if ((res.status === 529 || res.status === 503) && _retry < 3) {
@@ -616,19 +564,26 @@ const AGENT_CLARITY_SYSTEM=`Apply all corrections from reviewers. Then make the 
 - Return the EXACT same JSON schema. ONLY valid JSON.`;
 
 async function generatePlan(){
-  const age=document.getElementById('profileAge').value.trim();
-  const sex=document.getElementById('profileSex').value;
-  if(!age||!sex){alert('Please enter your age and biological sex at minimum.');return;}
+  // Read health profile saved on Precision Medicine page
+  let hp={};
+  try{hp=JSON.parse(localStorage.getItem('salus_health_profile')||'null')||{};}catch(_){}
+  if(!hp.age&&!hp.sex){
+    if(confirm('No health profile found. Go to Precision Medicine to set up your profile first?')){
+      window.location.href='precision-medicine3.html';
+    }
+    return;
+  }
 
   lastProfile={
-    age,sex,
-    smoking:document.getElementById('profileSmoking').value,
-    diabetes:document.getElementById('profileDiabetes').value,
-    heartDisease:document.getElementById('profileHeartDisease').value,
-    conditions:document.getElementById('profileConditions').value.trim(),
-    medications:document.getElementById('profileMeds').value.trim(),
-    screenings:document.getElementById('profileScreenings').value.trim(),
-    familyHistory:document.getElementById('profileFamily').value.trim(),
+    age: hp.age||'not provided',
+    sex: hp.sex||'not provided',
+    smoking: hp.smoking||'',
+    diabetes: hp.diabetes||'',
+    heartDisease: hp.heartDisease||'',
+    conditions: hp.conditions||'',
+    medications: hp.medications||'',
+    screenings: hp.screenings||'',
+    familyHistory: hp.familyHistory||'',
     recordsConnected
   };
 
@@ -654,9 +609,6 @@ async function generatePlan(){
     let p2;try{p2=safeParseJSON(extractText(r2));}catch(e){throw new Error('Care Planner JSON parse failed: '+e.message);}
     setAgentState(2,'done','Complete');
 
-    /* Show interim results immediately so user sees their plan */
-    renderResults(p2,{reviewer_note:'Review in progress…'},lastProfile);
-
     /* Agents 3+4: parallel with Haiku */
     setAgentState(3,'running','Verifying…');
     setAgentState(4,'running','Checking scope…');
@@ -670,18 +622,15 @@ async function generatePlan(){
     setAgentState(3,'done','Score '+(p3.accuracy_score||8)+'/10');
     setAgentState(4,'done',p4.scope_appropriate?'Approved ✓':'Issues flagged');
 
-    /* Agent 5: only if issues found */
+    /* Agent 5: Clarity — always runs after full review */
     let final=p2;
-    const hasIssues=(p3.corrections_needed||[]).length>0||(p4.issues_found||[]).length>0;
-    if(hasIssues){
-      setAgentState(5,'running','Applying corrections…');
-      const r5=await callClaude({systemPrompt:AGENT_CLARITY_SYSTEM,userContent:`Plan:\n${JSON.stringify(p2)}\nAccuracy:\n${JSON.stringify(p3)}\nLegal:\n${JSON.stringify(p4)}`,maxTokens:8000});
-      try{
-        const corrected=safeParseJSON(extractText(r5));
-        if(corrected.care_items&&corrected.care_items.length>0){final=corrected;}
-        setAgentState(5,'done','Corrections applied');
-      }catch(_){final=p2;}
-    }else{setAgentState(5,'done','No changes needed');}
+    setAgentState(5,'running','Polishing for clarity…');
+    const r5=await callClaude({systemPrompt:AGENT_CLARITY_SYSTEM,userContent:`Plan:\n${JSON.stringify(p2)}\nAccuracy:\n${JSON.stringify(p3)}\nLegal:\n${JSON.stringify(p4)}`,maxTokens:16000});
+    try{
+      const corrected=safeParseJSON(extractText(r5));
+      if(corrected?.care_items?.length>0){final=corrected;}
+      setAgentState(5,'done','Complete');
+    }catch(_){setAgentState(5,'done','Complete');}
 
     setTimeout(()=>{hidePipeline();if(final.care_items&&final.care_items.length>0){renderResults(final,p3,lastProfile);}document.getElementById('generateBtn').disabled=false;},400);
   }catch(err){handleError(err.message||String(err));}
@@ -882,13 +831,13 @@ function resetToForm(){
   document.getElementById('resultsSection').classList.remove('visible');
   document.getElementById('generateBtn').disabled=false;
   hidePipeline();
-  document.getElementById('profileCard').scrollIntoView({behavior:'smooth',block:'center'});
+  document.getElementById('generateCard').scrollIntoView({behavior:'smooth',block:'center'});
 }
 
 function handleError(msg){
   console.error(msg);
   [1,2,3,4,5].forEach(n=>{const c=document.getElementById('agentCard'+n);if(c&&c.classList.contains('running'))setAgentState(n,'error','Error');});
-  setTimeout(()=>{hidePipeline();document.getElementById('generateBtn').disabled=false;const d=document.createElement('div');d.id='pipelineErrorMsg';d.style.cssText='margin-top:16px;padding:16px 20px;background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.3);border-radius:12px;font-size:13px;color:#e07070;font-family:DM Sans,sans-serif;line-height:1.5;';d.innerHTML='<strong style="color:#e88;">⚠ Error:</strong> '+msg+'<br><span style="opacity:.6;font-size:12px;">Check your API key and try again.</span>';document.getElementById('profileCard').after(d);},800);
+  setTimeout(()=>{hidePipeline();document.getElementById('generateBtn').disabled=false;const d=document.createElement('div');d.id='pipelineErrorMsg';d.style.cssText='margin-top:16px;padding:16px 20px;background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.3);border-radius:12px;font-size:13px;color:#e07070;font-family:DM Sans,sans-serif;line-height:1.5;';d.innerHTML='<strong style="color:#e88;">⚠ Error:</strong> '+msg+'<br><span style="opacity:.6;font-size:12px;">Check your API key and try again.</span>';const anchor=document.getElementById('generateCard')||document.getElementById('pipelinePanel');if(anchor)anchor.after(d);},800);
 }
 
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
