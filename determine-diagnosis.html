@@ -300,14 +300,6 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
     </div>
   </div>
 
-  <!-- API KEY BAR -->
-  <div id="apiKeyBar" style="margin-bottom:20px;padding:14px 20px;background:rgba(155,89,182,0.07);border:1px solid rgba(155,89,182,0.25);border-radius:12px;display:none;align-items:center;gap:12px;flex-wrap:wrap;animation:fadeUp .5s ease both;">
-    <span style="font-size:12px;color:rgba(255,255,255,0.5);white-space:nowrap;flex-shrink:0;">🔑 Anthropic API Key required</span>
-    <input id="apiKeyInput" type="password" placeholder="sk-ant-..." style="flex:1;min-width:200px;padding:9px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(155,89,182,0.25);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--white);outline:none;transition:border-color .2s;" onfocus="this.style.borderColor='rgba(155,89,182,0.6)'" onblur="this.style.borderColor='rgba(155,89,182,0.25)'" onkeydown="if(event.key==='Enter')saveApiKey()">
-    <button onclick="saveApiKey()" style="padding:9px 20px;border-radius:8px;background:var(--plum);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;border:none;cursor:pointer;white-space:nowrap;flex-shrink:0;">Save Key</button>
-    <span style="font-size:11px;color:rgba(255,255,255,0.25);width:100%;margin-top:2px;">Your key is stored locally in this browser only and never sent to our servers.</span>
-  </div>
-
   <div class="input-card" id="inputCard">
     <div class="input-card-header">
       <div class="input-card-icon">🩺</div>
@@ -426,22 +418,7 @@ const SalusState = {
 
 window.addEventListener('DOMContentLoaded',()=>{
   salusInitUserBar();
-  checkApiKey();
 });
-
-function checkApiKey(){
-  const k=localStorage.getItem('salus_api_key')||'';
-  const bar=document.getElementById('apiKeyBar');
-  if(!k&&bar){bar.style.display='flex';}
-  else if(bar){bar.style.display='none';}
-}
-function saveApiKey(){
-  const input=document.getElementById('apiKeyInput');
-  const k=(input.value||'').trim();
-  if(!k){input.style.borderColor='rgba(192,57,43,0.6)';return;}
-  localStorage.setItem('salus_api_key',k);
-  document.getElementById('apiKeyBar').style.display='none';
-}
 window.addEventListener('scroll',()=>{const d=document.documentElement;const p=d.scrollHeight-d.clientHeight;document.getElementById('ppFill').style.width=p>0?(d.scrollTop/p*100)+'%':'0%';});
 
 function showPipeline(){document.getElementById('pipelinePanel').classList.add('visible');}
@@ -489,9 +466,9 @@ async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebS
     messages: [{ role: 'user', content: userContent }]
   };
   if (useWebSearch) body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch('/api/claude', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': (()=>{try{return localStorage.getItem('salus_api_key')||'';}catch(_){return '';}})(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
   if ((res.status === 529 || res.status === 503) && _retry < 3) {
