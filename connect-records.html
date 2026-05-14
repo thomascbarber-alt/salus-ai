@@ -242,8 +242,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
           Docs: https://docs.healthex.io/mcp-server/oauth-flow
         </div>
         <div class="step-actions">
-          <a href="https://salusai.health/auth/healthex" class="step-action step-action-gold">Authorize Salus AI →</a>
+          <button class="step-action step-action-gold" id="authorizeBtn" onclick="startHealthExAuth()">Authorize Salus AI →</button>
         </div>
+        <div id="authStatus" style="display:none;margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;line-height:1.5;"></div>
         <div class="step-note">
           <span class="step-note-icon">🛡️</span>
           Salus AI reads your records to provide personalized guidance. We never sell, share, or use your health data for any purpose other than powering your health coach. Full details in our <a href="#">Privacy Policy</a>.
@@ -357,12 +358,145 @@ function toggleRecordsStatus(){
   salusInitUserBar();
 }
 
-/* Handle return from HealthEx OAuth */
-(function(){
+/* ── HealthEx OAuth 2.0 + PKCE (fully client-side) ── */
+
+const HEALTHEX_BASE      = 'https://api.healthex.io';
+const HEALTHEX_REDIRECT  = window.location.origin + '/connect-records.html';
+const HEALTHEX_SCOPE     = 'patient/*.read offline_access';
+
+/* PKCE helpers */
+function base64url(buffer){
+  return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+async function pkceChallenge(){
+  const verifier=base64url(crypto.getRandomValues(new Uint8Array(32)));
+  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier));
+  return {verifier, challenge:base64url(digest)};
+}
+
+function setAuthStatus(msg,ok){
+  const el=document.getElementById('authStatus');
+  el.style.display='block';
+  el.style.background=ok?'rgba(26,191,173,0.1)':'rgba(192,57,43,0.1)';
+  el.style.border='1px solid '+(ok?'rgba(26,191,173,0.3)':'rgba(192,57,43,0.3)');
+  el.style.color=ok?'#1abfad':'#e07070';
+  el.innerHTML=msg;
+}
+
+async function startHealthExAuth(){
+  const btn=document.getElementById('authorizeBtn');
+  btn.disabled=true;
+  btn.textContent='Connecting…';
+
+  try{
+    /* Step 1: get or register OAuth client_id */
+    let clientId=localStorage.getItem('healthex_client_id');
+    if(!clientId){
+      const reg=await fetch(HEALTHEX_BASE+'/oauth/register',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          client_name:'Salus AI',
+          redirect_uris:[HEALTHEX_REDIRECT],
+          scope:HEALTHEX_SCOPE,
+          grant_types:['authorization_code'],
+          response_types:['code'],
+          token_endpoint_auth_method:'none'
+        })
+      });
+      if(!reg.ok){
+        const err=await reg.text();
+        throw new Error('Client registration failed ('+reg.status+'): '+err);
+      }
+      const regData=await reg.json();
+      clientId=regData.client_id;
+      localStorage.setItem('healthex_client_id',clientId);
+    }
+
+    /* Step 2: generate PKCE pair and store verifier */
+    const {verifier,challenge}=await pkceChallenge();
+    sessionStorage.setItem('healthex_pkce_verifier',verifier);
+    sessionStorage.setItem('healthex_client_id',clientId);
+
+    /* Step 3: redirect to HealthEx authorization endpoint */
+    const url=new URL(HEALTHEX_BASE+'/oauth/authorize');
+    url.searchParams.set('client_id',clientId);
+    url.searchParams.set('redirect_uri',HEALTHEX_REDIRECT);
+    url.searchParams.set('response_type','code');
+    url.searchParams.set('scope',HEALTHEX_SCOPE);
+    url.searchParams.set('code_challenge',challenge);
+    url.searchParams.set('code_challenge_method','S256');
+    url.searchParams.set('state','salus-'+Date.now());
+
+    window.location.href=url.toString();
+
+  }catch(err){
+    btn.disabled=false;
+    btn.textContent='Authorize Salus AI →';
+    setAuthStatus('⚠ '+err.message+'<br><span style="opacity:.7;font-size:12px;">Check your network connection and try again.</span>',false);
+  }
+}
+
+/* Handle return from HealthEx OAuth callback */
+(async function handleCallback(){
   const params=new URLSearchParams(window.location.search);
-  if(params.get('records')==='connected'){
-    SalusAuth.setRecordsConnected(true);
+  const code=params.get('code');
+  const error=params.get('error');
+
+  if(error){
     window.history.replaceState({},'',window.location.pathname);
+    setAuthStatus('⚠ HealthEx authorization declined: '+error,false);
+    return;
+  }
+
+  if(!code) return; /* normal page load, not a callback */
+
+  /* Exchange authorization code for tokens */
+  const verifier=sessionStorage.getItem('healthex_pkce_verifier');
+  const clientId=sessionStorage.getItem('healthex_client_id')||localStorage.getItem('healthex_client_id');
+  window.history.replaceState({},'',window.location.pathname);
+
+  if(!verifier||!clientId){
+    setAuthStatus('⚠ Session expired — please try authorizing again.',false);
+    return;
+  }
+
+  setAuthStatus('Exchanging authorization code…',true);
+
+  try{
+    const tokenRes=await fetch(HEALTHEX_BASE+'/oauth/token',{
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body:new URLSearchParams({
+        grant_type:'authorization_code',
+        code,
+        redirect_uri:HEALTHEX_REDIRECT,
+        client_id:clientId,
+        code_verifier:verifier
+      })
+    });
+
+    if(!tokenRes.ok){
+      const err=await tokenRes.text();
+      throw new Error('Token exchange failed ('+tokenRes.status+'): '+err);
+    }
+
+    const tokens=await tokenRes.json();
+    localStorage.setItem('healthex_access_token', tokens.access_token||'');
+    if(tokens.refresh_token) localStorage.setItem('healthex_refresh_token',tokens.refresh_token);
+    sessionStorage.removeItem('healthex_pkce_verifier');
+
+    SalusAuth.setRecordsConnected(true);
+    updateStatusBanner();
+    salusInitUserBar();
+
+    setAuthStatus('✓ HealthEx authorization complete — your records are now linked.',true);
+    const btn=document.getElementById('authorizeBtn');
+    if(btn){btn.textContent='✓ Authorized';btn.disabled=true;btn.style.opacity='0.6';}
+
+  }catch(err){
+    setAuthStatus('⚠ '+err.message,false);
   }
 })();
 
