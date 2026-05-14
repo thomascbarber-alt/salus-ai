@@ -585,11 +585,19 @@ const AGENT_LEGAL_SYSTEM=`Review the preventive care plan for scope issues. Resp
 FLAG: specific dosing, definitive diagnoses, mandatory language ("you must"), guarantees about outcomes.
 ACCEPTABLE: guideline-based recommendations, alternatives with pros/cons, questions to ask doctor.`;
 
-const AGENT_CLARITY_SYSTEM=`Apply all corrections from reviewers. Then make the plan clear and actionable for a patient:
-- Make "why_recommended" personal and specific — connect to THEIR age/conditions
-- Make alternatives genuinely helpful — not just lists but actual guidance on which might suit them
-- Ensure frequency_detail is clear and practical
-- Return the EXACT same JSON schema. ONLY valid JSON.`;
+const AGENT_CLARITY_SYSTEM=`You are Salus AI's Plain Language Editor. You will receive a preventive care plan JSON and lists of accuracy and legal issues to fix. Your job is to apply those corrections AND rewrite the output so it is easy to understand for someone with a general education but no medical background.
+
+PLAIN LANGUAGE RULES:
+- Replace ALL medical jargon with everyday words. If a medical term must stay (e.g. in a question for the doctor), immediately follow it with a plain-English explanation in parentheses — for example: "hypertension (high blood pressure)" or "contraindicated (should not be used together)".
+- Write as if explaining to a smart friend who is not a doctor. Use short sentences. Choose simple words over complex ones.
+- Break complex ideas into simple numbered steps or use a familiar analogy when explaining how something works.
+- Never use Latin phrases, abbreviations (e.g. PRN, QD, BMI), or specialist acronyms without explaining them.
+- Assume the reader has a general education level but no medical background.
+- Preserve ALL factual content and accuracy — reword the language, never the meaning.
+- Apply every correction flagged by the Accuracy and Legal reviewers.
+- Keep descriptions to 1-2 sentences per item.
+
+Return the corrected plan using the EXACT same JSON schema. Start with { and end with }. Return ONLY valid JSON, no other text.`;
 
 async function generatePlan(){
   // Read health profile saved on Precision Medicine page
@@ -650,15 +658,18 @@ async function generatePlan(){
     setAgentState(3,'done','Score '+(p3.accuracy_score||8)+'/10');
     setAgentState(4,'done',p4.scope_appropriate?'Approved ✓':'Issues flagged');
 
-    /* Agent 5: Clarity — always runs after full review */
+    /* Agent 5: Clarity — only calls API when reviewers flagged real issues */
     let final=p2;
-    setAgentState(5,'running','Polishing for clarity…');
-    const r5=await callClaude({systemPrompt:AGENT_CLARITY_SYSTEM,userContent:`Plan:\n${JSON.stringify(p2)}\nAccuracy:\n${JSON.stringify(p3)}\nLegal:\n${JSON.stringify(p4)}`,maxTokens:16000});
-    try{
-      const corrected=safeParseJSON(extractText(r5));
-      if(corrected?.care_items?.length>0){final=corrected;}
-      setAgentState(5,'done','Complete');
-    }catch(_){setAgentState(5,'done','Complete');}
+    const hasIssues=(p3.corrections_needed||[]).length>0||(p4.issues_found||[]).length>0;
+    if(hasIssues){
+      setAgentState(5,'running','Applying corrections…');
+      const r5=await callClaude({systemPrompt:AGENT_CLARITY_SYSTEM,userContent:`Plan:\n${JSON.stringify(p2)}\nAccuracy issues:\n${JSON.stringify(p3.corrections_needed||[])}\nLegal issues:\n${JSON.stringify(p4.issues_found||[])}`,maxTokens:6000,model:'claude-haiku-4-5-20251001'});
+      try{
+        const corrected=safeParseJSON(extractText(r5));
+        if(corrected?.care_items?.length>0){final=corrected;}
+        setAgentState(5,'done','Corrections applied');
+      }catch(_){setAgentState(5,'done','Corrections applied');}
+    }else{setAgentState(5,'done','No changes needed');}
 
     setTimeout(()=>{hidePipeline();if(final.care_items&&final.care_items.length>0){renderResults(final,p3,lastProfile);}document.getElementById('generateBtn').disabled=false;},400);
   }catch(err){handleError(err.message||String(err));}

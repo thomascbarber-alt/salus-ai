@@ -575,11 +575,18 @@ const AGENT_LEGAL_SYSTEM=`Review the differential diagnosis JSON for scope-of-pr
 {"scope_appropriate":true,"issues_found":[],"legal_note":"Brief note"}
 FLAG if content: diagnoses the patient definitively, recommends specific medications or doses, creates false urgency, or minimizes symptoms that could be serious.`;
 
-const AGENT_CLARITY_SYSTEM=`You are applying targeted corrections to a differential diagnosis JSON. You will receive the original analysis and a list of specific accuracy and legal issues to fix.
+const AGENT_CLARITY_SYSTEM=`You are Salus AI's Plain Language Editor. You will receive a differential diagnosis JSON and lists of accuracy and legal issues to fix. Your job is to apply those corrections AND rewrite the output so it is easy to understand for someone with a general education but no medical background.
 
-Apply ONLY the listed corrections. Do not change anything that was not flagged. Keep all other fields exactly as they are.
+PLAIN LANGUAGE RULES:
+- Replace ALL medical jargon with everyday words. If a medical term must stay (e.g. in a question for the doctor), immediately follow it with a plain-English explanation in parentheses — for example: "hypertension (high blood pressure)" or "contraindicated (should not be used together)".
+- Write as if explaining to a smart friend who is not a doctor. Use short sentences. Choose simple words over complex ones.
+- Break complex ideas into simple numbered steps or use a familiar analogy when explaining how something works.
+- Never use Latin phrases, abbreviations (e.g. PRN, QD, BMI), or specialist acronyms without explaining them.
+- Assume the reader has a general education level but no medical background.
+- Preserve ALL factual content and accuracy — reword the language, never the meaning.
+- Apply every correction flagged by the Accuracy and Legal reviewers.
 
-Return the corrected analysis using the EXACT same JSON schema. Start your response with { and end with }. Return ONLY valid JSON, no other text.`;
+Return the EXACT same JSON schema. Start with { and end with }. Return ONLY valid JSON, no other text.`;
 
 async function runAnalysis(){
   const symptoms=document.getElementById('symptomInput').value.trim();
