@@ -575,11 +575,11 @@ const AGENT_LEGAL_SYSTEM=`Review the differential diagnosis JSON for scope-of-pr
 {"scope_appropriate":true,"issues_found":[],"legal_note":"Brief note"}
 FLAG if content: diagnoses the patient definitively, recommends specific medications or doses, creates false urgency, or minimizes symptoms that could be serious.`;
 
-const AGENT_CLARITY_SYSTEM=`Apply all corrections from Accuracy and Legal reviewers. Then rewrite for a worried patient: be clear, direct, and reassuring where appropriate — not alarmist, not dismissive. Make "why_it_fits" explanations feel connected to what THEY described.
+const AGENT_CLARITY_SYSTEM=`You are applying targeted corrections to a differential diagnosis JSON. You will receive the original analysis and a list of specific accuracy and legal issues to fix.
 
-For the clinical_summary specifically: rewrite it in plain, conversational language a non-medical person can easily understand. Replace medical jargon with everyday words (e.g. "inflammation" → "irritation and swelling", "presenting symptoms" → "the symptoms you're describing", "etiology" → "cause"). Write as if a knowledgeable friend is explaining it over coffee — warm, clear, and human. No Latin, no clinical shorthand, no passive voice.
+Apply ONLY the listed corrections. Do not change anything that was not flagged. Keep all other fields exactly as they are.
 
-Ensure clinical_summary and recent_research are well-written, complete paragraphs — never empty. Return the exact same JSON schema, polished. ONLY valid JSON.`;
+Return the corrected analysis using the EXACT same JSON schema. Start your response with { and end with }. Return ONLY valid JSON, no other text.`;
 
 async function runAnalysis(){
   const symptoms=document.getElementById('symptomInput').value.trim();
@@ -647,15 +647,18 @@ async function runMainPipeline(){
     setAgentState(3,'done','Score '+(p3.accuracy_score||8)+'/10');
     setAgentState(4,'done',p4.scope_appropriate?'Approved ✓':'Issues flagged');
 
-    /* Agent 5: Clarity — always runs after full review */
+    /* Agent 5: Clarity — only calls API when reviewers flagged real issues */
     let final=p2;
-    setAgentState(5,'running','Polishing for clarity…');
-    const r5=await callClaude({systemPrompt:AGENT_CLARITY_SYSTEM,userContent:`Analysis:\n${JSON.stringify(p2)}\nAccuracy:\n${JSON.stringify(p3)}\nLegal:\n${JSON.stringify(p4)}`,maxTokens:6000});
-    try{
-      const corrected=safeParseJSON(extractText(r5));
-      if(corrected?.differential_diagnoses?.length>0){final=corrected;}
-      setAgentState(5,'done','Complete');
-    }catch(_){setAgentState(5,'done','Complete');}
+    const hasIssues=(p3.corrections_needed||[]).length>0||(p4.issues_found||[]).length>0;
+    if(hasIssues){
+      setAgentState(5,'running','Applying corrections…');
+      const r5=await callClaude({systemPrompt:AGENT_CLARITY_SYSTEM,userContent:`Analysis:\n${JSON.stringify(p2)}\nAccuracy issues:\n${JSON.stringify(p3.corrections_needed||[])}\nLegal issues:\n${JSON.stringify(p4.issues_found||[])}`,maxTokens:4000,model:'claude-haiku-4-5-20251001'});
+      try{
+        const corrected=safeParseJSON(extractText(r5));
+        if(corrected?.differential_diagnoses?.length>0){final=corrected;}
+        setAgentState(5,'done','Corrections applied');
+      }catch(_){setAgentState(5,'done','Corrections applied');}
+    }else{setAgentState(5,'done','No changes needed');}
 
     setTimeout(()=>{hidePipeline();renderResults(final,p3);document.getElementById('submitBtn').disabled=false;document.getElementById('symptomInput').disabled=false;},400);
   }catch(err){handleError(err.message||String(err));}
