@@ -424,6 +424,30 @@ window.addEventListener('scroll',()=>{const d=document.documentElement;const p=d
 function showPipeline(){document.getElementById('pipelinePanel').classList.add('visible');}
 function hidePipeline(){document.getElementById('pipelinePanel').classList.remove('visible');}
 
+const TRACK_STEPS = { 1: 0, 2: 25, 3: 50, 4: 75, 5: 100 };
+
+function setAgentState(n, state, msg) {
+  const card   = document.getElementById('agentCard' + n);
+  const status = document.getElementById('agentStatus' + n);
+  const flag   = document.getElementById('agentFlag' + n);
+  if (!card) return;
+  card.className = 'agent-card' + (state ? ' ' + state : '');
+  status.textContent = msg;
+  const icons = { 1:'💬', 2:'🩺', 3:'🔬', 4:'⚖️', 5:'✦' };
+  if (state === 'done') {
+    flag.textContent = '✓';
+    document.getElementById('trackFill').style.width = TRACK_STEPS[n] + '%';
+  } else if (state === 'paused') {
+    flag.textContent = '⏸';
+  } else if (state === 'running') {
+    flag.textContent = icons[n] || '⟳';
+  } else if (state === 'error') {
+    flag.textContent = '✕';
+  } else {
+    flag.textContent = icons[n] || '○';
+  }
+}
+
 /* Reads personal context saved on the Precision Medicine page */
 function getSalusLifeContext(){
   try{
