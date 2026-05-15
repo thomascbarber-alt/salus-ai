@@ -6,6 +6,19 @@
   var u=null;try{u=JSON.parse(localStorage.getItem('salus_user')||'null');}catch(_){}
   if(!u||!u.email){var t=encodeURIComponent(window.location.href);window.location.replace('login.html?redirect='+t);}
 })();
+
+function comingSoon(el, evt) {
+  if (evt) { evt.preventDefault(); evt.stopPropagation(); }
+  var container = el.closest('.step-actions, .records-btns, .healthex-connect-wrap, .hub-card, .hero-ctas') || el.parentNode;
+  if (!container.querySelector('.coming-soon-note')) {
+    var note = document.createElement('div');
+    note.className = 'coming-soon-note';
+    note.textContent = '⚠ Function coming soon';
+    container.appendChild(note);
+  }
+  return false;
+}
+
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -128,6 +141,28 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .back-row{text-align:center;margin-top:48px;animation:fadeUp .6s ease .2s both;}
 .back-to-pm{display:inline-flex;align-items:center;gap:10px;padding:14px 36px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;text-decoration:none;transition:all .2s;}
 .back-to-pm:hover{background:rgba(255,255,255,0.09);color:white;}
+
+/* ── Coming Soon buttons ── */
+.coming-soon-note {
+  display: block;
+  margin-top: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #d4aa3a;
+  background: rgba(212,170,58,0.10);
+  border: 1px solid rgba(212,170,58,0.35);
+  border-radius: 7px;
+  padding: 5px 12px;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: 0.3px;
+  pointer-events: none;
+}
+.btn-coming-soon {
+  opacity: 0.70 !important;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -168,7 +203,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
       <div class="status-title" id="statusTitle">Records not yet connected</div>
       <div class="status-sub" id="statusSub">Follow the steps below to link your medical records via HealthEx.</div>
     </div>
-    <button class="status-action" id="statusToggle" onclick="toggleRecordsStatus()"></button>
+    <button class="status-action btn-coming-soon" id="statusToggle" onclick="comingSoon(this, event); return false;"></button>
   </div>
 
   <!-- WHAT GETS CONNECTED -->
@@ -242,7 +277,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
           Docs: https://docs.healthex.io/mcp-server/oauth-flow
         </div>
         <div class="step-actions">
-          <button class="step-action step-action-gold" id="authorizeBtn" onclick="startHealthExAuth()">Authorize Salus AI →</button>
+          <button class="step-action step-action-gold btn-coming-soon" id="authorizeBtn" onclick="comingSoon(this, event); return false;">Authorize Salus AI →</button>
         </div>
         <div id="authStatus" style="display:none;margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;line-height:1.5;"></div>
         <div class="step-note">
@@ -259,7 +294,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
         <div class="step-title">Mark Your Records as Connected</div>
         <p class="step-body">Once you have authorized HealthEx and your records are linked, click below to activate the personalized features across Salus AI. This tells Salus AI to use your records when generating recommendations on Health Decisions, Determine Diagnosis, and Manage My Health.</p>
         <div class="step-actions">
-          <button class="step-action step-action-teal" onclick="markConnected()">✓ My Records Are Connected</button>
+          <button class="step-action step-action-teal btn-coming-soon" onclick="comingSoon(this, event); return false;">✓ My Records Are Connected</button>
         </div>
         <div class="step-note">
           <span class="step-note-icon">ℹ️</span>

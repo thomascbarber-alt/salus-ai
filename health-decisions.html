@@ -10,6 +10,19 @@
     window.location.replace('login.html?redirect='+t);
   }
 })();
+
+function comingSoon(el, evt) {
+  if (evt) { evt.preventDefault(); evt.stopPropagation(); }
+  var container = el.closest('.step-actions, .records-btns, .healthex-connect-wrap, .hub-card, .hero-ctas') || el.parentNode;
+  if (!container.querySelector('.coming-soon-note')) {
+    var note = document.createElement('div');
+    note.className = 'coming-soon-note';
+    note.textContent = '⚠ Function coming soon';
+    container.appendChild(note);
+  }
+  return false;
+}
+
 </script>
 
 <meta charset="UTF-8">
@@ -850,6 +863,28 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
   .section-pane{display:block!important;margin-bottom:24px;}
 }
 
+
+/* ── Coming Soon buttons ── */
+.coming-soon-note {
+  display: block;
+  margin-top: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #d4aa3a;
+  background: rgba(212,170,58,0.10);
+  border: 1px solid rgba(212,170,58,0.35);
+  border-radius: 7px;
+  padding: 5px 12px;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: 0.3px;
+  pointer-events: none;
+}
+.btn-coming-soon {
+  opacity: 0.70 !important;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
 </style>
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -911,7 +946,7 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
           <div class="records-text-sub">Salus AI can use your actual health history, labs, medications, and diagnoses to tailor every answer specifically to you.</div>
         </div>
         <div class="records-btns">
-          <button class="records-btn records-btn-yes" onclick="connectRecords()">Use My Records</button>
+          <button class="records-btn records-btn-yes btn-coming-soon" onclick="comingSoon(this, event); return false;">Use My Records</button>
           <button class="records-btn records-btn-no"  onclick="dismissBanner()">Ask Generically</button>
         </div>
       </div>

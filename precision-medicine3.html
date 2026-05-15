@@ -10,6 +10,19 @@
     window.location.replace('login.html?redirect='+t);
   }
 })();
+
+function comingSoon(el, evt) {
+  if (evt) { evt.preventDefault(); evt.stopPropagation(); }
+  var container = el.closest('.step-actions, .records-btns, .healthex-connect-wrap, .hub-card, .hero-ctas') || el.parentNode;
+  if (!container.querySelector('.coming-soon-note')) {
+    var note = document.createElement('div');
+    note.className = 'coming-soon-note';
+    note.textContent = '⚠ Function coming soon';
+    container.appendChild(note);
+  }
+  return false;
+}
+
 </script>
 
 <meta charset="UTF-8">
@@ -1283,6 +1296,28 @@ footer p {
 .subs-signout:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.5);}
 @media(max-width:768px){#salusUserBar{padding:0 16px;}.subs-email{display:none;}.subs-records span{display:none;}}
 
+
+/* ── Coming Soon buttons ── */
+.coming-soon-note {
+  display: block;
+  margin-top: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #d4aa3a;
+  background: rgba(212,170,58,0.10);
+  border: 1px solid rgba(212,170,58,0.35);
+  border-radius: 7px;
+  padding: 5px 12px;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: 0.3px;
+  pointer-events: none;
+}
+.btn-coming-soon {
+  opacity: 0.70 !important;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
 </style>
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -1354,10 +1389,10 @@ footer p {
         <div class="badge"><div class="badge-dot"></div> Your data stays yours</div>
       </div>
       <div class="hero-ctas">
-        <a href="#connect" class="hero-cta">
+        <button class="hero-cta btn-coming-soon" onclick="comingSoon(this, event); return false;">
           Connect My Records
           <span class="hero-cta-arrow">→</span>
-        </a>
+        </button>
 
       </div>
     </div>
@@ -1425,10 +1460,10 @@ footer p {
         <div class="hub-card-step">Step 1</div>
         <div class="hub-card-title">Connect My Records</div>
         <div class="hub-card-desc">Link your medical records via HealthEx — labs, diagnoses, medications, imaging, visit notes, and immunizations. Powers the Precision Medicine tier.</div>
-        <a href="connect-records.html" class="hub-card-btn hub-btn-gold">
+        <button class="hub-card-btn hub-btn-gold btn-coming-soon" onclick="comingSoon(this, event); return false;">
           <span>Connect My Records</span>
           <span class="hub-btn-arrow">→</span>
-        </a>
+        </button>
         <div class="hub-card-note">HIPAA-compliant · Encrypted · You control access</div>
       </div>
 
