@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Salus AI — Sign In</title>
+<title>Caedrix AI — Sign In</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
 <style>
@@ -88,8 +88,8 @@ footer{text-align:center;padding:20px;font-size:11px;color:rgba(255,255,255,0.2)
   <div class="login-card">
 
     <div class="login-logo">
-      <img src="salusAI-logo.jpg" alt="Salus AI" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="login-logo-placeholder" style="display:none;">Salus AI</div>
+      <img src="caedrix-logo.png" alt="Caedrix AI" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="login-logo-placeholder" style="display:none;">Caedrix AI</div>
     </div>
 
     <!-- Create / Sign In tabs -->
@@ -134,12 +134,12 @@ footer{text-align:center;padding:20px;font-size:11px;color:rgba(255,255,255,0.2)
     </div>
 
     <div class="divider"><div class="divider-line"></div><div class="divider-text">SECURE · PRIVATE · PHYSICIAN-FOUNDED</div><div class="divider-line"></div></div>
-    <div class="terms-note" style="color:rgba(255,255,255,0.2);">salusai.health · Not a replacement for your physician. Your data stays in your browser until you connect records.</div>
+    <div class="terms-note" style="color:rgba(255,255,255,0.2);">caedrix.com · Not a replacement for your physician. Your data stays in your browser until you connect records.</div>
 
   </div>
 </div>
 
-<footer>© 2025 Salus AI · All health information is for educational purposes only</footer>
+<footer>© 2025 Caedrix AI · All health information is for educational purposes only</footer>
 
 <script>
 /* ── Already logged in? Redirect to destination ── */
@@ -176,7 +176,7 @@ function doCreate(){
   var user={email,phone:phone||'',loginTime:Date.now(),created:true};
   localStorage.setItem('salus_user',JSON.stringify(user));
 
-  showMsg('createMsg','success','Account created! Taking you to Salus AI…');
+  showMsg('createMsg','success','Account created! Taking you to Caedrix AI…');
   document.getElementById('createBtn').disabled=true;
   setTimeout(()=>{
     var params=new URLSearchParams(window.location.search);
@@ -197,7 +197,7 @@ function doSignIn(){
   user.loginTime=Date.now();
   localStorage.setItem('salus_user',JSON.stringify(user));
 
-  showMsg('signinMsg','success','Welcome back! Taking you to Salus AI…');
+  showMsg('signinMsg','success','Welcome back! Taking you to Caedrix AI…');
   document.getElementById('signinBtn').disabled=true;
   setTimeout(()=>{
     var params=new URLSearchParams(window.location.search);
