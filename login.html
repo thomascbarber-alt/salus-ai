@@ -50,18 +50,6 @@ body{background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;
 .phone-prefix{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.3);font-size:15px;pointer-events:none;}
 .phone-input{padding-left:36px;}
 
-/* API KEY SECTION */
-.api-section{margin-top:8px;padding:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;margin-bottom:18px;}
-.api-section-title{font-size:12px;font-weight:700;color:rgba(255,255,255,0.4);margin-bottom:6px;display:flex;align-items:center;gap:8px;}
-.api-section-sub{font-size:12px;color:rgba(255,255,255,0.25);line-height:1.5;margin-bottom:10px;}
-.api-toggle{font-size:11px;color:rgba(19,160,144,0.8);cursor:pointer;text-decoration:underline;background:none;border:none;font-family:'DM Sans',sans-serif;padding:0;}
-.api-toggle:hover{color:var(--teal-light);}
-.api-key-row{display:none;margin-top:10px;}
-.api-key-row.visible{display:flex;gap:8px;}
-.api-key-input{flex:1;padding:9px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--white);outline:none;}
-.api-key-input:focus{border-color:rgba(19,160,144,0.4);}
-.api-key-input::placeholder{color:rgba(255,255,255,0.15);}
-
 /* SUBMIT */
 .submit-btn{width:100%;padding:15px;border-radius:12px;background:linear-gradient(135deg,var(--teal-light),var(--teal));color:white;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:all .25s;margin-top:4px;position:relative;overflow:hidden;}
 .submit-btn:hover:not(:disabled){background:linear-gradient(135deg,#1abfad,var(--teal-light));transform:translateY(-1px);box-shadow:0 6px 20px rgba(19,160,144,0.35);}
@@ -127,16 +115,6 @@ footer{text-align:center;padding:20px;font-size:11px;color:rgba(255,255,255,0.2)
           <input id="createPhone" class="form-input phone-input" type="tel" placeholder="(555) 000-0000" autocomplete="tel">
         </div>
       </div>
-      <div class="api-section">
-        <div class="api-section-title">
-          🔑 Anthropic API Key
-          <button class="api-toggle" onclick="toggleApiSection('create')">Enter key →</button>
-        </div>
-        <div class="api-section-sub">Required to use AI features. Enter once and it will be saved across all Salus AI pages. You can also enter it later on any page.</div>
-        <div class="api-key-row" id="createApiRow">
-          <input id="createApiKey" class="api-key-input" type="password" placeholder="sk-ant-api03-…">
-        </div>
-      </div>
       <button class="submit-btn" id="createBtn" onclick="doCreate()">
         <div class="submit-btn-inner"><span>Create My Free Account</span><span>→</span></div>
       </button>
@@ -149,16 +127,6 @@ footer{text-align:center;padding:20px;font-size:11px;color:rgba(255,255,255,0.2)
       <div class="form-group">
         <label>Email address</label>
         <input id="signinEmail" class="form-input" type="email" placeholder="you@example.com" autocomplete="email">
-      </div>
-      <div class="api-section">
-        <div class="api-section-title">
-          🔑 Anthropic API Key
-          <button class="api-toggle" onclick="toggleApiSection('signin')">Enter key →</button>
-        </div>
-        <div class="api-section-sub">Re-enter your API key to restore AI features if this is a new browser.</div>
-        <div class="api-key-row" id="signinApiRow">
-          <input id="signinApiKey" class="api-key-input" type="password" placeholder="sk-ant-api03-…">
-        </div>
       </div>
       <button class="submit-btn" id="signinBtn" onclick="doSignIn()">
         <div class="submit-btn-inner"><span>Sign In</span><span>→</span></div>
@@ -191,14 +159,6 @@ function switchTab(tab){
   document.getElementById('panelSignin').style.display=tab==='signin'?'block':'none';
 }
 
-function toggleApiSection(which){
-  var row=document.getElementById(which+'ApiRow');
-  row.classList.toggle('visible');
-  var btn=row.previousElementSibling.querySelector('.api-toggle');
-  if(row.classList.contains('visible')){btn.textContent='Hide ↑';}
-  else{btn.textContent='Enter key →';}
-}
-
 function showMsg(id,type,text){
   var el=document.getElementById(id);
   el.className='auth-msg '+type+' visible';
@@ -210,16 +170,11 @@ function validateEmail(e){return/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);}
 function doCreate(){
   var email=document.getElementById('createEmail').value.trim();
   var phone=document.getElementById('createPhone').value.trim();
-  var apiKey=document.getElementById('createApiKey').value.trim();
   if(!email){showMsg('createMsg','error','Please enter your email address.');return;}
   if(!validateEmail(email)){showMsg('createMsg','error','Please enter a valid email address.');return;}
 
   var user={email,phone:phone||'',loginTime:Date.now(),created:true};
   localStorage.setItem('salus_user',JSON.stringify(user));
-  if(apiKey&&apiKey.startsWith('sk-')){
-    localStorage.setItem('salus_api_key',apiKey);
-    sessionStorage.setItem('salus_api_key',apiKey);
-  }
 
   showMsg('createMsg','success','Account created! Taking you to Salus AI…');
   document.getElementById('createBtn').disabled=true;
@@ -232,7 +187,6 @@ function doCreate(){
 
 function doSignIn(){
   var email=document.getElementById('signinEmail').value.trim();
-  var apiKey=document.getElementById('signinApiKey').value.trim();
   if(!email){showMsg('signinMsg','error','Please enter your email address.');return;}
   if(!validateEmail(email)){showMsg('signinMsg','error','Please enter a valid email address.');return;}
 
@@ -242,10 +196,6 @@ function doSignIn(){
   var user=existing&&existing.email===email?existing:{email,phone:'',loginTime:Date.now()};
   user.loginTime=Date.now();
   localStorage.setItem('salus_user',JSON.stringify(user));
-  if(apiKey&&apiKey.startsWith('sk-')){
-    localStorage.setItem('salus_api_key',apiKey);
-    sessionStorage.setItem('salus_api_key',apiKey);
-  }
 
   showMsg('signinMsg','success','Welcome back! Taking you to Salus AI…');
   document.getElementById('signinBtn').disabled=true;

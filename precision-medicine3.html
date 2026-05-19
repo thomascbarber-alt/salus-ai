@@ -1297,6 +1297,209 @@ footer p {
 @media(max-width:768px){#salusUserBar{padding:0 16px;}.subs-email{display:none;}.subs-records span{display:none;}}
 
 
+/* ── Records Interest Toggle ── */
+.records-interest-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px;
+  background: rgba(184,147,42,0.07);
+  border: 1px solid rgba(184,147,42,0.25);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  margin-bottom: 14px;
+}
+.records-interest-label:hover {
+  background: rgba(184,147,42,0.12);
+  border-color: rgba(184,147,42,0.4);
+}
+.records-interest-label.checked {
+  background: rgba(58,158,106,0.1);
+  border-color: rgba(58,158,106,0.35);
+}
+.records-interest-check-wrap {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.records-interest-check-wrap input[type="checkbox"] {
+  display: none;
+}
+.records-interest-custom-check {
+  font-size: 22px;
+  color: rgba(255,255,255,0.3);
+  line-height: 1;
+  transition: color 0.2s;
+}
+.records-interest-label.checked .records-interest-custom-check {
+  color: #52c488;
+}
+.records-interest-text {
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  color: rgba(255,255,255,0.75);
+  line-height: 1.6;
+}
+.records-interest-confirm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #52c488;
+  background: rgba(58,158,106,0.1);
+  border: 1px solid rgba(58,158,106,0.3);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+
+/* ── Profile Summary Section ── */
+.profile-summary-wrap {
+  margin-top: 48px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px;
+  overflow: hidden;
+}
+.profile-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 28px 32px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.profile-summary-icon { font-size: 28px; flex-shrink: 0; }
+.profile-summary-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 21px;
+  color: var(--white);
+  line-height: 1.2;
+}
+.profile-summary-subtitle {
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  margin-top: 3px;
+}
+.profile-summary-status {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 5px 14px;
+  border-radius: 100px;
+}
+.profile-summary-status.has-data {
+  background: rgba(58,158,106,0.15);
+  border: 1px solid rgba(58,158,106,0.3);
+  color: #52c488;
+}
+.profile-summary-status.no-data {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.25);
+}
+
+.profile-summary-body {
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.profile-summary-empty {
+  font-family: 'Crimson Pro', serif;
+  font-size: 16px;
+  color: rgba(255,255,255,0.3);
+  font-style: italic;
+  text-align: center;
+  padding: 12px 0;
+}
+.profile-summary-group {}
+.profile-summary-group-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+.profile-summary-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.profile-summary-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+  align-items: start;
+}
+.profile-summary-key {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding-top: 1px;
+}
+.profile-summary-val {
+  font-family: 'Crimson Pro', serif;
+  font-size: 16px;
+  color: rgba(255,255,255,0.8);
+  line-height: 1.5;
+}
+
+.profile-summary-actions {
+  padding: 20px 32px 28px;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.profile-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.25s;
+}
+.profile-edit-btn-teal {
+  background: linear-gradient(135deg, #13a090, #0a7c6e);
+  color: white;
+  box-shadow: 0 4px 16px rgba(10,124,110,0.25);
+}
+.profile-edit-btn-teal:hover {
+  box-shadow: 0 6px 24px rgba(10,124,110,0.4);
+  transform: translateY(-1px);
+}
+.profile-edit-btn-gold {
+  background: linear-gradient(135deg, #d4aa3a, #b8932a);
+  color: #0c1e3a;
+  box-shadow: 0 4px 16px rgba(184,147,42,0.25);
+}
+.profile-edit-btn-gold:hover {
+  box-shadow: 0 6px 24px rgba(184,147,42,0.4);
+  transform: translateY(-1px);
+}
+@media(max-width:768px){
+  .profile-summary-header { padding: 20px; flex-wrap: wrap; }
+  .profile-summary-body   { padding: 20px; }
+  .profile-summary-actions { padding: 16px 20px 20px; }
+  .profile-summary-row { grid-template-columns: 1fr; gap: 4px; }
+  .profile-summary-status { margin-left: 0; }
+}
+
 /* ── Coming Soon buttons ── */
 .coming-soon-note {
   display: block;
@@ -1389,11 +1592,6 @@ footer p {
         <div class="badge"><div class="badge-dot"></div> Your data stays yours</div>
       </div>
       <div class="hero-ctas">
-        <button class="hero-cta btn-coming-soon" onclick="comingSoon(this, event); return false;">
-          Connect My Records
-          <span class="hero-cta-arrow">→</span>
-        </button>
-
       </div>
     </div>
 
@@ -1460,10 +1658,16 @@ footer p {
         <div class="hub-card-step">Step 1</div>
         <div class="hub-card-title">Connect My Records</div>
         <div class="hub-card-desc">Link your medical records via HealthEx — labs, diagnoses, medications, imaging, visit notes, and immunizations. Powers the Precision Medicine tier.</div>
-        <button class="hub-card-btn hub-btn-gold btn-coming-soon" onclick="comingSoon(this, event); return false;">
-          <span>Connect My Records</span>
-          <span class="hub-btn-arrow">→</span>
-        </button>
+        <label class="records-interest-label" id="recordsInterestLabel">
+          <div class="records-interest-check-wrap">
+            <input type="checkbox" id="recordsInterestCheck" onchange="handleRecordsInterest(this)">
+            <span class="records-interest-custom-check" id="recordsInterestIcon">☐</span>
+          </div>
+          <span class="records-interest-text">I am interested in exploring connecting my medical records electronically so I don't have to enter the information and keep it updated.</span>
+        </label>
+        <div class="records-interest-confirm" id="recordsInterestConfirm" style="display:none;">
+          <span>✓</span> Interest noted — we'll notify you when electronic record connection is available.
+        </div>
         <div class="hub-card-note">HIPAA-compliant · Encrypted · You control access</div>
       </div>
 
@@ -1500,6 +1704,46 @@ footer p {
       </div>
 
     </div>
+
+    <!-- ── PROFILE SUMMARY ── -->
+    <div class="profile-summary-wrap" id="profileSummaryWrap">
+      <div class="profile-summary-header">
+        <span class="profile-summary-icon">📋</span>
+        <div>
+          <div class="profile-summary-title">Your Profile Summary</div>
+          <div class="profile-summary-subtitle">Combined entries from Personal Details &amp; Health Profile</div>
+        </div>
+        <div class="profile-summary-status" id="profileSummaryStatus"></div>
+      </div>
+
+      <div class="profile-summary-body" id="profileSummaryBody">
+        <div class="profile-summary-empty" id="profileSummaryEmpty">
+          No profile information added yet. Use the cards above to get started.
+        </div>
+
+        <!-- Personal Details summary -->
+        <div class="profile-summary-group" id="summaryPersonalGroup" style="display:none;">
+          <div class="profile-summary-group-label">🙋 Personal Details</div>
+          <div class="profile-summary-rows" id="summaryPersonalRows"></div>
+        </div>
+
+        <!-- Health Profile summary -->
+        <div class="profile-summary-group" id="summaryHealthGroup" style="display:none;">
+          <div class="profile-summary-group-label">🏥 Health Profile</div>
+          <div class="profile-summary-rows" id="summaryHealthRows"></div>
+        </div>
+      </div>
+
+      <div class="profile-summary-actions">
+        <a href="personal-details.html" class="profile-edit-btn profile-edit-btn-teal">
+          <span>✏️</span> Edit Personal Details
+        </a>
+        <a href="health-profile.html" class="profile-edit-btn profile-edit-btn-gold">
+          <span>✏️</span> Edit Health Profile
+        </a>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -1599,6 +1843,120 @@ footer p {
 </footer>
 
 <script>
+
+/* ── Records Interest Tracking ── */
+const RECORDS_INTEREST_KEY = 'salus_records_interest';
+
+function handleRecordsInterest(checkbox) {
+  const label   = document.getElementById('recordsInterestLabel');
+  const icon    = document.getElementById('recordsInterestIcon');
+  const confirm = document.getElementById('recordsInterestConfirm');
+  if (checkbox.checked) {
+    localStorage.setItem(RECORDS_INTEREST_KEY, JSON.stringify({
+      interested: true,
+      timestamp: new Date().toISOString(),
+      userEmail: SalusAuth.getUser()?.email || ''
+    }));
+    label.classList.add('checked');
+    icon.textContent = '☑';
+    confirm.style.display = 'flex';
+    const rb = document.getElementById('recordsBadge');
+    if (rb) { rb.textContent = '⭐ Interested'; rb.className = 'hub-card-badge partial'; }
+  } else {
+    localStorage.removeItem(RECORDS_INTEREST_KEY);
+    label.classList.remove('checked');
+    icon.textContent = '☐';
+    confirm.style.display = 'none';
+    updateHubBadges();
+  }
+}
+
+function loadRecordsInterest() {
+  try {
+    const data = JSON.parse(localStorage.getItem(RECORDS_INTEREST_KEY) || 'null');
+    if (!data?.interested) return;
+    const cb = document.getElementById('recordsInterestCheck');
+    if (cb) { cb.checked = true; handleRecordsInterest(cb); }
+  } catch(_) {}
+}
+
+/* ── Profile Summary Renderer ── */
+function renderProfileSummary() {
+  const PERSONAL_LABELS = {
+    activities: 'Favorite Activities',
+    important:  'Important Context',
+    caregiver:  'Caregiver Role',
+    living:     'Living Situation'
+  };
+  const HEALTH_LABELS = {
+    age:             'Age',
+    sex:             'Biological Sex',
+    height:          'Height',
+    weight:          'Weight',
+    conditions:      'Conditions',
+    medications:     'Medications',
+    allergies:       'Allergies',
+    surgeries:       'Surgeries / Procedures',
+    familyHistory:   'Family History',
+    smokingStatus:   'Smoking Status',
+    alcoholUse:      'Alcohol Use',
+    exerciseHabits:  'Exercise Habits',
+    screenings:      'Screening History',
+    riskFactors:     'Risk Factors'
+  };
+
+  let hasAny = false;
+
+  // Personal details
+  try {
+    const ctx = JSON.parse(localStorage.getItem('salus_life_context') || 'null');
+    const personalGroup = document.getElementById('summaryPersonalGroup');
+    const personalRows  = document.getElementById('summaryPersonalRows');
+    if (ctx && personalGroup && personalRows) {
+      const entries = Object.entries(PERSONAL_LABELS)
+        .filter(([k]) => ctx[k] && ctx[k].trim())
+        .map(([k, label]) => `
+          <div class="profile-summary-row">
+            <div class="profile-summary-key">${label}</div>
+            <div class="profile-summary-val">${ctx[k].trim()}</div>
+          </div>`).join('');
+      if (entries) {
+        personalRows.innerHTML = entries;
+        personalGroup.style.display = 'block';
+        hasAny = true;
+      }
+    }
+  } catch(_) {}
+
+  // Health profile
+  try {
+    const hp = JSON.parse(localStorage.getItem('salus_health_profile') || 'null');
+    const healthGroup = document.getElementById('summaryHealthGroup');
+    const healthRows  = document.getElementById('summaryHealthRows');
+    if (hp && healthGroup && healthRows) {
+      const entries = Object.entries(HEALTH_LABELS)
+        .filter(([k]) => hp[k] && String(hp[k]).trim())
+        .map(([k, label]) => `
+          <div class="profile-summary-row">
+            <div class="profile-summary-key">${label}</div>
+            <div class="profile-summary-val">${String(hp[k]).trim()}</div>
+          </div>`).join('');
+      if (entries) {
+        healthRows.innerHTML = entries;
+        healthGroup.style.display = 'block';
+        hasAny = true;
+      }
+    }
+  } catch(_) {}
+
+  const empty  = document.getElementById('profileSummaryEmpty');
+  const status = document.getElementById('profileSummaryStatus');
+  if (empty)  empty.style.display  = hasAny ? 'none' : 'block';
+  if (status) {
+    status.textContent  = hasAny ? '✓ Profile Active' : 'Not Yet Filled';
+    status.className    = 'profile-summary-status ' + (hasAny ? 'has-data' : 'no-data');
+  }
+}
 
 /* ── Salus Auth: shared state (localStorage-backed) ── */
 const SalusAuth = {
@@ -1724,7 +2082,7 @@ function updateHubBadges(){
   }catch(_){}
 }
 
-window.addEventListener('DOMContentLoaded',()=>{loadLifeContext();updateHubBadges();salusInitUserBar();});
+window.addEventListener('DOMContentLoaded',()=>{loadLifeContext();updateHubBadges();salusInitUserBar();loadRecordsInterest();renderProfileSummary();});
 
 /* ── Progress bar ── */
 window.addEventListener('scroll', () => {

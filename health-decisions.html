@@ -864,6 +864,81 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 }
 
 
+/* ═══════════════════ PROFILE CONTEXT BOX ═══════════════════ */
+.profile-context-box {
+  border-radius: 16px; margin-bottom: 24px; overflow: hidden;
+  border: 1px solid rgba(184,147,42,0.28);
+  background: rgba(184,147,42,0.06);
+  backdrop-filter: blur(8px);
+  animation: fadeUp 0.5s ease 0.25s both;
+}
+.profile-context-header {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid rgba(184,147,42,0.15);
+}
+.profile-context-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
+.profile-context-statement {
+  font-family: 'Crimson Pro', serif;
+  font-size: 16px; color: rgba(255,255,255,0.7);
+  line-height: 1.55; font-style: italic;
+}
+.profile-context-body {
+  padding: 18px 24px 4px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.profile-context-empty {
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px; color: rgba(255,255,255,0.3);
+  font-style: italic; padding: 4px 0 12px;
+}
+.profile-context-group-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--gold-light);
+  margin-bottom: 10px;
+}
+.profile-context-rows { display: flex; flex-direction: column; gap: 6px; }
+.profile-context-row {
+  display: grid; grid-template-columns: 160px 1fr;
+  gap: 10px; padding: 9px 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px; align-items: start;
+}
+.profile-context-key {
+  font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.35);
+  text-transform: uppercase; letter-spacing: 0.5px; padding-top: 1px;
+}
+.profile-context-val {
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px; color: rgba(255,255,255,0.75); line-height: 1.45;
+}
+.profile-context-actions {
+  padding: 14px 24px 18px;
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+.profile-ctx-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 18px; border-radius: 8px;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
+  text-decoration: none; transition: all 0.2s;
+}
+.profile-ctx-btn-teal {
+  background: linear-gradient(135deg,#13a090,#0a7c6e); color: white;
+  box-shadow: 0 3px 12px rgba(10,124,110,0.2);
+}
+.profile-ctx-btn-teal:hover { box-shadow: 0 5px 18px rgba(10,124,110,0.35); transform: translateY(-1px); }
+.profile-ctx-btn-gold {
+  background: linear-gradient(135deg,#d4aa3a,#b8932a); color: #0c1e3a;
+  box-shadow: 0 3px 12px rgba(184,147,42,0.2);
+}
+.profile-ctx-btn-gold:hover { box-shadow: 0 5px 18px rgba(184,147,42,0.35); transform: translateY(-1px); }
+@media(max-width:768px){
+  .profile-context-row { grid-template-columns: 1fr; gap: 3px; }
+  .profile-context-actions { flex-direction: column; }
+  .profile-ctx-btn { justify-content: center; }
+}
+
 /* ── Coming Soon buttons ── */
 .coming-soon-note {
   display: block;
@@ -937,26 +1012,31 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 <section class="interface-section" id="interface">
   <div class="interface-wrap">
 
-    <!-- Records permission banner -->
-    <div class="records-banner" id="recordsBanner">
-      <div class="records-banner-inner">
-        <div class="records-icon">🏥</div>
-        <div class="records-text">
-          <div class="records-text-title">Connect your medical records for personalized answers</div>
-          <div class="records-text-sub">Salus AI can use your actual health history, labs, medications, and diagnoses to tailor every answer specifically to you.</div>
-        </div>
-        <div class="records-btns">
-          <button class="records-btn records-btn-yes btn-coming-soon" onclick="comingSoon(this, event); return false;">Use My Records</button>
-          <button class="records-btn records-btn-no"  onclick="dismissBanner()">Ask Generically</button>
+    <!-- Profile Context Summary -->
+    <div class="profile-context-box" id="profileContextBox">
+      <div class="profile-context-header">
+        <span class="profile-context-icon">📋</span>
+        <div class="profile-context-statement">
+          The following personal and health information will be used to craft the best answer for you.
         </div>
       </div>
-    </div>
-
-    <!-- Connected bar -->
-    <div class="records-connected-bar" id="recordsConnectedBar">
-      <div class="records-connected-dot"></div>
-      <span>Medical records connected via <span class="records-connected-name">HealthEx</span> — answers will be personalized to your health history.</span>
-      <button class="records-revoke" onclick="revokeRecords()">Disconnect</button>
+      <div class="profile-context-body">
+        <div class="profile-context-empty" id="ctxEmpty">
+          No profile information added yet — add your details on the Precision Medicine page to receive personalized guidance.
+        </div>
+        <div class="profile-context-group" id="ctxPersonalGroup" style="display:none;">
+          <div class="profile-context-group-label">🙋 Personal Details</div>
+          <div class="profile-context-rows" id="ctxPersonalRows"></div>
+        </div>
+        <div class="profile-context-group" id="ctxHealthGroup" style="display:none;">
+          <div class="profile-context-group-label">🏥 Health Profile</div>
+          <div class="profile-context-rows" id="ctxHealthRows"></div>
+        </div>
+      </div>
+      <div class="profile-context-actions">
+        <a href="precision-medicine3.html#connect" class="profile-ctx-btn profile-ctx-btn-teal">✏️ Edit Personal Details</a>
+        <a href="precision-medicine3.html#connect" class="profile-ctx-btn profile-ctx-btn-gold">✏️ Edit Health Profile</a>
+      </div>
     </div>
 
     <!-- Question card -->
@@ -1191,11 +1271,9 @@ const SalusState = {
 ══════════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', () => {
   salusInitUserBar();
-  // Restore API key// Restore records state
+  renderProfileContextBox();
   if (SalusState.isRecordsConnected()) {
     recordsConnected = true;
-    document.getElementById('recordsBanner').style.display      = 'none';
-    document.getElementById('recordsConnectedBar').style.display = 'flex';
   }
 });
 
@@ -1247,19 +1325,55 @@ window.addEventListener('scroll', () => {
 /* ══════════════════════════════════════════════════════
    RECORDS
 ══════════════════════════════════════════════════════ */
+function renderProfileContextBox() {
+  const PERSONAL_LABELS = {
+    activities: 'Favorite Activities', important: 'Important Context',
+    caregiver: 'Caregiver Role',       living: 'Living Situation'
+  };
+  const HEALTH_LABELS = {
+    age: 'Age', sex: 'Biological Sex', smoking: 'Smoking Status',
+    diabetes: 'Diabetes', heartDisease: 'Heart Disease',
+    conditions: 'Other Conditions', medications: 'Medications',
+    screenings: 'Recent Screenings', familyHistory: 'Family History',
+    allergies: 'Allergies', surgeries: 'Surgeries / Procedures',
+    exerciseHabits: 'Exercise Habits', riskFactors: 'Risk Factors'
+  };
+  let hasAny = false;
+  try {
+    const ctx = JSON.parse(localStorage.getItem('salus_life_context') || 'null');
+    const group = document.getElementById('ctxPersonalGroup');
+    const rows  = document.getElementById('ctxPersonalRows');
+    if (ctx && group && rows) {
+      const html = Object.entries(PERSONAL_LABELS)
+        .filter(([k]) => ctx[k]?.trim())
+        .map(([k, lbl]) => `<div class="profile-context-row"><div class="profile-context-key">${lbl}</div><div class="profile-context-val">${ctx[k].trim()}</div></div>`)
+        .join('');
+      if (html) { rows.innerHTML = html; group.style.display = 'block'; hasAny = true; }
+    }
+  } catch(_) {}
+  try {
+    const hp = JSON.parse(localStorage.getItem('salus_health_profile') || 'null');
+    const group = document.getElementById('ctxHealthGroup');
+    const rows  = document.getElementById('ctxHealthRows');
+    if (hp && group && rows) {
+      const html = Object.entries(HEALTH_LABELS)
+        .filter(([k]) => hp[k] && String(hp[k]).trim())
+        .map(([k, lbl]) => `<div class="profile-context-row"><div class="profile-context-key">${lbl}</div><div class="profile-context-val">${String(hp[k]).trim()}</div></div>`)
+        .join('');
+      if (html) { rows.innerHTML = html; group.style.display = 'block'; hasAny = true; }
+    }
+  } catch(_) {}
+  const empty = document.getElementById('ctxEmpty');
+  if (empty) empty.style.display = hasAny ? 'none' : 'block';
+}
+
 function connectRecords() {
-  // Redirect to HealthEx OAuth flow — patient will authorize Salus AI
-  // to access their records, then be redirected back here
   window.location.href = '/api/healthex-auth';
 }
-function dismissBanner() {
-  document.getElementById('recordsBanner').style.display = 'none';
-}
+function dismissBanner() {}
 function revokeRecords() {
   recordsConnected = false;
   SalusState.setRecordsConnected(false);
-  document.getElementById('recordsConnectedBar').style.display = 'none';
-  document.getElementById('recordsBanner').style.display       = 'block';
 }
 
 /* ══════════════════════════════════════════════════════
