@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
 <script>
-/* Salus AI auth gate — runs before page renders */
+/* Caedrix AI auth gate — runs before page renders */
 (function(){
-  var u=null;try{u=JSON.parse(localStorage.getItem('salus_user')||'null');}catch(_){}
+  var u=null;try{u=JSON.parse(localStorage.getItem('caedrix_user')||'null');}catch(_){}
   if(!u||!u.email){
     var t=encodeURIComponent(window.location.href);
     window.location.replace('login.html?redirect='+t);
@@ -27,7 +27,7 @@ function comingSoon(el, evt) {
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Salus AI — Health Decisions</title>
+<title>Caedrix AI — Health Decisions</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -821,8 +821,8 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 .hidden { display: none !important; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
 
-/* ── Salus User Status Bar ── */
-#salusUserBar{
+/* ── Caedrix User Status Bar ── */
+#caedrixUserBar{
   position:fixed;top:96px;left:0;right:0;z-index:99;
   background:rgba(7,16,32,0.98);
   border-bottom:1px solid rgba(255,255,255,0.055);
@@ -845,7 +845,7 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 @keyframes subsDotPulse{0%{box-shadow:0 0 0 0 rgba(82,196,136,.5);}70%{box-shadow:0 0 0 5px rgba(82,196,136,0);}100%{box-shadow:0 0 0 0 rgba(82,196,136,0);}}
 .subs-signout{padding:4px 9px;border-radius:6px;background:none;border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.22);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;transition:all .2s;}
 .subs-signout:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.5);}
-@media(max-width:768px){#salusUserBar{padding:0 16px;}.subs-email{display:none;}.subs-records span{display:none;}}
+@media(max-width:768px){#caedrixUserBar{padding:0 16px;}.subs-email{display:none;}.subs-records span{display:none;}}
 
 
 /* ── Print/Download bar ── */
@@ -856,7 +856,7 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 .print-btn-print{background:rgba(19,160,144,0.15);color:#13c0ac;border:1px solid rgba(19,160,144,0.3);}
 .print-btn-print:hover{background:rgba(19,160,144,0.25);color:white;}
 @media print{
-  nav,#salusUserBar,.print-bar,.pipeline-panel,.input-card,.clarify-panel,
+  nav,#caedrixUserBar,.print-bar,.pipeline-panel,.input-card,.clarify-panel,
   .section-tabs,.filter-tabs,.reset-btn,.records-banner,.records-connected-bar{display:none!important;}
   body{background:white!important;color:#111!important;}
   .results-section,.results-section.visible{display:block!important;}
@@ -972,7 +972,7 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 <nav>
   <div class="nav-logo">
     <a href="index.html" style="display:flex;align-items:center;">
-      <img src="salusAI-logo.jpg" class="logo-img" alt="Salus AI">
+      <img src="caedrixAI-logo.jpg" class="logo-img" alt="Caedrix AI">
     </a>
   </div>
     <div class="nav-actions">
@@ -987,7 +987,7 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
     <a href="#interface" class="nav-cta">Try Now →</a>
   </div>
 </nav>
-<div id="salusUserBar"></div>
+<div id="caedrixUserBar"></div>
 
 <!-- ══════════════════ HERO ══════════════════ -->
 <section class="hero">
@@ -996,12 +996,12 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
   <div class="hero-inner">
     <div class="hero-eyebrow">
       <div class="eyebrow-line"></div>
-      Salus AI · Health Decisions
+      Caedrix AI · Health Decisions
       <div class="eyebrow-line"></div>
     </div>
     <h1>The Right <em>Questions.</em><br>The Right <em>Information.</em></h1>
     <p class="hero-sub">
-      Describe the health decision you're facing. Salus AI will analyze your personal health record,
+      Describe the health decision you're facing. Caedrix AI will analyze your personal health record,
       review the evidence, and give you a clear, individualized breakdown of your options — so you
       walk into your next appointment informed and prepared.
     </p>
@@ -1085,7 +1085,7 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 
     <!-- Pipeline progress -->
     <div class="pipeline-panel" id="pipelinePanel">
-      <div class="pipeline-title">Salus AI · 5-Agent Review Pipeline</div>
+      <div class="pipeline-title">Caedrix AI · 5-Agent Review Pipeline</div>
       <div class="pipeline-track">
         <div class="pipeline-track-line"><div class="pipeline-track-fill" id="trackFill"></div></div>
         <div class="agents-row" style="width:100%;">
@@ -1195,13 +1195,13 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
     <div class="disclaimer-box">
       <div class="disclaimer-icon">ℹ️</div>
       <div class="disclaimer-text">
-        <strong>This is health information, not medical advice.</strong> Salus AI is designed to help you understand your options and have more informed conversations with your care team — not to replace clinical judgment. Always consult your physician before making any medical decision. The information above is based on evidence-based guidelines and, where your records are available, your personal health context.
+        <strong>This is health information, not medical advice.</strong> Caedrix AI is designed to help you understand your options and have more informed conversations with your care team — not to replace clinical judgment. Always consult your physician before making any medical decision. The information above is based on evidence-based guidelines and, where your records are available, your personal health context.
       </div>
     </div>
 
     <!-- New question -->
     <div class="new-question-bar visible" id="newQBar">
-      <div class="new-q-text">Have another question? Ask Salus AI anything about your health decisions.</div>
+      <div class="new-q-text">Have another question? Ask Caedrix AI anything about your health decisions.</div>
       <button class="new-q-btn" onclick="resetToQuestion()">Ask Another Question →</button>
     </div>
 
@@ -1210,11 +1210,11 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 
 <!-- ══════════════════ FOOTER ══════════════════ -->
 <footer>
-  <div class="footer-logo">Salus <span>AI</span></div>
+  <div class="footer-logo">Caedrix <span>AI</span></div>
   <p>Your personal health coach — built by a physician, powered by AI.</p>
   <div class="footer-divider"></div>
   <p class="footer-disclaimer">
-    Salus AI provides health information to help you understand your medical data and prepare for
+    Caedrix AI provides health information to help you understand your medical data and prepare for
     conversations with your care team. It does not constitute medical advice, diagnosis, or treatment.
     Always consult a qualified and licensed healthcare provider before making medical decisions.
   </p>
@@ -1222,20 +1222,20 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 
 <script>
 /* ══════════════════════════════════════════════════════
-   SALUS AUTH — shared state (localStorage-backed)
+   CAEDRIX AUTH — shared state (localStorage-backed)
 ══════════════════════════════════════════════════════ */
-const SalusAuth = {
-  getUser:             ()  => { try{ return JSON.parse(localStorage.getItem('salus_user')||'null'); }catch(_){return null;} },
-  logout:              ()  => { localStorage.removeItem('salus_user'); sessionStorage.clear(); window.location.href='login.html'; },
-  isRecordsConnected:  ()  => localStorage.getItem('salus_records_connected') === 'true',
-  setRecordsConnected: (v) => v ? localStorage.setItem('salus_records_connected','true') : localStorage.removeItem('salus_records_connected')
+const CaedrixAuth = {
+  getUser:             ()  => { try{ return JSON.parse(localStorage.getItem('caedrix_user')||'null'); }catch(_){return null;} },
+  logout:              ()  => { localStorage.removeItem('caedrix_user'); sessionStorage.clear(); window.location.href='login.html'; },
+  isRecordsConnected:  ()  => localStorage.getItem('caedrix_records_connected') === 'true',
+  setRecordsConnected: (v) => v ? localStorage.setItem('caedrix_records_connected','true') : localStorage.removeItem('caedrix_records_connected')
 };
 
-function salusInitUserBar() {
-  const bar = document.getElementById('salusUserBar');
+function caedrixInitUserBar() {
+  const bar = document.getElementById('caedrixUserBar');
   if (!bar) return;
-  const user    = SalusAuth.getUser() || {};
-  const rc      = SalusAuth.isRecordsConnected();
+  const user    = CaedrixAuth.getUser() || {};
+  const rc      = CaedrixAuth.isRecordsConnected();
   const initials= (user.email||'?')[0].toUpperCase();
   const email   = user.email || '';
   bar.innerHTML =
@@ -1248,7 +1248,7 @@ function salusInitUserBar() {
         ? '<div class="subs-records subs-records-on"><div class="subs-rdot subs-rdot-on"></div><span>Records Linked</span></div>'
         : '<a href="health-decisions.html" class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Link Medical Records</span></a>'
       ) +
-      '<button class="subs-signout" onclick="SalusAuth.logout()">Sign out</button>' +
+      '<button class="subs-signout" onclick="CaedrixAuth.logout()">Sign out</button>' +
     '</div>';
 }
 
@@ -1262,18 +1262,18 @@ let clarifyRound        = 0;
 const MAX_CLARIFY_ROUNDS = 1;  // Keep fast — 1 round max
 let finalClarifications = {};
 
-const SalusState = {
-  isRecordsConnected:  () => SalusAuth.isRecordsConnected(),
-  setRecordsConnected: (v) => SalusAuth.setRecordsConnected(v)
+const CaedrixState = {
+  isRecordsConnected:  () => CaedrixAuth.isRecordsConnected(),
+  setRecordsConnected: (v) => CaedrixAuth.setRecordsConnected(v)
 };
 
 /* ══════════════════════════════════════════════════════
    PAGE LOAD — restore API key + records state
 ══════════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', () => {
-  salusInitUserBar();
+  caedrixInitUserBar();
   renderProfileContextBox();
-  if (SalusState.isRecordsConnected()) {
+  if (CaedrixState.isRecordsConnected()) {
     recordsConnected = true;
   }
 });
@@ -1283,9 +1283,9 @@ window.addEventListener('DOMContentLoaded', () => {
 ══════════════════════════════════════════════════════ */
 
 /* Reads personal context saved on the Precision Medicine page */
-function getSalusLifeContext(){
+function getCaedrixLifeContext(){
   try{
-    const ctx=JSON.parse(localStorage.getItem('salus_life_context')||'null');
+    const ctx=JSON.parse(localStorage.getItem('caedrix_life_context')||'null');
     if(!ctx)return '';
     const parts=[];
     if(ctx.activities)parts.push('Favorite activities: '+ctx.activities);
@@ -1297,9 +1297,9 @@ function getSalusLifeContext(){
   }catch(_){return '';}
 }
 
-function getSalusHealthProfile(){
+function getCaedrixHealthProfile(){
   try{
-    const hp=JSON.parse(localStorage.getItem('salus_health_profile')||'null');
+    const hp=JSON.parse(localStorage.getItem('caedrix_health_profile')||'null');
     if(!hp)return '';
     const parts=[];
     if(hp.age)          parts.push('Age: '+hp.age);
@@ -1341,7 +1341,7 @@ function renderProfileContextBox() {
   };
   let hasAny = false;
   try {
-    const ctx = JSON.parse(localStorage.getItem('salus_life_context') || 'null');
+    const ctx = JSON.parse(localStorage.getItem('caedrix_life_context') || 'null');
     const group = document.getElementById('ctxPersonalGroup');
     const rows  = document.getElementById('ctxPersonalRows');
     if (ctx && group && rows) {
@@ -1353,7 +1353,7 @@ function renderProfileContextBox() {
     }
   } catch(_) {}
   try {
-    const hp = JSON.parse(localStorage.getItem('salus_health_profile') || 'null');
+    const hp = JSON.parse(localStorage.getItem('caedrix_health_profile') || 'null');
     const group = document.getElementById('ctxHealthGroup');
     const rows  = document.getElementById('ctxHealthRows');
     if (hp && group && rows) {
@@ -1374,7 +1374,7 @@ function connectRecords() {
 function dismissBanner() {}
 function revokeRecords() {
   recordsConnected = false;
-  SalusState.setRecordsConnected(false);
+  CaedrixState.setRecordsConnected(false);
 }
 
 /* ══════════════════════════════════════════════════════
@@ -1495,7 +1495,7 @@ function safeParseJSON(text){
 /* ══════════════════════════════════════════════════════
    AGENT 1 — CLARIFYING ASSISTANT
 ══════════════════════════════════════════════════════ */
-const AGENT_CLARIFY_SYSTEM = `You are Salus AI's Clarifying Assistant. Your ONLY job is to determine whether the health question asked is clear enough to give a high-quality, personalized answer — and if not, ask the minimum number of questions needed to clarify it.
+const AGENT_CLARIFY_SYSTEM = `You are Caedrix AI's Clarifying Assistant. Your ONLY job is to determine whether the health question asked is clear enough to give a high-quality, personalized answer — and if not, ask the minimum number of questions needed to clarify it.
 
 Respond with ONLY this JSON:
 {
@@ -1517,7 +1517,7 @@ RULES:
 /* ══════════════════════════════════════════════════════
    AGENT 2 — CLINICAL DECISION ANALYST (main analysis)
 ══════════════════════════════════════════════════════ */
-const AGENT_ANALYZE_SYSTEM = `You are Salus AI's Clinical Decision Analyst — a physician-trained health decision support agent. Your role is to help patients understand their health options clearly, accurately, and without replacing their physician.
+const AGENT_ANALYZE_SYSTEM = `You are Caedrix AI's Clinical Decision Analyst — a physician-trained health decision support agent. Your role is to help patients understand their health options clearly, accurately, and without replacing their physician.
 
 ALWAYS respond with a JSON object matching this exact schema:
 {
@@ -1555,7 +1555,7 @@ RULES:
 /* ══════════════════════════════════════════════════════
    AGENT 3 — ACCURACY REVIEW (hallucination & citation check)
 ══════════════════════════════════════════════════════ */
-const AGENT_ACCURACY_SYSTEM = `You are Salus AI's Medical Accuracy Reviewer. Your job is to rigorously review clinical decision guidance for accuracy, safety, and whether cited evidence actually exists.
+const AGENT_ACCURACY_SYSTEM = `You are Caedrix AI's Medical Accuracy Reviewer. Your job is to rigorously review clinical decision guidance for accuracy, safety, and whether cited evidence actually exists.
 
 You will receive a JSON object from the Clinical Analyst. Review it and respond with ONLY:
 {
@@ -1583,7 +1583,7 @@ Return ONLY valid JSON. No preamble.`;
 /* ══════════════════════════════════════════════════════
    AGENT 4 — LEGAL REVIEW (scope of practice check)
 ══════════════════════════════════════════════════════ */
-const AGENT_LEGAL_SYSTEM = `You are Salus AI's Legal & Scope-of-Practice Reviewer. Your job is to ensure that all content stays within the appropriate scope of a patient health education service, and does not cross into medical advice that must be provided by a licensed physician.
+const AGENT_LEGAL_SYSTEM = `You are Caedrix AI's Legal & Scope-of-Practice Reviewer. Your job is to ensure that all content stays within the appropriate scope of a patient health education service, and does not cross into medical advice that must be provided by a licensed physician.
 
 You will receive a JSON object. Review it and respond with ONLY:
 {
@@ -1615,7 +1615,7 @@ Return ONLY valid JSON. No preamble.`;
 /* ══════════════════════════════════════════════════════
    AGENT 5 — CLARITY EDITOR
 ══════════════════════════════════════════════════════ */
-const AGENT_CLARITY_SYSTEM = `You are Salus AI's Plain Language Editor. You will receive a clinical analysis JSON plus accuracy and legal review outputs. Your job is to apply those corrections AND rewrite the output so it is easy to understand for someone with a general education but no medical background.
+const AGENT_CLARITY_SYSTEM = `You are Caedrix AI's Plain Language Editor. You will receive a clinical analysis JSON plus accuracy and legal review outputs. Your job is to apply those corrections AND rewrite the output so it is easy to understand for someone with a general education but no medical background.
 
 PLAIN LANGUAGE RULES:
 - Replace ALL medical jargon with everyday words. If a medical term must stay (e.g. in a question for the doctor), immediately follow it with a plain-English explanation in parentheses — for example: "hypertension (high blood pressure)" or "contraindicated (should not be used together)".
@@ -1664,7 +1664,7 @@ async function runClarifyAgent() {
   setAgentState(1, 'running', 'Reading your question…');
 
   // Build clarify message with full history
-  let msg = `The patient's health question: "${lastQuestion}"${getSalusHealthProfile()}${getSalusLifeContext()}`;
+  let msg = `The patient's health question: "${lastQuestion}"${getCaedrixHealthProfile()}${getCaedrixLifeContext()}`;
   if (clarifyingHistory.length > 0) {
     msg += `\nPrevious clarification rounds (${clarifyingHistory.length}):\n`;
     clarifyingHistory.forEach(r => {
@@ -1756,7 +1756,7 @@ function submitClarifications() {
 ══════════════════════════════════════════════════════ */
 async function runMainPipeline() {
   // Build analysis message
-  let userMsg = `The patient asks: "${lastQuestion}"${getSalusHealthProfile()}${getSalusLifeContext()}`;
+  let userMsg = `The patient asks: "${lastQuestion}"${getCaedrixHealthProfile()}${getCaedrixLifeContext()}`;
   const hasClarifications = Object.keys(finalClarifications).some(k => finalClarifications[k]);
   if (hasClarifications) {
     userMsg += '\n\nClarifying information provided by the patient:\n';
@@ -1765,8 +1765,8 @@ async function runMainPipeline() {
     });
   }
   // Determine what personal data is available
-  const hasHealthProfile = getSalusHealthProfile().length > 0;
-  const hasLifeContext   = getSalusLifeContext().length > 0;
+  const hasHealthProfile = getCaedrixHealthProfile().length > 0;
+  const hasLifeContext   = getCaedrixLifeContext().length > 0;
   if (recordsConnected) {
     userMsg += '\n\nNote: This patient has linked their medical records via HealthEx. Personalize your analysis accordingly.';
   } else if (hasHealthProfile || hasLifeContext) {
@@ -1881,7 +1881,7 @@ function renderResults(result, accuracy, legal, originalQuestion) {
     '"' + (result.question_understood || originalQuestion) + '"';
 
   const now = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  const hasProfileData = getSalusHealthProfile().length > 0 || getSalusLifeContext().length > 0;
+  const hasProfileData = getCaedrixHealthProfile().length > 0 || getCaedrixLifeContext().length > 0;
   const personalizationChip = recordsConnected
     ? '<div class="results-meta-chip">🏥 Personalized to your records</div>'
     : hasProfileData
@@ -1899,9 +1899,9 @@ function renderResults(result, accuracy, legal, originalQuestion) {
     accuracy?.reviewer_note,
     legal?.legal_note
   ].filter(Boolean).join(' · ');
-  document.getElementById('agentNote').textContent = accuracyNote || 'Reviewed by Salus AI 5-agent pipeline.';
+  document.getElementById('agentNote').textContent = accuracyNote || 'Reviewed by Caedrix AI 5-agent pipeline.';
 
-  const hasProfileData = getSalusHealthProfile().length > 0 || getSalusLifeContext().length > 0;
+  const hasProfileData = getCaedrixHealthProfile().length > 0 || getCaedrixLifeContext().length > 0;
   if (result.patient_context_used && (recordsConnected || hasProfileData)) {
     document.getElementById('contextBox').style.display = 'flex';
     document.getElementById('contextBody').textContent = result.patient_context_used;
@@ -2021,8 +2021,8 @@ document.getElementById('questionInput').addEventListener('keydown', function(e)
   const recordsParam = params.get('records');
   if (recordsParam === 'connected') {
     // Patient just authorized HealthEx — mark as connected and clean URL
-    localStorage.setItem('salus_records_connected', 'true');
-    SalusAuth.setRecordsConnected(true);
+    localStorage.setItem('caedrix_records_connected', 'true');
+    CaedrixAuth.setRecordsConnected(true);
     window.history.replaceState({}, '', window.location.pathname);
   } else if (recordsParam === 'error') {
     const reason = params.get('reason') || 'unknown';
@@ -2034,7 +2034,7 @@ document.getElementById('questionInput').addEventListener('keydown', function(e)
 
 function downloadResults() {
   const title = document.getElementById('resultsDiagnosisName')?.textContent ||
-                document.getElementById('resultQuestionEcho')?.textContent || 'Salus AI Results';
+                document.getElementById('resultQuestionEcho')?.textContent || 'Caedrix AI Results';
   const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+title+'</title>' +
     '<style>body{font-family:Georgia,serif;max-width:800px;margin:40px auto;color:#111;line-height:1.6;}' +
     'h1{font-size:28px;}h2{font-size:20px;margin-top:32px;border-bottom:1px solid #ccc;padding-bottom:6px;}' +
@@ -2043,7 +2043,7 @@ function downloadResults() {
   const blob = new Blob([html], {type:'text/html'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = title.replace(/[^a-z0-9]/gi,'_').toLowerCase() + '_salus_ai.html';
+  a.download = title.replace(/[^a-z0-9]/gi,'_').toLowerCase() + '_caedrix_ai.html';
   a.click();
 }
 
