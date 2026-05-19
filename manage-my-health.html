@@ -766,13 +766,19 @@ async function generatePlan(){
   lastProfile={
     age: hp.age||'not provided',
     sex: hp.sex||'not provided',
+    height: hp.height||'',
+    weight: hp.weight||'',
     smoking: hp.smoking||'',
     diabetes: hp.diabetes||'',
     heartDisease: hp.heartDisease||'',
     conditions: hp.conditions||'',
     medications: hp.medications||'',
+    allergies: hp.allergies||'',
+    surgeries: hp.surgeries||'',
     screenings: hp.screenings||'',
     familyHistory: hp.familyHistory||'',
+    exerciseHabits: hp.exerciseHabits||'',
+    riskFactors: hp.riskFactors||'',
     recordsConnected
   };
 
@@ -829,28 +835,42 @@ async function generatePlan(){
 }
 
 function buildProfileMessage(p){
-  return `Patient Profile for Preventive Care Planning:
-Age: ${p.age}
-Biological Sex: ${p.sex}
-Smoking: ${p.smoking||'Not provided'}
-Diabetes: ${p.diabetes||'Not provided'}
-Heart Disease: ${p.heartDisease||'Not provided'}
-Other Conditions: ${p.conditions||'None provided'}
-Current Medications: ${p.medications||'None provided'}
-Recent Screenings: ${p.screenings||'None provided'}
-Family History: ${p.familyHistory||'None provided'}
-Medical Records Connected: ${p.recordsConnected?'Yes — personalize accordingly':'No — use profile only'}${getSalusLifeContext()}
+  const lines=[
+    `Age: ${p.age}`,
+    `Biological Sex: ${p.sex}`,
+    p.height         ? `Height: ${p.height}` : null,
+    p.weight         ? `Weight: ${p.weight}` : null,
+    `Smoking: ${p.smoking||'Not provided'}`,
+    `Diabetes: ${p.diabetes||'Not provided'}`,
+    `Heart Disease: ${p.heartDisease||'Not provided'}`,
+    p.conditions     ? `Other Conditions: ${p.conditions}` : `Other Conditions: None provided`,
+    p.medications    ? `Current Medications: ${p.medications}` : `Current Medications: None provided`,
+    p.allergies      ? `Allergies: ${p.allergies}` : null,
+    p.surgeries      ? `Prior Surgeries / Procedures: ${p.surgeries}` : null,
+    `Recent Screenings: ${p.screenings||'None provided'}`,
+    `Family History: ${p.familyHistory||'None provided'}`,
+    p.exerciseHabits ? `Exercise Habits: ${p.exerciseHabits}` : null,
+    p.riskFactors    ? `Additional Risk Factors: ${p.riskFactors}` : null,
+    `Medical Records Connected: ${p.recordsConnected?'Yes — personalize accordingly':'No — use profile only'}`
+  ].filter(Boolean).join('\n');
 
-Generate a COMPLETE preventive care plan for this patient including ALL relevant screenings, immunizations, and health maintenance items. Include alternatives where they exist (colonoscopy vs FIT, mammogram approaches, etc.). Use the personal context above to make recommendations practical for this patient's actual life — their activities, responsibilities, and living situation.`;
+  const lifeCtx = getSalusLifeContext();
+  return `Patient Profile for Preventive Care Planning:\n${lines}${lifeCtx}\n\nIMPORTANT: Generate a COMPLETE, personalized preventive care plan that uses ALL of the above profile data. Reference the patient's specific conditions, medications, family history, and personal context when selecting and tailoring each recommendation — do not produce a generic checklist. Include alternatives where they exist (colonoscopy vs FIT, mammogram approaches, etc.). Use the personal context to make recommendations practical for this patient's actual life — their activities, responsibilities, and living situation.`;
 }
 
 function renderResults(r,accuracy,profile){
   const sec=document.getElementById('resultsSection');
   sec.style.display='block';sec.classList.add('visible');
 
-  document.getElementById('profileEcho').textContent=`${profile.age}-year-old ${profile.sex.toLowerCase()}${profile.conditions?` · ${profile.conditions}`:''} ${recordsConnected?'· Records connected':''}`;
+  document.getElementById('profileEcho').textContent=`${profile.age}-year-old ${profile.sex.toLowerCase()}${profile.conditions?` · ${profile.conditions}`:''}`;
   const now=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  document.getElementById('resultsMeta').innerHTML=`<div class="results-meta-chip">📅 ${now}</div><div class="results-meta-chip">${(r.care_items||[]).length} care items</div><div class="results-meta-chip">✓ 5-Agent Review</div>${recordsConnected?'<div class="results-meta-chip">🏥 Personalized to your records</div>':'<div class="results-meta-chip">📋 Guideline-based</div>'}`;
+  const hasProfileData = getSalusHealthProfile().length > 0 || getSalusLifeContext().length > 0;
+  const personalizationChip = recordsConnected
+    ? '<div class="results-meta-chip">🏥 Personalized to your records</div>'
+    : hasProfileData
+      ? '<div class="results-meta-chip">👤 Personalized to your profile</div>'
+      : '<div class="results-meta-chip">📋 Guideline-based</div>';
+  document.getElementById('resultsMeta').innerHTML=`<div class="results-meta-chip">📅 ${now}</div><div class="results-meta-chip">${(r.care_items||[]).length} care items</div><div class="results-meta-chip">✓ 5-Agent Review</div>${personalizationChip}`;
   document.getElementById('agentNote').textContent=accuracy?.reviewer_note||'Reviewed by Salus AI 5-agent pipeline.';
   document.getElementById('personalizationNote').innerHTML=`<strong>How this plan was personalized:</strong> ${esc(r.personalization_notes||'Based on your age, sex, and provided health profile against current USPSTF, ACIP, and major society guidelines.')}`;
 

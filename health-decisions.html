@@ -1545,6 +1545,7 @@ RULES:
 - Always include 2-4 options unless the question genuinely only has one answer.
 - Evidence levels: high = RCT/meta-analysis/major guideline; moderate = observational studies/consensus; low = expert opinion/limited data
 - Stay within scope: help patients understand options, not prescribe. Never say "you should do X."
+- If the message contains patient health profile data (age, sex, conditions, medications, etc.) or personal context (activities, living situation, etc.), you MUST use that information to personalize the analysis. Populate patient_context_used with a concise summary of the specific profile details that shaped your answer. Do not default to generic guidance when patient data is present.
 - If the message indicates the patient has connected their HealthEx records, note this in your patient_context_used field and tailor your analysis to a patient who has taken proactive steps to manage their health data.
 - Be direct and concrete. Avoid vague hedge-piling.
 - Only cite literature that actually exists. If unsure of a specific citation, describe the type of evidence instead.
@@ -1762,9 +1763,16 @@ async function runMainPipeline() {
       if (a) userMsg += `Q: ${q}\nA: ${a}\n\n`;
     });
   }
-  userMsg += recordsConnected
-    ? '\n\nNote: This patient has linked their medical records via HealthEx. Personalize your analysis accordingly, noting that a connected records context is available. Provide guidance tailored to a patient who has taken this step to share their health data.'
-    : '\n\nNo personal health records are connected. Provide high-quality general guidance and note that connecting records via HealthEx would allow a more personalized analysis.';
+  // Determine what personal data is available
+  const hasHealthProfile = getSalusHealthProfile().length > 0;
+  const hasLifeContext   = getSalusLifeContext().length > 0;
+  if (recordsConnected) {
+    userMsg += '\n\nNote: This patient has linked their medical records via HealthEx. Personalize your analysis accordingly.';
+  } else if (hasHealthProfile || hasLifeContext) {
+    userMsg += '\n\nIMPORTANT: The patient has provided their personal health profile and/or personal context above. These are real, self-reported health details about this specific patient. You MUST use this information to personalize your analysis — do not treat this as a generic query. Reference the specific details provided (age, conditions, medications, activities, living situation, etc.) in your how_it_applies fields and key_takeaway. Populate patient_context_used with a summary of which profile details you applied.';
+  } else {
+    userMsg += '\n\nNo personal health profile or records are available. Provide high-quality general guidance and note that adding a health profile on the Precision Medicine page would allow a more personalized analysis.';
+  }
 
   try {
     /* ── Agent 2: Clinical Analysis ── */
@@ -1872,9 +1880,15 @@ function renderResults(result, accuracy, legal, originalQuestion) {
     '"' + (result.question_understood || originalQuestion) + '"';
 
   const now = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const hasProfileData = getSalusHealthProfile().length > 0 || getSalusLifeContext().length > 0;
+  const personalizationChip = recordsConnected
+    ? '<div class="results-meta-chip">🏥 Personalized to your records</div>'
+    : hasProfileData
+      ? '<div class="results-meta-chip">👤 Personalized to your profile</div>'
+      : '<div class="results-meta-chip">📚 General guidance</div>';
   document.getElementById('resultsMeta').innerHTML = `
     <div class="results-meta-chip">📅 ${now}</div>
-    ${recordsConnected ? '<div class="results-meta-chip">🏥 Personalized to your records</div>' : '<div class="results-meta-chip">📚 General guidance</div>'}
+    ${personalizationChip}
     <div class="results-meta-chip">⚗️ ${(result.options || []).length} options analyzed</div>
     <div class="results-meta-chip">✓ 5-Agent Review</div>
   `;
@@ -1886,7 +1900,8 @@ function renderResults(result, accuracy, legal, originalQuestion) {
   ].filter(Boolean).join(' · ');
   document.getElementById('agentNote').textContent = accuracyNote || 'Reviewed by Salus AI 5-agent pipeline.';
 
-  if (result.patient_context_used && recordsConnected) {
+  const hasProfileData = getSalusHealthProfile().length > 0 || getSalusLifeContext().length > 0;
+  if (result.patient_context_used && (recordsConnected || hasProfileData)) {
     document.getElementById('contextBox').style.display = 'flex';
     document.getElementById('contextBody').textContent = result.patient_context_used;
   } else {
