@@ -587,24 +587,11 @@ nav {
   </p>
 </footer>
 
+<script src="caedrix-shared.js"></script>
 <script>
 /* ════════════════════════════════════
    AUTH
 ════════════════════════════════════ */
-const SalusAuth = {
-  logout:()=>{sessionStorage.clear();window.location.href='login.html';},
-  isRecordsConnected:()=>sessionStorage.getItem('caedrix_records_connected')==='true'
-};
-function salusInitUserBar(){
-  const bar=document.getElementById('salusUserBar');
-  if(!bar)return;
-  bar.innerHTML=
-    '<div class="subs-left">' +
-    '<div class="subs-avatar" style="background:rgba(19,160,144,0.25);color:#13a090;font-size:11px;">β</div>' +
-    '<span class="subs-email">Beta Session · Health data not stored</span>' +
-    '</div>' +
-    '<div class="subs-right"><button class="subs-signout" onclick="sessionStorage.clear();window.location.href='login.html'">End Session</button></div>';
-}
 window.addEventListener('DOMContentLoaded',salusInitUserBar);
 
 /* ════════════════════════════════════
@@ -625,19 +612,6 @@ function setHint(el){
 ════════════════════════════════════ */
 
 /* Reads personal context saved on the Precision Medicine page */
-function getSalusLifeContext(){
-  try{
-    const ctx=JSON.parse(sessionStorage.getItem('caedrix_life_context')||'null');
-    if(!ctx)return '';
-    const parts=[];
-    if(ctx.activities)parts.push('Favorite activities: '+ctx.activities);
-    if(ctx.important) parts.push('Important personal context: '+ctx.important);
-    if(ctx.caregiver) parts.push('Caregiver responsibilities: '+ctx.caregiver);
-    if(ctx.living)    parts.push('Living situation: '+ctx.living);
-    if(!parts.length) return '';
-    return '\n\n---\nPersonal context about this patient:\n'+parts.join('\n')+'\n---';
-  }catch(_){return '';}
-}
 
 const AGENT_ICONS={1:'💬',2:'🩺',3:'🔬',4:'⚖️',5:'✦'};
 // Track fill % when each agent completes — visual progress indicator across the 5-stage pipeline
@@ -685,131 +659,7 @@ function freezePipelineTimer(){
 /* ════════════════════════════════════
    API
 ════════════════════════════════════ */
-async function callClaude({systemPrompt,userContent,maxTokens=2500,useWebSearch=false,model='claude-sonnet-4-6'},_retry=0){
-  const body={
-    model:model,
-    max_tokens:maxTokens,
-    system:systemPrompt,
-    messages:[{role:'user',content:userContent}]
-  };
-  if(useWebSearch){
-    body.tools=[{type:'web_search_20250305',name:'web_search'}];
-  }
-  // 90s client-side timeout — if /api/claude hangs we want to fail fast, not forever
-  const ctrl=new AbortController();
-  const timeoutId=setTimeout(()=>ctrl.abort(),90000);
-  let res;
-  try{
-    res=await fetch('/api/claude',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(body),
-      signal:ctrl.signal
-    });
-  }catch(e){
-    clearTimeout(timeoutId);
-    if(e.name==='AbortError')throw new Error('Request timed out after 90s. The serverless function likely exceeded its limit. Try a more specific diagnosis or reduce max_tokens.');
-    throw e;
-  }
-  clearTimeout(timeoutId);
-  if((res.status===529||res.status===503)&&_retry<2){
-    await new Promise(r=>setTimeout(r,(_retry+1)*2000));
-    return callClaude({systemPrompt,userContent,maxTokens,useWebSearch,model},_retry+1);
-  }
-  if(!res.ok){
-    const err=await res.text();
-    throw new Error('API '+res.status+': '+err.substring(0,200));
-  }
-  return await res.json();
-}
 
-function extractText(data){
-  return (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
-}
-function safeParseJSON(text){
-  if(!text||!text.trim())throw new Error('Empty response');
-
-  // Strip markdown code fences and trim
-  let clean=text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
-
-  // 1) Fast path — whole string is valid JSON
-  try{return JSON.parse(clean);}catch(_){}
-
-  // 2) Find the first '{' and walk to its matching '}' (skips preamble AND postamble)
-  const start=clean.indexOf('{');
-  if(start<0)throw new Error('No JSON object found. Preview: '+clean.substring(0,200));
-
-  const balanced=extractBalancedObject(clean,start);
-  if(balanced){
-    try{return JSON.parse(balanced);}catch(_){}
-  }
-
-  // 3) Truncated JSON — best-effort repair (closes open strings + dangling brackets)
-  const repaired=repairTruncatedJSON(clean.substring(start));
-  if(repaired){
-    try{return JSON.parse(repaired);}catch(_){}
-  }
-
-  // 4) Last resort — original greedy match
-  const m=clean.match(/\{[\s\S]*\}/);
-  if(m){try{return JSON.parse(m[0]);}catch(_){}}
-
-  throw new Error('JSON parse failed. Preview: '+clean.substring(0,200));
-}
-
-/* Walk from `start` (a '{' char) until the matching '}'. Properly tracks
-   strings and escapes so braces inside string values are ignored.
-   Returns the balanced substring, or null if the closing brace is missing. */
-function extractBalancedObject(s,start){
-  let depth=0,inStr=false,esc=false;
-  for(let i=start;i<s.length;i++){
-    const ch=s[i];
-    if(inStr){
-      if(esc){esc=false;}
-      else if(ch==='\\'){esc=true;}
-      else if(ch==='"'){inStr=false;}
-      continue;
-    }
-    if(ch==='"'){inStr=true;continue;}
-    if(ch==='{')depth++;
-    else if(ch==='}'){depth--;if(depth===0)return s.substring(start,i+1);}
-  }
-  return null;
-}
-
-/* Repair a JSON object that was truncated (typically by max_tokens):
-   - close any open string,
-   - drop dangling commas,
-   - fill missing values after a trailing colon with null,
-   - close all open brackets in reverse order.
-   Best-effort — caller must still try/catch JSON.parse. */
-function repairTruncatedJSON(text){
-  let s=text.replace(/\s+$/,'');
-  let inStr=false,esc=false;
-  const stack=[]; // '{' or '['
-  for(let i=0;i<s.length;i++){
-    const ch=s[i];
-    if(inStr){
-      if(esc){esc=false;}
-      else if(ch==='\\'){esc=true;}
-      else if(ch==='"'){inStr=false;}
-      continue;
-    }
-    if(ch==='"'){inStr=true;continue;}
-    if(ch==='{'||ch==='[')stack.push(ch);
-    else if(ch==='}'){if(stack[stack.length-1]==='{')stack.pop();}
-    else if(ch===']'){if(stack[stack.length-1]==='[')stack.pop();}
-  }
-  if(inStr)s+='"';                  // close dangling string
-  s=s.replace(/,\s*$/,'');           // drop trailing comma
-  if(/:\s*$/.test(s))s+='null';      // fill missing value after colon
-  s=s.replace(/,\s*$/,'');           // (re-check after the close-string step)
-  while(stack.length){
-    const o=stack.pop();
-    s+=(o==='{'?'}':']');
-  }
-  return s;
-}
 
 /* ════════════════════════════════════
    AGENT 1 — CLARIFIER (Haiku, fast)
@@ -1296,11 +1146,6 @@ function handleError(err){
     e.innerHTML='<strong style="color:#e88;">⚠ Error:</strong> '+esc(msg)+'<br><span style="opacity:0.6;font-size:12px;">Open browser console (F12) for details.</span>';
     document.getElementById('inputCard').after(e);
   },600);
-}
-
-function esc(str){
-  if(str===null||str===undefined)return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 document.getElementById('diagnosisInput').addEventListener('keydown',e=>{
