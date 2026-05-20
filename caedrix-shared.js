@@ -90,11 +90,12 @@
   const getCaedrixLifeContext = getSalusLifeContext;
 
   /* ── CLAUDE API ────────────────────────────────────────────────────
-   * Posts to /api/claude. 90s client-side timeout. Retries on 503/529.
+   * Posts to /api/claude. Client-side timeout (default 90s — pass timeoutMs
+   * for slower calls like those using web search). Retries on 503/529.
    * Throws on non-2xx with the server's error text included.
    * ────────────────────────────────────────────────────────────────── */
   async function callClaude(
-    { systemPrompt, userContent, maxTokens = 1500, useWebSearch = false, model = 'claude-sonnet-4-6' },
+    { systemPrompt, userContent, maxTokens = 1500, useWebSearch = false, model = 'claude-sonnet-4-6', timeoutMs = 90000 },
     _retry = 0
   ) {
     const body = {
@@ -106,9 +107,9 @@
     if (useWebSearch) {
       body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
     }
-    /* 90s client-side timeout — if /api/claude hangs we fail fast, not forever. */
+    /* Client-side timeout — if /api/claude hangs we fail fast, not forever. */
     const ctrl = new AbortController();
-    const timeoutId = setTimeout(() => ctrl.abort(), 90000);
+    const timeoutId = setTimeout(() => ctrl.abort(), timeoutMs);
     let res;
     try {
       res = await fetch('/api/claude', {
@@ -120,14 +121,14 @@
     } catch (e) {
       clearTimeout(timeoutId);
       if (e.name === 'AbortError') {
-        throw new Error('Request timed out after 90s. The serverless function likely exceeded its limit. Try a more specific input or reduce max_tokens.');
+        throw new Error('Request timed out after ' + Math.round(timeoutMs/1000) + 's. The serverless function likely exceeded its limit. Try a more specific input or reduce max_tokens.');
       }
       throw e;
     }
     clearTimeout(timeoutId);
     if ((res.status === 529 || res.status === 503) && _retry < 2) {
       await new Promise(r => setTimeout(r, (_retry + 1) * 2000));
-      return callClaude({ systemPrompt, userContent, maxTokens, useWebSearch, model }, _retry + 1);
+      return callClaude({ systemPrompt, userContent, maxTokens, useWebSearch, model, timeoutMs }, _retry + 1);
     }
     if (!res.ok) {
       const err = await res.text();

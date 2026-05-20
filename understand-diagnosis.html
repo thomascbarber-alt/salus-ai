@@ -592,7 +592,7 @@ nav {
 /* ════════════════════════════════════
    AUTH
 ════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded',salusInitUserBar);
+window.addEventListener('DOMContentLoaded', () => salusInitUserBar());
 
 /* ════════════════════════════════════
    STATE
@@ -931,12 +931,14 @@ async function runResearchInParallel(){
   // Note: web_search consumes output tokens for server_tool_use + search result blocks,
   // so the real JSON budget is much smaller than maxTokens. Keep these generous to
   // avoid mid-JSON truncation (which is what was causing Agent 2/3 parse errors).
+  // Trials agent gets a longer timeout (180s) because web_search round-trips are slow.
   const [clin,trials]=await Promise.allSettled([
     callClaude({systemPrompt:CLINICAL_SYSTEM,userContent:userMsg,maxTokens:4000,useWebSearch:false}),
-    callClaude({systemPrompt:TRIALS_SYSTEM,userContent:userMsg,maxTokens:5000,useWebSearch:true})
+    callClaude({systemPrompt:TRIALS_SYSTEM,userContent:userMsg,maxTokens:5000,useWebSearch:true,timeoutMs:180000})
   ]);
 
   let clinData=null,trialsData=null;
+  let trialsFromFallback=false;
 
   if(clin.status==='fulfilled'){
     try{clinData=safeParseJSON(extractText(clin.value));setAgentState(2,'done','Complete');}
@@ -949,7 +951,25 @@ async function runResearchInParallel(){
     try{trialsData=safeParseJSON(extractText(trials.value));setAgentState(3,'done','Complete');}
     catch(e){setAgentState(3,'error','Parse error');console.error('Agent 3 parse:',e);}
   }else{
-    setAgentState(3,'error','Failed');console.error('Agent 3 fetch:',trials.reason);
+    console.error('Agent 3 fetch:',trials.reason);
+    // FALLBACK — retry without web search using the model's own knowledge.
+    // Less current than web-search trials but much faster (~15s) and gets the user *something*.
+    setAgentState(3,'running','Retrying without web search…');
+    try{
+      const r3b=await callClaude({
+        systemPrompt:TRIALS_SYSTEM+'\n\nNOTE: Web search is unavailable. Use your existing knowledge. If you cannot verify a specific trial or specialist, describe the category of trial activity or type of program instead of inventing names.',
+        userContent:userMsg,
+        maxTokens:3500,
+        useWebSearch:false,
+        timeoutMs:60000
+      });
+      trialsData=safeParseJSON(extractText(r3b));
+      trialsFromFallback=true;
+      setAgentState(3,'done','Complete (fallback)');
+    }catch(e2){
+      setAgentState(3,'error','Failed');
+      console.error('Agent 3 fallback also failed:',e2);
+    }
   }
 
   if(!clinData&&!trialsData){
@@ -958,6 +978,8 @@ async function runResearchInParallel(){
 
   // Merge into single object for review pipeline
   let merged={...(clinData||{}),...(trialsData||{})};
+  if(trialsFromFallback)merged._trialsFromFallback=true;
+  if(!trialsData)merged._trialsFailed=true;
 
   /* ── AGENT 4: Legal Review (Haiku — fast scope check) ── */
   setAgentState(4,'running','Checking scope…');
@@ -1071,7 +1093,24 @@ function renderResults(c,legal){
     '</div></div>').join('');
 
   /* PANE 2 — Trials & Centers */
-  document.getElementById('s3TrialsOverview').textContent=c.trials_overview||'';
+  // If Agent 3 failed entirely, c._trialsFailed is set and the section will be missing
+  // its trial/specialist/center fields. Show a clear message instead of a blank pane.
+  // If Agent 3 used the no-web-search fallback, surface that so clinician knows the
+  // data is from model knowledge (less current) rather than verified web results.
+  const trialsFailedNotice = c._trialsFailed
+    ? '<div class="trials-cta" style="background:rgba(192,57,43,0.06);border-color:rgba(192,57,43,0.25);color:rgba(255,200,200,0.85);">'
+      + '<strong>⚠ Trials & Centers lookup failed.</strong> The research agent timed out or returned an unparseable response. '
+      + 'Please regenerate, or verify trials directly at <a href="https://clinicaltrials.gov" target="_blank">ClinicalTrials.gov</a>.'
+      + '</div>'
+    : '';
+  const trialsFallbackNotice = c._trialsFromFallback
+    ? '<div class="trials-cta" style="background:rgba(184,147,42,0.06);border-color:rgba(184,147,42,0.25);">'
+      + '<strong>ℹ Web search unavailable.</strong> The trials/centers below are from model knowledge rather than a live web search. '
+      + 'They may not reflect the most current studies — please verify at <a href="https://clinicaltrials.gov" target="_blank">ClinicalTrials.gov</a>.'
+      + '</div>'
+    : '';
+
+  document.getElementById('s3TrialsOverview').innerHTML = trialsFailedNotice + trialsFallbackNotice + esc(c.trials_overview||'');
   document.getElementById('s3Trials').innerHTML=(c.active_trials||[]).map(tr=>
     '<div class="trial-card">'+
     '<div class="trial-top"><div class="trial-title">'+esc(tr.title)+'</div>'+
