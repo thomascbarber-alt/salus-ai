@@ -33,10 +33,16 @@
   const HEALTH_PROFILE_KEY = 'caedrix_health_profile';
 
   /* ── SESSION USER BAR ─────────────────────────────────────────────
-   * Injects the top session bar. Looks for #salusUserBar and fills it.
+   * Injects the top session bar (the "Beta Session" strip with the
+   * Feedback link and End Session button). On first call it also
+   * injects the feedback modal's CSS and HTML so the link works.
    * Safe to call on pages that don't have the bar — no-ops.
    * ────────────────────────────────────────────────────────────────── */
   function salusInitUserBar() {
+    /* Inject the feedback modal once per page */
+    if (!document.getElementById('caedrix-feedback-styles')) {
+      _injectFeedbackUI();
+    }
     const bar = document.getElementById('salusUserBar');
     if (!bar) return;
     bar.innerHTML =
@@ -45,9 +51,123 @@
         '<span class="subs-email">Beta Session · Health data not stored</span>' +
       '</div>' +
       '<div class="subs-right">' +
+        '<button class="subs-feedback" onclick="CaedrixFeedback.open()">💬 Feedback</button>' +
         '<button class="subs-signout" onclick="CaedrixAuth.logout()">End Session</button>' +
       '</div>';
   }
+
+  /* ── FEEDBACK MODAL ───────────────────────────────────────────────
+   * In-app form that POSTs to a Google Apps Script web app, which
+   * emails the feedback to the configured address. The Apps Script
+   * URL must be set in FEEDBACK_ENDPOINT below before deploy.
+   * ────────────────────────────────────────────────────────────────── */
+  /* PASTE THE FEEDBACK Apps Script /exec URL HERE (separate from signin) */
+  const FEEDBACK_ENDPOINT = 'PASTE_FEEDBACK_APPS_SCRIPT_URL_HERE';
+
+  function _injectFeedbackUI() {
+    const style = document.createElement('style');
+    style.id = 'caedrix-feedback-styles';
+    style.textContent =
+      '.subs-feedback{padding:4px 10px;border-radius:6px;background:none;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.55);cursor:pointer;font-family:inherit;font-size:11px;transition:all .2s;margin-right:8px;}' +
+      '.subs-feedback:hover{border-color:rgba(19,160,144,0.5);color:rgba(19,160,144,0.9);}' +
+      '#cf-modal{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;font-family:"DM Sans",sans-serif;}' +
+      '#cf-modal.open{display:flex;}' +
+      '#cf-modal .cf-backdrop{position:absolute;inset:0;background:rgba(7,16,32,0.78);backdrop-filter:blur(6px);}' +
+      '#cf-modal .cf-dialog{position:relative;max-width:520px;width:calc(100% - 32px);background:#0c1e3a;border:1px solid rgba(212,170,58,0.25);border-radius:18px;padding:28px;box-shadow:0 24px 80px rgba(0,0,0,0.5);animation:cf-pop .25s ease;}' +
+      '@keyframes cf-pop{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}' +
+      '#cf-modal .cf-title{font-family:"Playfair Display",serif;font-size:22px;font-weight:600;color:#fff;margin-bottom:6px;}' +
+      '#cf-modal .cf-sub{font-size:13px;color:rgba(255,255,255,0.55);line-height:1.55;margin-bottom:18px;}' +
+      '#cf-modal label{display:block;font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:6px;}' +
+      '#cf-modal textarea,#cf-modal input{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px 14px;font-family:"DM Sans",sans-serif;font-size:14px;color:#fff;outline:none;transition:all .2s;}' +
+      '#cf-modal textarea{min-height:130px;resize:vertical;margin-bottom:14px;}' +
+      '#cf-modal input{margin-bottom:16px;}' +
+      '#cf-modal textarea:focus,#cf-modal input:focus{border-color:rgba(19,160,144,0.5);background:rgba(19,160,144,0.05);}' +
+      '#cf-modal textarea::placeholder,#cf-modal input::placeholder{color:rgba(255,255,255,0.2);}' +
+      '#cf-modal .cf-actions{display:flex;gap:10px;justify-content:flex-end;}' +
+      '#cf-modal .cf-cancel{padding:11px 18px;background:none;border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:rgba(255,255,255,0.6);cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;}' +
+      '#cf-modal .cf-cancel:hover{border-color:rgba(255,255,255,0.3);color:#fff;}' +
+      '#cf-modal .cf-send{padding:11px 22px;background:linear-gradient(135deg,#13a090,#0a7c6e);border:none;border-radius:10px;color:#fff;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;}' +
+      '#cf-modal .cf-send:hover:not(:disabled){background:linear-gradient(135deg,#1abfad,#13a090);}' +
+      '#cf-modal .cf-send:disabled{opacity:.6;cursor:not-allowed;}' +
+      '#cf-modal .cf-msg{display:none;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;line-height:1.5;}' +
+      '#cf-modal .cf-msg.error{display:block;background:rgba(192,57,43,0.12);border:1px solid rgba(192,57,43,0.3);color:#e07070;}' +
+      '#cf-modal .cf-msg.success{display:block;background:rgba(10,124,110,0.12);border:1px solid rgba(10,124,110,0.3);color:#13c0ac;}';
+    document.head.appendChild(style);
+
+    const modal = document.createElement('div');
+    modal.id = 'cf-modal';
+    modal.innerHTML =
+      '<div class="cf-backdrop" onclick="CaedrixFeedback.close()"></div>' +
+      '<div class="cf-dialog">' +
+        '<div class="cf-title">Send Feedback</div>' +
+        '<div class="cf-sub">Tell us what\'s working, what\'s not, or anything you\'d like to see. Your feedback comes straight to the team.</div>' +
+        '<div class="cf-msg" id="cf-msg"></div>' +
+        '<label for="cf-text">Your feedback</label>' +
+        '<textarea id="cf-text" placeholder="Type your feedback…"></textarea>' +
+        '<label for="cf-email">Email (optional — only if you\'d like a reply)</label>' +
+        '<input id="cf-email" type="email" placeholder="you@example.com">' +
+        '<div class="cf-actions">' +
+          '<button class="cf-cancel" onclick="CaedrixFeedback.close()">Cancel</button>' +
+          '<button class="cf-send" id="cf-send" onclick="CaedrixFeedback.submit()">Send</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(modal);
+
+    /* Escape key closes the modal */
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') CaedrixFeedback.close();
+    });
+  }
+
+  const CaedrixFeedback = {
+    open() {
+      const m = document.getElementById('cf-modal');
+      if (!m) return;
+      m.classList.add('open');
+      /* reset msg + autofocus textarea */
+      const msg = document.getElementById('cf-msg');
+      if (msg) { msg.className = 'cf-msg'; msg.textContent = ''; }
+      setTimeout(() => { const t = document.getElementById('cf-text'); if (t) t.focus(); }, 50);
+    },
+    close() {
+      const m = document.getElementById('cf-modal');
+      if (m) m.classList.remove('open');
+    },
+    async submit() {
+      const textEl = document.getElementById('cf-text');
+      const emailEl = document.getElementById('cf-email');
+      const msgEl = document.getElementById('cf-msg');
+      const sendBtn = document.getElementById('cf-send');
+      const feedback = (textEl.value || '').trim();
+      const email = (emailEl.value || '').trim();
+      if (!feedback) {
+        msgEl.className = 'cf-msg error';
+        msgEl.textContent = 'Please write some feedback before sending.';
+        return;
+      }
+      sendBtn.disabled = true; sendBtn.textContent = 'Sending…';
+      try {
+        await fetch(FEEDBACK_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            feedback: feedback,
+            email: email,
+            page: window.location.pathname + window.location.search
+          })
+        });
+        msgEl.className = 'cf-msg success';
+        msgEl.textContent = '✓ Thanks — your feedback was sent.';
+        textEl.value = ''; emailEl.value = '';
+        setTimeout(() => CaedrixFeedback.close(), 1400);
+      } catch (err) {
+        msgEl.className = 'cf-msg error';
+        msgEl.textContent = 'Could not send feedback (network error). Please try again.';
+      } finally {
+        sendBtn.disabled = false; sendBtn.textContent = 'Send';
+      }
+    }
+  };
 
   /* ── PROFILE CONTEXT (used to enrich LLM prompts) ─────────────────
    * Returns a delimited block of text suitable for appending to a
@@ -244,6 +364,7 @@
   global.CaedrixAuth          = CaedrixAuth;
   global.SalusAuth            = SalusAuth;
   global.SalusState           = SalusState;
+  global.CaedrixFeedback      = CaedrixFeedback;
   global.LIFE_CONTEXT_KEY     = LIFE_CONTEXT_KEY;
   global.HEALTH_PROFILE_KEY   = HEALTH_PROFILE_KEY;
   global.salusInitUserBar     = salusInitUserBar;
