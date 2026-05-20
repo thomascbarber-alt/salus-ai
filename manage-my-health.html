@@ -570,6 +570,26 @@ function getSalusLifeContext(){
     return '\n\nPersonal context about this patient:\n'+parts.join('\n');
   }catch(_){return '';}
 }
+
+/* Reads health profile saved on the Health Profile page */
+function getSalusHealthProfile(){
+  try{
+    const hp=JSON.parse(sessionStorage.getItem('caedrix_health_profile')||'null');
+    if(!hp)return '';
+    const parts=[];
+    if(hp.age)          parts.push('Age: '+hp.age);
+    if(hp.sex)          parts.push('Biological sex: '+hp.sex);
+    if(hp.smoking)      parts.push('Smoking status: '+hp.smoking);
+    if(hp.diabetes)     parts.push('Diabetes: '+hp.diabetes);
+    if(hp.heartDisease) parts.push('Heart disease: '+hp.heartDisease);
+    if(hp.conditions)   parts.push('Other conditions: '+hp.conditions);
+    if(hp.medications)  parts.push('Current medications: '+hp.medications);
+    if(hp.screenings)   parts.push('Recent screenings: '+hp.screenings);
+    if(hp.familyHistory)parts.push('Family history: '+hp.familyHistory);
+    if(!parts.length)return '';
+    return '\n\n---\nPatient health profile:\n'+parts.join('\n')+'\n---';
+  }catch(_){return '';}
+}
 const SalusState = {
   isRecordsConnected:  () => SalusAuth.isRecordsConnected(),
   setRecordsConnected: (v) => SalusAuth.setRecordsConnected(v)
