@@ -960,6 +960,77 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 
 </style>
   <script defer src="/_vercel/insights/script.js"></script>
+
+<style>
+/* ── Canonical nav — standardized across all pages ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  padding: 0 48px;
+  height: 96px;
+  background: rgba(12,30,58,0.97);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(212,170,58,0.2);
+}
+.nav-logo {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+.logo-img {
+  height: 90px;
+  width: auto;
+  object-fit: contain;
+}
+/* Centered button bar — absolute so nav-links presence/absence never shifts it */
+.nav-actions {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+}
+.nav-mini {
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  line-height: 1;
+  border: 1px solid transparent;  /* reserves space so active border doesn't resize button */
+}
+.nav-mini:hover { transform: translateY(-1px); opacity: 0.9; }
+.nav-mini-active { border-color: rgba(255,255,255,0.5); }
+.btn1 { background: linear-gradient(135deg,#d4aa3a,#b8932a); color:#0c1e3a; }
+.btn2 { background: linear-gradient(135deg,#13a090,#0a7c6e); color:#fff; }
+.btn3 { background: linear-gradient(135deg,#4a6fa5,#162d52); color:#fff; }
+.btn4 { background: linear-gradient(135deg,#9b59b6,#6b7a8d); color:#fff; }
+.btn5 { background: linear-gradient(135deg,#3a9e6a,#2d7a52); color:#fff; }
+.nav-links { margin-left: auto; display: flex; align-items: center; gap: 24px; }
+.nav-links a { color: rgba(255,255,255,0.65); text-decoration:none; font-size:13px; transition:color .2s; }
+.nav-links a:hover { color:#fff; }
+.nav-cta {
+  background: linear-gradient(135deg,#d4aa3a,#b8932a) !important;
+  color: #0c1e3a !important;
+  padding: 8px 20px !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+}
+@media (max-width: 1100px) {
+  nav { padding: 0 24px; }
+  .nav-mini { font-size: 11px; padding: 7px 12px; }
+}
+@media (max-width: 900px) {
+  .nav-links { display: none; }
+  .nav-actions { gap: 6px; }
+  .nav-mini { font-size: 10px; padding: 6px 10px; }
+}
+</style>
 </head>
 <body>
 
@@ -970,12 +1041,12 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 <nav>
   <div class="nav-logo">
     <a href="index.html" style="display:flex;align-items:center;">
-      <img src="salusAI-logo.jpg" class="logo-img" alt="Caedrix AI">
+      <img src="/salusAI-logo.jpg" class="logo-img" alt="Caedrix AI" />
     </a>
   </div>
-    <div class="nav-actions">
+  <div class="nav-actions">
     <a href="precision-medicine3.html"  class="nav-mini btn1">Precision Medicine</a>
-    <a href="health-decisions.html"    class="nav-mini btn2" style="border:1px solid rgba(19,160,144,0.6);">Health Decisions</a>
+    <a href="health-decisions.html"     class="nav-mini btn2 nav-mini-active">Health Decisions</a>
     <a href="determine-diagnosis.html"  class="nav-mini btn4">Determine Diagnosis</a>
     <a href="understand-diagnosis.html" class="nav-mini btn3">Understand Diagnosis</a>
     <a href="manage-my-health.html"     class="nav-mini btn5">Manage My Health</a>
