@@ -786,7 +786,7 @@ async function generatePlan(){
 
     /* Agent 2: Care Planner */
     setAgentState(2,'running','Building your plan…');
-    const r2=await callClaude({systemPrompt:AGENT_CARE_PLANNER_SYSTEM,userContent:profileMsg,maxTokens:32000});
+    const r2=await callClaude({systemPrompt:AGENT_CARE_PLANNER_SYSTEM,userContent:profileMsg,maxTokens:32000,timeoutMs:180000});
     let p2;try{p2=safeParseJSON(extractText(r2));}catch(e){throw new Error('Care Planner JSON parse failed: '+e.message);}
     setAgentState(2,'done','Complete');
 
