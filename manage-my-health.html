@@ -869,7 +869,7 @@ async function generatePlan(){
 
     /* Agent 2: Care Planner */
     setAgentState(2,'running','Building your plan…');
-    const r2=await callClaude({systemPrompt:AGENT_CARE_PLANNER_SYSTEM,userContent:profileMsg,maxTokens:16000});
+    const r2=await callClaude({systemPrompt:AGENT_CARE_PLANNER_SYSTEM,userContent:profileMsg,maxTokens:32000});
     let p2;try{p2=safeParseJSON(extractText(r2));}catch(e){throw new Error('Care Planner JSON parse failed: '+e.message);}
     setAgentState(2,'done','Complete');
 
@@ -899,7 +899,25 @@ async function generatePlan(){
       }catch(_){setAgentState(5,'done','Corrections applied');}
     }else{setAgentState(5,'done','No changes needed');}
 
-    setTimeout(()=>{hidePipeline();if(final.care_items&&final.care_items.length>0){renderResults(final,p3,lastProfile);}document.getElementById('generateBtn').disabled=false;},400);
+    setTimeout(()=>{
+      hidePipeline();
+      document.getElementById('generateBtn').disabled=false;
+      if(!final || !final.care_items || final.care_items.length===0){
+        // Surface the silent-failure path: pipeline finished but no care items came through
+        console.error('[Caedrix] Pipeline completed but care_items missing/empty.',{final,p2,p3,p4});
+        const truncated = (final && final.care_items && final.care_items.length===0)
+          ? 'The Care Planner returned an empty list.'
+          : 'The Care Planner response was likely truncated or malformed.';
+        handleError('Plan generated but no care items were returned. '+truncated+' Open the browser console (F12) for the raw pipeline output, then click Regenerate.');
+        return;
+      }
+      try{
+        renderResults(final,p3,lastProfile);
+      }catch(err){
+        console.error('[Caedrix] renderResults threw:',err,'final=',final,'lastProfile=',lastProfile);
+        handleError('Failed to display results: '+(err.message||String(err))+'. See console for details.');
+      }
+    },400);
   }catch(err){handleError(err.message||String(err));}
 }
 
