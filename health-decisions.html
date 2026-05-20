@@ -1307,7 +1307,7 @@ function salusInitUserBar(){
     '<div class="subs-avatar" style="background:rgba(19,160,144,0.25);color:#13a090;font-size:11px;">β</div>' +
     '<span class="subs-email">Beta Session · Health data not stored</span>' +
     '</div>' +
-    '<div class="subs-right"><button class="subs-signout" onclick="sessionStorage.clear();window.location.href='login.html'">End Session</button></div>';
+    '<div class="subs-right"><button class="subs-signout" onclick="sessionStorage.clear();window.location.href=\'login.html\'">End Session</button></div>';
 }
 
 /* ══════════════════════════════════════════════════════
@@ -1959,7 +1959,6 @@ function renderResults(result, accuracy, legal, originalQuestion) {
   ].filter(Boolean).join(' · ');
   document.getElementById('agentNote').textContent = accuracyNote || 'Reviewed by Caedrix AI 5-agent pipeline.';
 
-  const hasProfileData = getSalusHealthProfile().length > 0 || getSalusLifeContext().length > 0;
   if (result.patient_context_used && (recordsConnected || hasProfileData)) {
     document.getElementById('contextBox').style.display = 'flex';
     document.getElementById('contextBody').textContent = result.patient_context_used;
