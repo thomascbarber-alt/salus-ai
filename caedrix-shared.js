@@ -51,6 +51,7 @@
         '<span class="subs-email">Beta Session · Health data not stored</span>' +
       '</div>' +
       '<div class="subs-right">' +
+        '<a class="subs-link" href="privacy-policy.html">Privacy</a>' +
         '<button class="subs-feedback" onclick="CaedrixFeedback.open()">💬 Feedback</button>' +
         '<button class="subs-signout" onclick="CaedrixAuth.logout()">End Session</button>' +
       '</div>';
@@ -62,7 +63,7 @@
    * URL must be set in FEEDBACK_ENDPOINT below before deploy.
    * ────────────────────────────────────────────────────────────────── */
   /* PASTE THE FEEDBACK Apps Script /exec URL HERE (separate from signin) */
-  const FEEDBACK_ENDPOINT = 'https://script.google.com/macros/s/AKfycbX...your-actual-url.../exec';
+  const FEEDBACK_ENDPOINT = 'PASTE_FEEDBACK_APPS_SCRIPT_URL_HERE';
 
   function _injectFeedbackUI() {
     const style = document.createElement('style');
@@ -70,6 +71,8 @@
     style.textContent =
       '.subs-feedback{padding:4px 10px;border-radius:6px;background:none;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.55);cursor:pointer;font-family:inherit;font-size:11px;transition:all .2s;margin-right:8px;}' +
       '.subs-feedback:hover{border-color:rgba(19,160,144,0.5);color:rgba(19,160,144,0.9);}' +
+      '.subs-link{padding:4px 10px;font-size:11px;color:rgba(255,255,255,0.45);text-decoration:none;transition:color .2s;margin-right:4px;}' +
+      '.subs-link:hover{color:rgba(255,255,255,0.85);}' +
       '#cf-modal{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;font-family:"DM Sans",sans-serif;}' +
       '#cf-modal.open{display:flex;}' +
       '#cf-modal .cf-backdrop{position:absolute;inset:0;background:rgba(7,16,32,0.78);backdrop-filter:blur(6px);}' +
