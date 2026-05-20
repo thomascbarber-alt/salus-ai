@@ -1785,7 +1785,7 @@ function runAnalysis() {
 }
 // ── Salus shared state (sessionStorage) ──
 (function() {
-  const connected = localStorage.getItem('salus_records_connected') === 'true';
+  const connected = sessionStorage.getItem('caedrix_records_connected') === 'true';
   if (connected) {
     document.getElementById('salusRecordsConnected').classList.add('visible');
   } else {

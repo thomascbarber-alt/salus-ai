@@ -2,10 +2,8 @@
 <html lang="en">
 <head>
 <script>
-/* Caedrix AI auth gate — runs before page renders */
 (function(){
-  var u=null;try{u=JSON.parse(localStorage.getItem('salus_user')||'null');}catch(_){}
-  if(!u||!u.email){
+  if(!sessionStorage.getItem('caedrix_beta_access')){
     var t=encodeURIComponent(window.location.href);
     window.location.replace('login.html?redirect='+t);
   }
@@ -1222,34 +1220,23 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 
 <script>
 /* ══════════════════════════════════════════════════════
-   SALUS AUTH — shared state (localStorage-backed)
+   Caedrix Auth — session-only state (no localStorage)
 ══════════════════════════════════════════════════════ */
 const SalusAuth = {
-  getUser:             ()  => { try{ return JSON.parse(localStorage.getItem('salus_user')||'null'); }catch(_){return null;} },
-  logout:              ()  => { localStorage.removeItem('salus_user'); sessionStorage.clear(); window.location.href='login.html'; },
-  isRecordsConnected:  ()  => localStorage.getItem('salus_records_connected') === 'true',
-  setRecordsConnected: (v) => v ? localStorage.setItem('salus_records_connected','true') : localStorage.removeItem('salus_records_connected')
+  logout:              ()  => { sessionStorage.clear(); window.location.href='login.html'; },
+  isRecordsConnected:  ()  => sessionStorage.getItem('caedrix_records_connected') === 'true',
+  setRecordsConnected: (v) => v ? sessionStorage.setItem('caedrix_records_connected','true') : sessionStorage.removeItem('caedrix_records_connected')
 };
 
-function salusInitUserBar() {
-  const bar = document.getElementById('salusUserBar');
-  if (!bar) return;
-  const user    = SalusAuth.getUser() || {};
-  const rc      = SalusAuth.isRecordsConnected();
-  const initials= (user.email||'?')[0].toUpperCase();
-  const email   = user.email || '';
-  bar.innerHTML =
+function salusInitUserBar(){
+  const bar=document.getElementById('salusUserBar');
+  if(!bar)return;
+  bar.innerHTML=
     '<div class="subs-left">' +
-      '<div class="subs-avatar">'+initials+'</div>' +
-      '<span class="subs-email">'+email+'</span>' +
+    '<div class="subs-avatar" style="background:rgba(19,160,144,0.25);color:#13a090;font-size:11px;">β</div>' +
+    '<span class="subs-email">Beta Session · Health data not stored</span>' +
     '</div>' +
-    '<div class="subs-right">' +
-      (rc
-        ? '<div class="subs-records subs-records-on"><div class="subs-rdot subs-rdot-on"></div><span>Records Linked</span></div>'
-        : '<a href="health-decisions.html" class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Link Medical Records</span></a>'
-      ) +
-      '<button class="subs-signout" onclick="SalusAuth.logout()">Sign out</button>' +
-    '</div>';
+    '<div class="subs-right"><button class="subs-signout" onclick="sessionStorage.clear();window.location.href='login.html'">End Session</button></div>';
 }
 
 /* ══════════════════════════════════════════════════════
@@ -1285,7 +1272,7 @@ window.addEventListener('DOMContentLoaded', () => {
 /* Reads personal context saved on the Precision Medicine page */
 function getSalusLifeContext(){
   try{
-    const ctx=JSON.parse(localStorage.getItem('salus_life_context')||'null');
+    const ctx=JSON.parse(sessionStorage.getItem('caedrix_life_context')||'null');
     if(!ctx)return '';
     const parts=[];
     if(ctx.activities)parts.push('Favorite activities: '+ctx.activities);
@@ -1299,7 +1286,7 @@ function getSalusLifeContext(){
 
 function getSalusHealthProfile(){
   try{
-    const hp=JSON.parse(localStorage.getItem('salus_health_profile')||'null');
+    const hp=JSON.parse(sessionStorage.getItem('caedrix_health_profile')||'null');
     if(!hp)return '';
     const parts=[];
     if(hp.age)          parts.push('Age: '+hp.age);
@@ -1341,7 +1328,7 @@ function renderProfileContextBox() {
   };
   let hasAny = false;
   try {
-    const ctx = JSON.parse(localStorage.getItem('salus_life_context') || 'null');
+    const ctx = JSON.parse(sessionStorage.getItem('caedrix_life_context') || 'null');
     const group = document.getElementById('ctxPersonalGroup');
     const rows  = document.getElementById('ctxPersonalRows');
     if (ctx && group && rows) {
@@ -1353,7 +1340,7 @@ function renderProfileContextBox() {
     }
   } catch(_) {}
   try {
-    const hp = JSON.parse(localStorage.getItem('salus_health_profile') || 'null');
+    const hp = JSON.parse(sessionStorage.getItem('caedrix_health_profile') || 'null');
     const group = document.getElementById('ctxHealthGroup');
     const rows  = document.getElementById('ctxHealthRows');
     if (hp && group && rows) {
@@ -2021,7 +2008,7 @@ document.getElementById('questionInput').addEventListener('keydown', function(e)
   const recordsParam = params.get('records');
   if (recordsParam === 'connected') {
     // Patient just authorized HealthEx — mark as connected and clean URL
-    localStorage.setItem('salus_records_connected', 'true');
+    sessionStorage.setItem('caedrix_records_connected', 'true');
     SalusAuth.setRecordsConnected(true);
     window.history.replaceState({}, '', window.location.pathname);
   } else if (recordsParam === 'error') {

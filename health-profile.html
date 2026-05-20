@@ -3,8 +3,10 @@
 <head>
 <script>
 (function(){
-  var u=null;try{u=JSON.parse(localStorage.getItem('salus_user')||'null');}catch(_){}
-  if(!u||!u.email){var t=encodeURIComponent(window.location.href);window.location.replace('login.html?redirect='+t);}
+  if(!sessionStorage.getItem('caedrix_beta_access')){
+    var t=encodeURIComponent(window.location.href);
+    window.location.replace('login.html?redirect='+t);
+  }
 })();
 </script>
 <meta charset="UTF-8">
@@ -251,21 +253,21 @@ label .opt{font-size:10px;font-weight:400;letter-spacing:0;text-transform:none;c
 
 <script>
 const SalusAuth={
-  getUser:()=>{try{return JSON.parse(localStorage.getItem('salus_user')||'null');}catch(_){return null;}},
-  logout:()=>{localStorage.removeItem('salus_user');sessionStorage.clear();window.location.href='login.html';}
+  logout:()=>{sessionStorage.clear();window.location.href='login.html';}
 };
 
 function salusInitUserBar(){
-  const bar=document.getElementById('salusUserBar');if(!bar)return;
-  const user=SalusAuth.getUser()||{};
-  const initials=(user.email||'?')[0].toUpperCase();
-  const email=user.email||'';
+  const bar=document.getElementById('salusUserBar');
+  if(!bar)return;
   bar.innerHTML=
-    '<div class="subs-left"><div class="subs-avatar">'+initials+'</div><span class="subs-email">'+email+'</span></div>'+
-    '<div class="subs-right"><button class="subs-signout" onclick="SalusAuth.logout()">Sign out</button></div>';
+    '<div class="subs-left">' +
+    '<div class="subs-avatar" style="background:rgba(19,160,144,0.25);color:#13a090;font-size:11px;">β</div>' +
+    '<span class="subs-email">Beta Session · Health data not stored</span>' +
+    '</div>' +
+    '<div class="subs-right"><button class="subs-signout" onclick="sessionStorage.clear();window.location.href='login.html'">End Session</button></div>';
 }
 
-const HEALTH_PROFILE_KEY='salus_health_profile';
+const HEALTH_PROFILE_KEY='caedrix_health_profile';
 
 const FIELDS=[
   {id:'hp-age',       key:'age'},
@@ -281,7 +283,7 @@ const FIELDS=[
 
 function loadProfile(){
   try{
-    const p=JSON.parse(localStorage.getItem(HEALTH_PROFILE_KEY)||'null');
+    const p=JSON.parse(sessionStorage.getItem(HEALTH_PROFILE_KEY)||'null');
     if(!p)return;
     FIELDS.forEach(({id,key})=>{
       const el=document.getElementById(id);
@@ -296,7 +298,7 @@ function saveAndReturn(){
     const el=document.getElementById(id);
     if(el)profile[key]=el.value.trim();
   });
-  localStorage.setItem(HEALTH_PROFILE_KEY,JSON.stringify(profile));
+  sessionStorage.setItem(HEALTH_PROFILE_KEY,JSON.stringify(profile));
 
   const btn=document.getElementById('saveBtn');
   btn.classList.add('saved');

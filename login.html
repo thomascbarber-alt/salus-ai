@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Caedrix AI — Sign In</title>
+<title>Caedrix AI — Beta Access</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
 <style>
@@ -13,72 +13,41 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;}
-
-/* Background decoration */
 .bg-grid{position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at 50% 0%,black 40%,transparent 80%);}
 .bg-glow{position:fixed;top:-20%;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(10,124,110,0.12) 0%,transparent 70%);pointer-events:none;}
-
-/* LAYOUT */
 .login-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 24px;position:relative;}
-
-/* CARD */
 .login-card{width:100%;max-width:460px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:48px 44px;backdrop-filter:blur(16px);box-shadow:0 24px 80px rgba(0,0,0,0.4);animation:fadeUp .5s ease;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-
-/* LOGO */
 .login-logo{display:flex;justify-content:center;margin-bottom:32px;}
 .login-logo img{height:80px;width:auto;object-fit:contain;}
 .login-logo-placeholder{height:80px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--gold);}
-
-/* TOGGLE TABS */
-.auth-tabs{display:flex;background:rgba(255,255,255,0.04);border-radius:12px;padding:4px;margin-bottom:32px;gap:4px;}
-.auth-tab{flex:1;padding:10px;border-radius:9px;border:none;background:transparent;color:rgba(255,255,255,0.4);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
-.auth-tab.active{background:rgba(255,255,255,0.08);color:var(--white);box-shadow:0 1px 4px rgba(0,0,0,0.2);}
-
-/* HEADING */
 .login-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:600;color:var(--white);margin-bottom:8px;text-align:center;}
 .login-sub{font-family:'Crimson Pro',serif;font-size:16px;color:var(--text-dim);text-align:center;line-height:1.5;margin-bottom:28px;}
-
-/* FORM */
+.free-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;background:rgba(212,170,58,0.12);border:1px solid rgba(212,170,58,0.3);font-size:11px;font-weight:700;color:var(--gold);margin-bottom:24px;}
+.free-badge-wrap{display:flex;justify-content:center;margin-bottom:20px;}
 .form-group{margin-bottom:18px;}
 .form-group label{display:block;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:8px;}
-.form-group label .optional{font-size:10px;font-weight:400;letter-spacing:0;text-transform:none;color:rgba(255,255,255,0.2);margin-left:6px;}
 .form-input{width:100%;padding:13px 16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--white);outline:none;transition:all .2s;}
 .form-input:focus{border-color:rgba(19,160,144,0.6);background:rgba(19,160,144,0.06);box-shadow:0 0 0 3px rgba(19,160,144,0.1);}
 .form-input::placeholder{color:rgba(255,255,255,0.18);}
-.phone-wrap{position:relative;}
-.phone-prefix{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.3);font-size:15px;pointer-events:none;}
-.phone-input{padding-left:36px;}
-
-/* SUBMIT */
-.submit-btn{width:100%;padding:15px;border-radius:12px;background:linear-gradient(135deg,var(--teal-light),var(--teal));color:white;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:all .25s;margin-top:4px;position:relative;overflow:hidden;}
+.submit-btn{width:100%;padding:15px;border-radius:12px;background:linear-gradient(135deg,var(--teal-light),var(--teal));color:white;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:all .25s;margin-top:4px;position:relative;}
 .submit-btn:hover:not(:disabled){background:linear-gradient(135deg,#1abfad,var(--teal-light));transform:translateY(-1px);box-shadow:0 6px 20px rgba(19,160,144,0.35);}
 .submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 .submit-btn-inner{display:flex;align-items:center;justify-content:center;gap:8px;}
-
-/* FREE BADGE */
-.free-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;background:rgba(212,170,58,0.12);border:1px solid rgba(212,170,58,0.3);font-size:11px;font-weight:700;color:var(--gold);margin-bottom:24px;margin-left:auto;margin-right:auto;}
-.free-badge-wrap{display:flex;justify-content:center;margin-bottom:20px;}
-
-/* ERROR / SUCCESS */
 .auth-msg{display:none;padding:12px 16px;border-radius:10px;font-size:13px;line-height:1.5;margin-bottom:16px;}
 .auth-msg.error{background:rgba(192,57,43,0.12);border:1px solid rgba(192,57,43,0.3);color:#e07070;}
 .auth-msg.success{background:rgba(10,124,110,0.12);border:1px solid rgba(10,124,110,0.3);color:#13c0ac;}
 .auth-msg.visible{display:block;}
-
-/* TERMS */
-.terms-note{font-size:11px;color:rgba(255,255,255,0.2);text-align:center;line-height:1.6;margin-top:16px;}
+.privacy-statement{background:rgba(10,124,110,0.07);border:1px solid rgba(10,124,110,0.18);border-radius:12px;padding:14px 18px;margin-top:20px;font-size:12px;color:rgba(255,255,255,0.45);line-height:1.6;text-align:center;}
+.privacy-statement strong{color:rgba(255,255,255,0.65);}
+.terms-note{font-size:11px;color:rgba(255,255,255,0.2);text-align:center;line-height:1.6;margin-top:14px;}
 .terms-note a{color:rgba(255,255,255,0.35);text-decoration:underline;}
-
-/* DIVIDER */
 .divider{display:flex;align-items:center;gap:12px;margin:20px 0;}
 .divider-line{flex:1;height:1px;background:rgba(255,255,255,0.07);}
 .divider-text{font-size:11px;color:rgba(255,255,255,0.25);}
-
-/* FOOTER */
 footer{text-align:center;padding:20px;font-size:11px;color:rgba(255,255,255,0.2);position:relative;z-index:1;}
 </style>
-  <script defer src="/_vercel/insights/script.js"></script>
+<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 <div class="bg-grid"></div>
@@ -92,49 +61,35 @@ footer{text-align:center;padding:20px;font-size:11px;color:rgba(255,255,255,0.2)
       <div class="login-logo-placeholder" style="display:none;">Caedrix AI</div>
     </div>
 
-    <!-- Create / Sign In tabs -->
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tabCreate" onclick="switchTab('create')">Create Account</button>
-      <button class="auth-tab" id="tabSignin" onclick="switchTab('signin')">Sign In</button>
+    <h1 class="login-title">Join the Beta</h1>
+    <p class="login-sub">Enter your email to access Caedrix AI. Your health information is never stored — each session is private and temporary.</p>
+
+    <div class="free-badge-wrap">
+      <div class="free-badge">✦ Free beta access — no credit card required</div>
     </div>
 
-    <!-- Create Account panel -->
-    <div id="panelCreate">
-      <div class="free-badge-wrap">
-        <div class="free-badge">✦ Free access — no credit card required</div>
-      </div>
-      <div class="auth-msg" id="createMsg"></div>
-      <div class="form-group">
-        <label>Email address</label>
-        <input id="createEmail" class="form-input" type="email" placeholder="you@example.com" autocomplete="email">
-      </div>
-      <div class="form-group">
-        <label>Cell phone <span class="optional">optional — for future text reminders</span></label>
-        <div class="phone-wrap">
-          <span class="phone-prefix">+1</span>
-          <input id="createPhone" class="form-input phone-input" type="tel" placeholder="(555) 000-0000" autocomplete="tel">
-        </div>
-      </div>
-      <button class="submit-btn" id="createBtn" onclick="doCreate()">
-        <div class="submit-btn-inner"><span>Create My Free Account</span><span>→</span></div>
-      </button>
-      <div class="terms-note">By creating an account you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. Your health information is encrypted and never sold.</div>
+    <div class="auth-msg" id="mainMsg"></div>
+
+    <div class="form-group">
+      <label>Email address</label>
+      <input id="userEmail" class="form-input" type="email" placeholder="you@example.com" autocomplete="email">
     </div>
 
-    <!-- Sign In panel -->
-    <div id="panelSignin" style="display:none;">
-      <div class="auth-msg" id="signinMsg"></div>
-      <div class="form-group">
-        <label>Email address</label>
-        <input id="signinEmail" class="form-input" type="email" placeholder="you@example.com" autocomplete="email">
-      </div>
-      <button class="submit-btn" id="signinBtn" onclick="doSignIn()">
-        <div class="submit-btn-inner"><span>Sign In</span><span>→</span></div>
-      </button>
+    <button class="submit-btn" id="accessBtn" onclick="requestAccess()">
+      <div class="submit-btn-inner"><span>Enter Caedrix AI</span><span>→</span></div>
+    </button>
+
+    <!-- Privacy statement — the core commitment -->
+    <div class="privacy-statement">
+      🔒 <strong>Your email is stored separately from your health activity.</strong>
+      We collect only your email to track beta participation and send occasional product updates.
+      Health information you enter during sessions is <strong>never saved</strong> and cannot be linked to your email.
     </div>
+
+    <div class="terms-note">By continuing you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</div>
 
     <div class="divider"><div class="divider-line"></div><div class="divider-text">SECURE · PRIVATE · PHYSICIAN-FOUNDED</div><div class="divider-line"></div></div>
-    <div class="terms-note" style="color:rgba(255,255,255,0.2);">caedrix.com · Not a replacement for your physician. Your data stays in your browser until you connect records.</div>
+    <div class="terms-note" style="color:rgba(255,255,255,0.2);">caedrix.com · Not a replacement for your physician.</div>
 
   </div>
 </div>
@@ -142,76 +97,95 @@ footer{text-align:center;padding:20px;font-size:11px;color:rgba(255,255,255,0.2)
 <footer>© 2025 Caedrix AI · All health information is for educational purposes only</footer>
 
 <script>
-/* ── Already logged in? Redirect to destination ── */
+/*
+ * ── CAEDRIX BETA LOGIN ────────────────────────────────────────────────────────
+ *
+ * PRIVACY ARCHITECTURE:
+ *   1. User enters email → sent to EMAIL_LIST_ENDPOINT only (external list service)
+ *   2. Browser receives back: sessionStorage.caedrix_beta_access = 'true'
+ *   3. The email value is NEVER stored in localStorage, sessionStorage, or any cookie
+ *   4. Health pages check sessionStorage.caedrix_beta_access — they never see the email
+ *   5. The two systems (email list / health session) are completely isolated
+ *
+ * TO CONFIGURE:
+ *   Replace EMAIL_LIST_ENDPOINT with your actual list service endpoint.
+ *   Options: Formspree (https://formspree.io), ConvertKit, Mailchimp embedded form endpoint.
+ *   The endpoint must accept a POST with { email } and return JSON or redirect.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+/* ── CONFIGURE THIS before launch ── */
+const EMAIL_LIST_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
+
+/* ── If already has active session, go straight in ── */
 (function(){
-  var user=null;try{user=JSON.parse(localStorage.getItem('salus_user')||'null');}catch(_){}
-  if(user&&user.email){
+  if(sessionStorage.getItem('caedrix_beta_access')){
     var params=new URLSearchParams(window.location.search);
     var redirect=params.get('redirect');
-    window.location.replace(redirect&&redirect.startsWith('http')?redirect:'health-decisions.html');
+    window.location.replace(redirect&&redirect.startsWith('/')&&!redirect.startsWith('//')?redirect:'health-decisions.html');
   }
 })();
 
-function switchTab(tab){
-  document.getElementById('tabCreate').classList.toggle('active',tab==='create');
-  document.getElementById('tabSignin').classList.toggle('active',tab==='signin');
-  document.getElementById('panelCreate').style.display=tab==='create'?'block':'none';
-  document.getElementById('panelSignin').style.display=tab==='signin'?'block':'none';
-}
-
-function showMsg(id,type,text){
-  var el=document.getElementById(id);
+function showMsg(type,text){
+  var el=document.getElementById('mainMsg');
   el.className='auth-msg '+type+' visible';
   el.textContent=text;
 }
 
 function validateEmail(e){return/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);}
 
-function doCreate(){
-  var email=document.getElementById('createEmail').value.trim();
-  var phone=document.getElementById('createPhone').value.trim();
-  if(!email){showMsg('createMsg','error','Please enter your email address.');return;}
-  if(!validateEmail(email)){showMsg('createMsg','error','Please enter a valid email address.');return;}
+async function requestAccess(){
+  var emailInput = document.getElementById('userEmail');
+  var email = emailInput.value.trim();
+  var btn = document.getElementById('accessBtn');
 
-  var user={email,phone:phone||'',loginTime:Date.now(),created:true};
-  localStorage.setItem('salus_user',JSON.stringify(user));
+  if(!email){showMsg('error','Please enter your email address.');return;}
+  if(!validateEmail(email)){showMsg('error','Please enter a valid email address.');return;}
 
-  showMsg('createMsg','success','Account created! Taking you to Caedrix AI…');
-  document.getElementById('createBtn').disabled=true;
-  setTimeout(()=>{
-    var params=new URLSearchParams(window.location.search);
-    var redirect=params.get('redirect');
-    window.location.href=redirect&&redirect.startsWith('http')?redirect:'health-decisions.html';
-  },900);
-}
+  btn.disabled=true;
+  btn.querySelector('.submit-btn-inner').innerHTML='<span>Sending…</span>';
 
-function doSignIn(){
-  var email=document.getElementById('signinEmail').value.trim();
-  if(!email){showMsg('signinMsg','error','Please enter your email address.');return;}
-  if(!validateEmail(email)){showMsg('signinMsg','error','Please enter a valid email address.');return;}
-
-  /* In dev mode: look for existing stored user, or create session */
-  var existing=null;
-  try{existing=JSON.parse(localStorage.getItem('salus_user')||'null');}catch(_){}
-  var user=existing&&existing.email===email?existing:{email,phone:'',loginTime:Date.now()};
-  user.loginTime=Date.now();
-  localStorage.setItem('salus_user',JSON.stringify(user));
-
-  showMsg('signinMsg','success','Welcome back! Taking you to Caedrix AI…');
-  document.getElementById('signinBtn').disabled=true;
-  setTimeout(()=>{
-    var params=new URLSearchParams(window.location.search);
-    var redirect=params.get('redirect');
-    window.location.href=redirect&&redirect.startsWith('http')?redirect:'health-decisions.html';
-  },900);
-}
-
-/* Enter key submits */
-document.addEventListener('keydown',function(e){
-  if(e.key==='Enter'){
-    if(document.getElementById('panelCreate').style.display!=='none')doCreate();
-    else doSignIn();
+  try {
+    /*
+     * POST email to the list service.
+     * The email goes HERE — to the external list — and nowhere else.
+     * It is not stored in the browser. After this call completes,
+     * the email value is discarded from memory.
+     */
+    await fetch(EMAIL_LIST_ENDPOINT, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+      body: JSON.stringify({ email: email })
+    });
+  } catch(err) {
+    /* Network error — still grant session access for beta usability.
+       The email submission is best-effort. Log for monitoring if needed. */
+    console.warn('Email list submission failed (network):', err.message);
   }
+
+  /*
+   * Grant session access.
+   * sessionStorage only — expires when browser tab closes.
+   * Contains ONLY a boolean flag. The email is NOT stored here.
+   */
+  sessionStorage.setItem('caedrix_beta_access', 'true');
+
+  /* Immediately discard the email from the input field */
+  emailInput.value = '';
+
+  showMsg('success','Welcome to Caedrix AI Beta — taking you in…');
+  btn.querySelector('.submit-btn-inner').innerHTML='<span>✓ Access granted</span>';
+
+  setTimeout(()=>{
+    var params=new URLSearchParams(window.location.search);
+    var redirect=params.get('redirect');
+    /* Only allow same-origin relative redirects for security */
+    window.location.href=(redirect&&redirect.startsWith('/')&&!redirect.startsWith('//'))?redirect:'health-decisions.html';
+  },900);
+}
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter') requestAccess();
 });
 </script>
 </body>

@@ -2,10 +2,8 @@
 <html lang="en">
 <head>
 <script>
-/* Salus AI auth gate — runs before page renders */
 (function(){
-  var u=null;try{u=JSON.parse(localStorage.getItem('salus_user')||'null');}catch(_){}
-  if(!u||!u.email){
+  if(!sessionStorage.getItem('caedrix_beta_access')){
     var t=encodeURIComponent(window.location.href);
     window.location.replace('login.html?redirect='+t);
   }
@@ -1852,10 +1850,10 @@ function handleRecordsInterest(checkbox) {
   const icon    = document.getElementById('recordsInterestIcon');
   const confirm = document.getElementById('recordsInterestConfirm');
   if (checkbox.checked) {
-    localStorage.setItem(RECORDS_INTEREST_KEY, JSON.stringify({
+    sessionStorage.setItem(RECORDS_INTEREST_KEY, JSON.stringify({
       interested: true,
       timestamp: new Date().toISOString(),
-      userEmail: SalusAuth.getUser()?.email || ''
+      userEmail: ''
     }));
     label.classList.add('checked');
     icon.textContent = '☑';
@@ -1863,7 +1861,7 @@ function handleRecordsInterest(checkbox) {
     const rb = document.getElementById('recordsBadge');
     if (rb) { rb.textContent = '⭐ Interested'; rb.className = 'hub-card-badge partial'; }
   } else {
-    localStorage.removeItem(RECORDS_INTEREST_KEY);
+    sessionStorage.removeItem(RECORDS_INTEREST_KEY);
     label.classList.remove('checked');
     icon.textContent = '☐';
     confirm.style.display = 'none';
@@ -1873,7 +1871,7 @@ function handleRecordsInterest(checkbox) {
 
 function loadRecordsInterest() {
   try {
-    const data = JSON.parse(localStorage.getItem(RECORDS_INTEREST_KEY) || 'null');
+    const data = JSON.parse(sessionStorage.getItem(RECORDS_INTEREST_KEY) || 'null');
     if (!data?.interested) return;
     const cb = document.getElementById('recordsInterestCheck');
     if (cb) { cb.checked = true; handleRecordsInterest(cb); }
@@ -1909,7 +1907,7 @@ function renderProfileSummary() {
 
   // Personal details
   try {
-    const ctx = JSON.parse(localStorage.getItem('salus_life_context') || 'null');
+    const ctx = JSON.parse(sessionStorage.getItem('caedrix_life_context') || 'null');
     const personalGroup = document.getElementById('summaryPersonalGroup');
     const personalRows  = document.getElementById('summaryPersonalRows');
     if (ctx && personalGroup && personalRows) {
@@ -1930,7 +1928,7 @@ function renderProfileSummary() {
 
   // Health profile
   try {
-    const hp = JSON.parse(localStorage.getItem('salus_health_profile') || 'null');
+    const hp = JSON.parse(sessionStorage.getItem('caedrix_health_profile') || 'null');
     const healthGroup = document.getElementById('summaryHealthGroup');
     const healthRows  = document.getElementById('summaryHealthRows');
     if (hp && healthGroup && healthRows) {
@@ -1958,40 +1956,29 @@ function renderProfileSummary() {
   }
 }
 
-/* ── Caedrix Auth: shared state (localStorage-backed) ── */
+/* ── Caedrix Auth: session-only state (no localStorage) ── */
 const CaedrixAuth = {
-  getUser:            ()  => { try{ return JSON.parse(localStorage.getItem('salus_user')||'null'); }catch(_){return null;} },
-  logout:             ()  => { localStorage.removeItem('salus_user'); sessionStorage.clear(); window.location.href='login.html'; },
-  getApiKey:          ()  => localStorage.getItem('salus_api_key') || sessionStorage.getItem('salus_api_key') || '',
-  setApiKey:          (k) => { if(k){ localStorage.setItem('salus_api_key',k); sessionStorage.setItem('salus_api_key',k); } else { localStorage.removeItem('salus_api_key'); sessionStorage.removeItem('salus_api_key'); } },
-  isRecordsConnected: ()  => localStorage.getItem('salus_records_connected') === 'true',
-  setRecordsConnected:(v) => v ? localStorage.setItem('salus_records_connected','true') : localStorage.removeItem('salus_records_connected')
+  logout:             ()  => { sessionStorage.clear(); window.location.href='login.html'; },
+  getApiKey:          ()  => sessionStorage.getItem('salus_api_key') || '',
+  setApiKey:          (k) => { if(k){ sessionStorage.setItem('salus_api_key',k); } else { sessionStorage.removeItem('salus_api_key'); } },
+  isRecordsConnected: ()  => sessionStorage.getItem('caedrix_records_connected') === 'true',
+  setRecordsConnected:(v) => v ? sessionStorage.setItem('caedrix_records_connected','true') : sessionStorage.removeItem('caedrix_records_connected')
 };
 
-function salusInitUserBar() {
-  const bar = document.getElementById('salusUserBar');
-  if (!bar) return;
-  const user    = CaedrixAuth.getUser() || {};
-  const rc      = CaedrixAuth.isRecordsConnected();
-  const initials= (user.email||'?')[0].toUpperCase();
-  const email   = user.email || '';
-  bar.innerHTML =
+function salusInitUserBar(){
+  const bar=document.getElementById('salusUserBar');
+  if(!bar)return;
+  bar.innerHTML=
     '<div class="subs-left">' +
-      '<div class="subs-avatar">'+initials+'</div>' +
-      '<span class="subs-email">'+email+'</span>' +
+    '<div class="subs-avatar" style="background:rgba(19,160,144,0.25);color:#13a090;font-size:11px;">β</div>' +
+    '<span class="subs-email">Beta Session · Health data not stored</span>' +
     '</div>' +
-    '<div class="subs-right">' +
-      (rc
-        ? '<div class="subs-records subs-records-on"><div class="subs-rdot subs-rdot-on"></div><span>Records Linked</span></div>'
-        : '<a href="health-decisions.html" class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Link Medical Records</span></a>'
-      ) +
-      '<button class="subs-signout" onclick="CaedrixAuth.logout()">Sign out</button>' +
-    '</div>';
+    '<div class="subs-right"><button class="subs-signout" onclick="sessionStorage.clear();window.location.href='login.html'">End Session</button></div>';
 }
 
 
 /* ── About You: save / load / shared context helper ── */
-const LIFE_CONTEXT_KEY = 'salus_life_context';
+const LIFE_CONTEXT_KEY = 'caedrix_life_context';
 
 function saveLifeContext(){
   const ctx={
@@ -2000,12 +1987,12 @@ function saveLifeContext(){
     caregiver:  document.getElementById('ctx-caregiver')?.value.trim()||'',
     living:     document.getElementById('ctx-living')?.value.trim()||''
   };
-  localStorage.setItem(LIFE_CONTEXT_KEY,JSON.stringify(ctx));
+  sessionStorage.setItem(LIFE_CONTEXT_KEY,JSON.stringify(ctx));
 }
 
 function loadLifeContext(){
   try{
-    const ctx=JSON.parse(localStorage.getItem(LIFE_CONTEXT_KEY)||'null');
+    const ctx=JSON.parse(sessionStorage.getItem(LIFE_CONTEXT_KEY)||'null');
     if(!ctx)return;
     if(ctx.activities)document.getElementById('ctx-activities').value=ctx.activities;
     if(ctx.important) document.getElementById('ctx-important').value=ctx.important;
@@ -2017,7 +2004,7 @@ function loadLifeContext(){
 /* Called by other pages to inject personal context into AI prompts */
 function getCaedrixLifeContext(){
   try{
-    const ctx=JSON.parse(localStorage.getItem(LIFE_CONTEXT_KEY)||'null');
+    const ctx=JSON.parse(sessionStorage.getItem(LIFE_CONTEXT_KEY)||'null');
     if(!ctx)return '';
     const parts=[];
     if(ctx.activities)parts.push('Favorite activities: '+ctx.activities);
@@ -2063,7 +2050,7 @@ function updateHubBadges(){
 
   /* Personal details badge */
   try{
-    const ctx=JSON.parse(localStorage.getItem('salus_life_context')||'null');
+    const ctx=JSON.parse(sessionStorage.getItem('caedrix_life_context')||'null');
     const pb=document.getElementById('personalBadge');
     if(pb){
       const filled=ctx&&(ctx.activities||ctx.important||ctx.caregiver||ctx.living);
@@ -2073,7 +2060,7 @@ function updateHubBadges(){
 
   /* Health profile badge */
   try{
-    const hp=JSON.parse(localStorage.getItem('salus_health_profile')||'null');
+    const hp=JSON.parse(sessionStorage.getItem('caedrix_health_profile')||'null');
     const hb=document.getElementById('healthBadge');
     if(hb){
       const filled=hp&&(hp.age||hp.sex);

@@ -2,10 +2,8 @@
 <html lang="en">
 <head>
 <script>
-/* Caedrix AI auth gate — runs before page renders */
 (function(){
-  var u=null;try{u=JSON.parse(localStorage.getItem('salus_user')||'null');}catch(_){}
-  if(!u||!u.email){
+  if(!sessionStorage.getItem('caedrix_beta_access')){
     var t=encodeURIComponent(window.location.href);
     window.location.replace('login.html?redirect='+t);
   }
@@ -469,20 +467,19 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
 <script>
 
 const SalusAuth = {
-  getUser:             ()  => { try{ return JSON.parse(localStorage.getItem('salus_user')||'null'); }catch(_){return null;} },
-  logout:              ()  => { localStorage.removeItem('salus_user'); sessionStorage.clear(); window.location.href='login.html'; },
-  isRecordsConnected:  ()  => localStorage.getItem('salus_records_connected') === 'true',
-  setRecordsConnected: (v) => v ? localStorage.setItem('salus_records_connected','true') : localStorage.removeItem('salus_records_connected')
+  logout:              ()  => { sessionStorage.clear(); window.location.href='login.html'; },
+  isRecordsConnected:  ()  => sessionStorage.getItem('caedrix_records_connected') === 'true',
+  setRecordsConnected: (v) => v ? sessionStorage.setItem('caedrix_records_connected','true') : sessionStorage.removeItem('caedrix_records_connected')
 };
-function salusInitUserBar() {
-  const bar = document.getElementById('salusUserBar');
-  if (!bar) return;
-  const user=SalusAuth.getUser()||{}, rc=SalusAuth.isRecordsConnected();
-  const initials=(user.email||'?')[0].toUpperCase(), email=user.email||'';
-  bar.innerHTML='<div class="subs-left"><div class="subs-avatar">'+initials+'</div><span class="subs-email">'+email+'</span></div>'+
-    '<div class="subs-right">'+(rc?'<div class="subs-records subs-records-on"><div class="subs-rdot subs-rdot-on"></div><span>Records Linked</span></div>':
-    '<a href="health-decisions.html" class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Link Medical Records</span></a>')+
-    '<button class="subs-signout" onclick="SalusAuth.logout()">Sign out</button></div>';
+function salusInitUserBar(){
+  const bar=document.getElementById('salusUserBar');
+  if(!bar)return;
+  bar.innerHTML=
+    '<div class="subs-left">' +
+    '<div class="subs-avatar" style="background:rgba(19,160,144,0.25);color:#13a090;font-size:11px;">β</div>' +
+    '<span class="subs-email">Beta Session · Health data not stored</span>' +
+    '</div>' +
+    '<div class="subs-right"><button class="subs-signout" onclick="sessionStorage.clear();window.location.href='login.html'">End Session</button></div>';
 }
 
 
@@ -491,7 +488,7 @@ let recordsConnected=false, lastProfile={}, currentCareItems=[], activeFilter='a
 /* Reads personal context saved on the Precision Medicine page */
 function getSalusLifeContext(){
   try{
-    const ctx=JSON.parse(localStorage.getItem('salus_life_context')||'null');
+    const ctx=JSON.parse(sessionStorage.getItem('caedrix_life_context')||'null');
     if(!ctx)return '';
     const parts=[];
     if(ctx.activities)parts.push('Favorite activities: '+ctx.activities);
@@ -530,7 +527,7 @@ function renderProfileContextBox(){
   };
   let hasAny=false;
   try{
-    const ctx=JSON.parse(localStorage.getItem('salus_life_context')||'null');
+    const ctx=JSON.parse(sessionStorage.getItem('caedrix_life_context')||'null');
     const group=document.getElementById('ctxPersonalGroup'),rows=document.getElementById('ctxPersonalRows');
     if(ctx&&group&&rows){
       const html=Object.entries(PERSONAL_LABELS).filter(([k])=>ctx[k]?.trim())
@@ -539,7 +536,7 @@ function renderProfileContextBox(){
     }
   }catch(_){}
   try{
-    const hp=JSON.parse(localStorage.getItem('salus_health_profile')||'null');
+    const hp=JSON.parse(sessionStorage.getItem('caedrix_health_profile')||'null');
     const group=document.getElementById('ctxHealthGroup'),rows=document.getElementById('ctxHealthRows');
     if(hp&&group&&rows){
       const html=Object.entries(HEALTH_LABELS).filter(([k])=>hp[k]&&String(hp[k]).trim())
@@ -555,10 +552,10 @@ function buildProfileSummary(){
   const el=document.getElementById('profileSummaryText');
   if(!el)return;
   try{
-    const hp=JSON.parse(localStorage.getItem('salus_health_profile')||'null')||{};
-    const lc=JSON.parse(localStorage.getItem('salus_life_context')||'null')||{};
-    const recordsOn=localStorage.getItem('salus_records_connected')==='true';
-    const healthkitOn=localStorage.getItem('salus_healthkit_connected')==='true';
+    const hp=JSON.parse(sessionStorage.getItem('caedrix_health_profile')||'null')||{};
+    const lc=JSON.parse(sessionStorage.getItem('caedrix_life_context')||'null')||{};
+    const recordsOn=sessionStorage.getItem('caedrix_records_connected')==='true';
+    const healthkitOn=sessionStorage.getItem('caedrix_healthkit_connected')==='true';
 
     const parts=[];
 
@@ -756,7 +753,7 @@ Return the corrected plan using the EXACT same JSON schema. Start with { and end
 async function generatePlan(){
   // Read health profile saved on Precision Medicine page
   let hp={};
-  try{hp=JSON.parse(localStorage.getItem('salus_health_profile')||'null')||{};}catch(_){}
+  try{hp=JSON.parse(sessionStorage.getItem('caedrix_health_profile')||'null')||{};}catch(_){}
   if(!hp.age&&!hp.sex){
     if(confirm('No health profile found. Go to Precision Medicine to set up your profile first?')){
       window.location.href='precision-medicine3.html';
@@ -962,9 +959,9 @@ function renderCareList(items,filter){
 
 /* NOTIFICATIONS */
 function getStoredNotifications(){
-  try{return JSON.parse(localStorage.getItem('salus_notifications')||'{}');}catch(_){return{};}
+  try{return JSON.parse(sessionStorage.getItem('caedrix_notifications')||'{}');}catch(_){return{};}
 }
-function saveNotifications(obj){try{localStorage.setItem('salus_notifications',JSON.stringify(obj));}catch(_){}}
+function saveNotifications(obj){try{sessionStorage.setItem('caedrix_notifications',JSON.stringify(obj));}catch(_){}}
 
 function setNotification(id,name){
   const dateInput=document.getElementById('date-'+id);
@@ -1061,7 +1058,7 @@ function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/<
   const recordsParam = params.get('records');
   if (recordsParam === 'connected') {
     // Patient just authorized HealthEx — mark as connected and clean URL
-    localStorage.setItem('salus_records_connected', 'true');
+    sessionStorage.setItem('caedrix_records_connected', 'true');
     SalusAuth.setRecordsConnected(true);
     window.history.replaceState({}, '', window.location.pathname);
   } else if (recordsParam === 'error') {

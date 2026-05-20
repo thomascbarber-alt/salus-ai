@@ -2,10 +2,8 @@
 <html lang="en">
 <head>
 <script>
-/* Caedrix AI auth gate */
 (function(){
-  var u=null;try{u=JSON.parse(localStorage.getItem('salus_user')||'null');}catch(_){}
-  if(!u||!u.email){
+  if(!sessionStorage.getItem('caedrix_beta_access')){
     var t=encodeURIComponent(window.location.href);
     window.location.replace('login.html?redirect='+t);
   }
@@ -523,16 +521,18 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
    AUTH
 ════════════════════════════════════ */
 const SalusAuth = {
-  getUser:()=>{try{return JSON.parse(localStorage.getItem('salus_user')||'null');}catch(_){return null;}},
-  logout:()=>{localStorage.removeItem('salus_user');sessionStorage.clear();window.location.href='login.html';},
-  isRecordsConnected:()=>localStorage.getItem('salus_records_connected')==='true'
+  logout:()=>{sessionStorage.clear();window.location.href='login.html';},
+  isRecordsConnected:()=>sessionStorage.getItem('caedrix_records_connected')==='true'
 };
 function salusInitUserBar(){
-  const bar=document.getElementById('salusUserBar');if(!bar)return;
-  const user=SalusAuth.getUser()||{};
-  const initials=(user.email||'?')[0].toUpperCase();
-  bar.innerHTML='<div class="subs-left"><div class="subs-avatar">'+initials+'</div><span class="subs-email">'+(user.email||'')+'</span></div>'+
-    '<div class="subs-right"><button class="subs-signout" onclick="SalusAuth.logout()">Sign out</button></div>';
+  const bar=document.getElementById('salusUserBar');
+  if(!bar)return;
+  bar.innerHTML=
+    '<div class="subs-left">' +
+    '<div class="subs-avatar" style="background:rgba(19,160,144,0.25);color:#13a090;font-size:11px;">β</div>' +
+    '<span class="subs-email">Beta Session · Health data not stored</span>' +
+    '</div>' +
+    '<div class="subs-right"><button class="subs-signout" onclick="sessionStorage.clear();window.location.href='login.html'">End Session</button></div>';
 }
 window.addEventListener('DOMContentLoaded',salusInitUserBar);
 
@@ -556,7 +556,7 @@ function setHint(el){
 /* Reads personal context saved on the Precision Medicine page */
 function getSalusLifeContext(){
   try{
-    const ctx=JSON.parse(localStorage.getItem('salus_life_context')||'null');
+    const ctx=JSON.parse(sessionStorage.getItem('caedrix_life_context')||'null');
     if(!ctx)return '';
     const parts=[];
     if(ctx.activities)parts.push('Favorite activities: '+ctx.activities);
