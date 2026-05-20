@@ -62,7 +62,7 @@
    * URL must be set in FEEDBACK_ENDPOINT below before deploy.
    * ────────────────────────────────────────────────────────────────── */
   /* PASTE THE FEEDBACK Apps Script /exec URL HERE (separate from signin) */
-  const FEEDBACK_ENDPOINT = 'PASTE_FEEDBACK_APPS_SCRIPT_URL_HERE';
+  const FEEDBACK_ENDPOINT = 'https://script.google.com/macros/s/AKfycbX...your-actual-url.../exec';
 
   function _injectFeedbackUI() {
     const style = document.createElement('style');
