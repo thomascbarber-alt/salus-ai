@@ -3,7 +3,13 @@
 <head>
 <script>
 (function(){
-  if(!sessionStorage.getItem('caedrix_beta_access')){var t=encodeURIComponent(window.location.href);window.location.replace('login.html?redirect='+t);}
+  var v = sessionStorage.getItem('caedrix_beta_access');
+  var exp = v ? parseInt(v, 10) : 0;
+  if(!exp || isNaN(exp) || Date.now() >= exp){
+    sessionStorage.removeItem('caedrix_beta_access');
+    var t = encodeURIComponent(window.location.href);
+    window.location.replace('login.html?redirect=' + t);
+  }
 })();
 </script>
 <meta charset="UTF-8">
@@ -183,6 +189,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 
 </div>
 
+<script src="caedrix-shared.js"></script>
 <script>
 /*
  * PRIVACY ARCHITECTURE — personal-details.html
@@ -194,18 +201,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
  *   - Isolated to this browser tab only
  */
 
-const LIFE_CONTEXT_KEY = 'caedrix_life_context';
-
-function salusInitUserBar(){
-  const bar=document.getElementById('salusUserBar');
-  if(!bar)return;
-  bar.innerHTML=
-    '<div class="subs-left">' +
-    '<div class="subs-avatar">β</div>' +
-    '<span class="subs-email">Beta Session · Health data not stored</span>' +
-    '</div>' +
-    '<div class="subs-right"><button class="subs-signout" onclick="sessionStorage.clear();window.location.href=\'login.html\'">End Session</button></div>';
-}
+const LIFE_CONTEXT_KEY = window.LIFE_CONTEXT_KEY || 'caedrix_life_context';
 
 function loadLifeContext(){
   try{

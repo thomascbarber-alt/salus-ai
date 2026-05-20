@@ -114,15 +114,35 @@ footer{text-align:center;padding:20px;font-size:11px;color:rgba(255,255,255,0.2)
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-/* ── CONFIGURE THIS before launch ── */
-const EMAIL_LIST_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
+/* ── CONFIGURED ── deployed Google Apps Script web app URL ── */
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdKVM24PsmoRo_snp7Iqii4NpMjCbgHZY5UHYmMZuPyplaFp4Lxmd89feSSyAFVEEWPA/exec';
 
-/* ── If already has active session, go straight in ── */
+/* ── Session lifetime: 24 hours from sign-in, or until tab close (whichever is first) ── */
+const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
+
+/* ── Returns a same-origin path that's safe to redirect to.
+      Falls back to health-decisions.html for anything suspicious. ── */
+function safeRedirect(redirect){
+  try{
+    if(!redirect) return 'health-decisions.html';
+    if(redirect.indexOf('//') === 0) return 'health-decisions.html';        // protocol-relative URL — reject
+    if(redirect.charAt(0) === '/') return redirect;                          // absolute same-origin path
+    var u = new URL(redirect, window.location.origin);                      // resolve relative or absolute
+    if(u.origin === window.location.origin) return u.pathname + u.search + u.hash;
+  }catch(_){}
+  return 'health-decisions.html';
+}
+
+/* ── If already has a NON-EXPIRED session, skip the form and go straight in ── */
 (function(){
-  if(sessionStorage.getItem('caedrix_beta_access')){
-    var params=new URLSearchParams(window.location.search);
-    var redirect=params.get('redirect');
-    window.location.replace(redirect&&redirect.startsWith('/')&&!redirect.startsWith('//')?redirect:'health-decisions.html');
+  var v = sessionStorage.getItem('caedrix_beta_access');
+  var exp = v ? parseInt(v, 10) : 0;
+  if(exp && !isNaN(exp) && Date.now() < exp){
+    var params = new URLSearchParams(window.location.search);
+    window.location.replace(safeRedirect(params.get('redirect')));
+  }else if(v){
+    /* Stale or malformed token — wipe it so the head-guard doesn't loop us back here */
+    sessionStorage.removeItem('caedrix_beta_access');
   }
 })();
 
@@ -147,14 +167,16 @@ async function requestAccess(){
 
   try {
     /*
-     * POST email to the list service.
-     * The email goes HERE — to the external list — and nowhere else.
-     * It is not stored in the browser. After this call completes,
-     * the email value is discarded from memory.
+     * POST email to the Google Apps Script web app.
+     *
+     * Important: we use Content-Type 'text/plain' rather than 'application/json'.
+     * Apps Script web apps don't reliably respond to the CORS preflight (OPTIONS)
+     * that 'application/json' triggers. 'text/plain' is a "simple request" — no
+     * preflight needed — and the server-side script just JSON.parses the body.
      */
-    await fetch(EMAIL_LIST_ENDPOINT, {
+    await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ email: email })
     });
   } catch(err) {
@@ -165,10 +187,12 @@ async function requestAccess(){
 
   /*
    * Grant session access.
-   * sessionStorage only — expires when browser tab closes.
-   * Contains ONLY a boolean flag. The email is NOT stored here.
+   * sessionStorage only — wiped when the browser tab closes.
+   * Token IS the expiry timestamp (ms since epoch). Head-guards on every protected
+   * page check Date.now() < this value and redirect back here if not.
+   * The email itself is NOT stored here.
    */
-  sessionStorage.setItem('caedrix_beta_access', 'true');
+  sessionStorage.setItem('caedrix_beta_access', String(Date.now() + SESSION_TTL_MS));
 
   /* Immediately discard the email from the input field */
   emailInput.value = '';
@@ -177,10 +201,8 @@ async function requestAccess(){
   btn.querySelector('.submit-btn-inner').innerHTML='<span>✓ Access granted</span>';
 
   setTimeout(()=>{
-    var params=new URLSearchParams(window.location.search);
-    var redirect=params.get('redirect');
-    /* Only allow same-origin relative redirects for security */
-    window.location.href=(redirect&&redirect.startsWith('/')&&!redirect.startsWith('//'))?redirect:'health-decisions.html';
+    var params = new URLSearchParams(window.location.search);
+    window.location.href = safeRedirect(params.get('redirect'));
   },900);
 }
 

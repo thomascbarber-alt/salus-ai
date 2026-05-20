@@ -3,9 +3,12 @@
 <head>
 <script>
 (function(){
-  if(!sessionStorage.getItem('caedrix_beta_access')){
-    var t=encodeURIComponent(window.location.href);
-    window.location.replace('login.html?redirect='+t);
+  var v = sessionStorage.getItem('caedrix_beta_access');
+  var exp = v ? parseInt(v, 10) : 0;
+  if(!exp || isNaN(exp) || Date.now() >= exp){
+    sessionStorage.removeItem('caedrix_beta_access');
+    var t = encodeURIComponent(window.location.href);
+    window.location.replace('login.html?redirect=' + t);
   }
 })();
 </script>
@@ -251,21 +254,9 @@ label .opt{font-size:10px;font-weight:400;letter-spacing:0;text-transform:none;c
 
 </div>
 
+<script src="caedrix-shared.js"></script>
 <script>
-const SalusAuth={
-  logout:()=>{sessionStorage.clear();window.location.href='login.html';}
-};
 
-function salusInitUserBar(){
-  const bar=document.getElementById('salusUserBar');
-  if(!bar)return;
-  bar.innerHTML=
-    '<div class="subs-left">' +
-    '<div class="subs-avatar" style="background:rgba(19,160,144,0.25);color:#13a090;font-size:11px;">β</div>' +
-    '<span class="subs-email">Beta Session · Health data not stored</span>' +
-    '</div>' +
-    '<div class="subs-right"><button class="subs-signout" onclick="sessionStorage.clear();window.location.href=\'login.html\'">End Session</button></div>';
-}
 
 const HEALTH_PROFILE_KEY='caedrix_health_profile';
 

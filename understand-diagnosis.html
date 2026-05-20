@@ -3,9 +3,12 @@
 <head>
 <script>
 (function(){
-  if(!sessionStorage.getItem('caedrix_beta_access')){
-    var t=encodeURIComponent(window.location.href);
-    window.location.replace('login.html?redirect='+t);
+  var v = sessionStorage.getItem('caedrix_beta_access');
+  var exp = v ? parseInt(v, 10) : 0;
+  if(!exp || isNaN(exp) || Date.now() >= exp){
+    sessionStorage.removeItem('caedrix_beta_access');
+    var t = encodeURIComponent(window.location.href);
+    window.location.replace('login.html?redirect=' + t);
   }
 })();
 </script>

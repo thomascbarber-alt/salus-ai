@@ -3,9 +3,12 @@
 <head>
 <script>
 (function(){
-  if(!sessionStorage.getItem('caedrix_beta_access')){
-    var t=encodeURIComponent(window.location.href);
-    window.location.replace('login.html?redirect='+t);
+  var v = sessionStorage.getItem('caedrix_beta_access');
+  var exp = v ? parseInt(v, 10) : 0;
+  if(!exp || isNaN(exp) || Date.now() >= exp){
+    sessionStorage.removeItem('caedrix_beta_access');
+    var t = encodeURIComponent(window.location.href);
+    window.location.replace('login.html?redirect=' + t);
   }
 })();
 </script>
@@ -459,31 +462,13 @@ nav {
   <p style="margin-top:8px;max-width:700px;margin-left:auto;margin-right:auto;">This tool provides educational information about possible diagnoses based on symptoms. It is NOT a diagnosis and cannot replace evaluation by a licensed physician. Always consult a qualified healthcare provider for any medical concerns.</p>
 </footer>
 
+<script src="caedrix-shared.js"></script>
 <script>
 
-const SalusAuth = {
-  logout:              ()  => { sessionStorage.clear(); window.location.href='login.html'; },
-  isRecordsConnected:  ()  => sessionStorage.getItem('caedrix_records_connected') === 'true',
-  setRecordsConnected: (v) => v ? sessionStorage.setItem('caedrix_records_connected','true') : sessionStorage.removeItem('caedrix_records_connected')
-};
-function salusInitUserBar(){
-  const bar=document.getElementById('salusUserBar');
-  if(!bar)return;
-  bar.innerHTML=
-    '<div class="subs-left">' +
-    '<div class="subs-avatar" style="background:rgba(19,160,144,0.25);color:#13a090;font-size:11px;">β</div>' +
-    '<span class="subs-email">Beta Session · Health data not stored</span>' +
-    '</div>' +
-    '<div class="subs-right"><button class="subs-signout" onclick="sessionStorage.clear();window.location.href='login.html'">End Session</button></div>';
-}
 
 
 let lastSymptoms='', lastAge='', lastSex='', clarifyingHistory=[], clarifyRound=0, finalClarifications={};
 const MAX_CLARIFY_ROUNDS=3;
-const SalusState = {
-  isRecordsConnected:  () => SalusAuth.isRecordsConnected(),
-  setRecordsConnected: (v) => SalusAuth.setRecordsConnected(v)
-};
 
 window.addEventListener('DOMContentLoaded',()=>{
   salusInitUserBar();
@@ -518,68 +503,9 @@ function setAgentState(n, state, msg) {
 }
 
 /* Reads personal context saved on the Precision Medicine page */
-function getSalusLifeContext(){
-  try{
-    const ctx=JSON.parse(sessionStorage.getItem('caedrix_life_context')||'null');
-    if(!ctx)return '';
-    const parts=[];
-    if(ctx.activities)parts.push('Favorite activities: '+ctx.activities);
-    if(ctx.important) parts.push('Important personal context: '+ctx.important);
-    if(ctx.caregiver) parts.push('Caregiver responsibilities: '+ctx.caregiver);
-    if(ctx.living)    parts.push('Living situation: '+ctx.living);
-    if(!parts.length) return '';
-    return '\n\n---\nPersonal context about this patient:\n'+parts.join('\n')+'\n---';
-  }catch(_){return '';}
-}
 
-function getSalusHealthProfile(){
-  try{
-    const hp=JSON.parse(sessionStorage.getItem('caedrix_health_profile')||'null');
-    if(!hp)return '';
-    const parts=[];
-    if(hp.age)          parts.push('Age: '+hp.age);
-    if(hp.sex)          parts.push('Biological sex: '+hp.sex);
-    if(hp.smoking)      parts.push('Smoking status: '+hp.smoking);
-    if(hp.diabetes)     parts.push('Diabetes: '+hp.diabetes);
-    if(hp.heartDisease) parts.push('Heart disease: '+hp.heartDisease);
-    if(hp.conditions)   parts.push('Other conditions: '+hp.conditions);
-    if(hp.medications)  parts.push('Current medications: '+hp.medications);
-    if(hp.screenings)   parts.push('Recent screenings: '+hp.screenings);
-    if(hp.familyHistory)parts.push('Family history: '+hp.familyHistory);
-    if(!parts.length)return '';
-    return '\n\n---\nPatient health profile:\n'+parts.join('\n')+'\n---';
-  }catch(_){return '';}
-}
 
-async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebSearch = false, model = 'claude-sonnet-4-6' }, _retry = 0) {
-  const body = {
-    model: model,
-    max_tokens: maxTokens,
-    system: systemPrompt,
-    messages: [{ role: 'user', content: userContent }]
-  };
-  if (useWebSearch) body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
-  const res = await fetch('/api/claude', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  if ((res.status === 529 || res.status === 503) && _retry < 3) {
-    await new Promise(r => setTimeout(r, (_retry + 1) * 2000));
-    return callClaude({ systemPrompt, userContent, maxTokens, useWebSearch, model }, _retry + 1);
-  }
-  if (!res.ok) { const err = await res.text(); throw new Error('API error ' + res.status + ': ' + err); }
-  return await res.json();
-}
 
-function extractText(d){return(d.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');}
-function safeParseJSON(text){
-  if(!text||!text.trim())throw new Error('Empty response');
-  let c=text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
-  try{return JSON.parse(c);}catch(_){}
-  const m=c.match(/\{[\s\S]*\}/);if(m){try{return JSON.parse(m[0]);}catch(_){}}
-  throw new Error('Could not parse JSON. Preview: '+c.substring(0,300));
-}
 
 const AGENT_CLARIFY_SYSTEM=`You are Caedrix AI's Clarifying Assistant for symptom analysis. Your job is to ask targeted follow-up questions to narrow down potential diagnoses.
 
@@ -808,7 +734,6 @@ function renderResults(r,accuracy){
 function toggleDiff(h){const b=h.nextElementSibling;const c=h.querySelector('.diff-chevron');b.classList.toggle('open');c.textContent=b.classList.contains('open')?'▾':'▸';}
 function resetToInput(){document.getElementById('resultsSection').style.display='none';document.getElementById('symptomInput').value='';document.getElementById('symptomInput').disabled=false;document.getElementById('submitBtn').disabled=false;document.getElementById('clarifyPanel').classList.remove('visible');hidePipeline();document.getElementById('inputCard').scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>document.getElementById('symptomInput').focus(),400);}
 function handleError(msg){console.error(msg);[1,2,3,4,5].forEach(n=>{const c=document.getElementById('agentCard'+n);if(c&&c.classList.contains('running'))setAgentState(n,'error','Error');});setTimeout(()=>{hidePipeline();document.getElementById('submitBtn').disabled=false;document.getElementById('symptomInput').disabled=false;const d=document.createElement('div');d.id='pipelineErrorMsg';d.style.cssText='margin-top:16px;padding:16px 20px;background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.3);border-radius:12px;font-size:13px;color:#e07070;font-family:DM Sans,sans-serif;line-height:1.5;';d.innerHTML='<strong style="color:#e88;">⚠ Error:</strong> '+msg+'<br><span style="opacity:.6;font-size:12px;">Check your API key and try again.</span>';document.getElementById('inputCard').after(d);},800);}
-function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 document.getElementById('symptomInput').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')runAnalysis();});
 document.getElementById('symptomInput').addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(300,Math.max(100,this.scrollHeight))+'px';});
 

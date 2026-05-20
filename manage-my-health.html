@@ -3,9 +3,12 @@
 <head>
 <script>
 (function(){
-  if(!sessionStorage.getItem('caedrix_beta_access')){
-    var t=encodeURIComponent(window.location.href);
-    window.location.replace('login.html?redirect='+t);
+  var v = sessionStorage.getItem('caedrix_beta_access');
+  var exp = v ? parseInt(v, 10) : 0;
+  if(!exp || isNaN(exp) || Date.now() >= exp){
+    sessionStorage.removeItem('caedrix_beta_access');
+    var t = encodeURIComponent(window.location.href);
+    window.location.replace('login.html?redirect=' + t);
   }
 })();
 
@@ -535,65 +538,16 @@ nav {
   <p style="margin-top:8px;max-width:700px;margin-left:auto;margin-right:auto;">Recommendations are educational and based on population-level guidelines. Your physician may have different recommendations based on your individual clinical situation. Always discuss preventive care decisions with your healthcare provider. Notification reminders are stored locally in your browser.</p>
 </footer>
 
+<script src="caedrix-shared.js"></script>
 <script>
 
-const SalusAuth = {
-  logout:              ()  => { sessionStorage.clear(); window.location.href='login.html'; },
-  isRecordsConnected:  ()  => sessionStorage.getItem('caedrix_records_connected') === 'true',
-  setRecordsConnected: (v) => v ? sessionStorage.setItem('caedrix_records_connected','true') : sessionStorage.removeItem('caedrix_records_connected')
-};
-function salusInitUserBar(){
-  const bar=document.getElementById('salusUserBar');
-  if(!bar)return;
-  bar.innerHTML=
-    '<div class="subs-left">' +
-    '<div class="subs-avatar" style="background:rgba(19,160,144,0.25);color:#13a090;font-size:11px;">β</div>' +
-    '<span class="subs-email">Beta Session · Health data not stored</span>' +
-    '</div>' +
-    '<div class="subs-right"><button class="subs-signout" onclick="sessionStorage.clear();window.location.href=\'login.html\'">End Session</button></div>';
-}
 
 
 let recordsConnected=false, lastProfile={}, currentCareItems=[], activeFilter='all';
 
 /* Reads personal context saved on the Precision Medicine page */
-function getSalusLifeContext(){
-  try{
-    const ctx=JSON.parse(sessionStorage.getItem('caedrix_life_context')||'null');
-    if(!ctx)return '';
-    const parts=[];
-    if(ctx.activities)parts.push('Favorite activities: '+ctx.activities);
-    if(ctx.important) parts.push('Important personal context: '+ctx.important);
-    if(ctx.caregiver) parts.push('Caregiver responsibilities: '+ctx.caregiver);
-    if(ctx.living)    parts.push('Living situation: '+ctx.living);
-    if(!parts.length) return '';
-    return '\n\nPersonal context about this patient:\n'+parts.join('\n');
-  }catch(_){return '';}
-}
 
 /* Reads health profile saved on the Health Profile page */
-function getSalusHealthProfile(){
-  try{
-    const hp=JSON.parse(sessionStorage.getItem('caedrix_health_profile')||'null');
-    if(!hp)return '';
-    const parts=[];
-    if(hp.age)          parts.push('Age: '+hp.age);
-    if(hp.sex)          parts.push('Biological sex: '+hp.sex);
-    if(hp.smoking)      parts.push('Smoking status: '+hp.smoking);
-    if(hp.diabetes)     parts.push('Diabetes: '+hp.diabetes);
-    if(hp.heartDisease) parts.push('Heart disease: '+hp.heartDisease);
-    if(hp.conditions)   parts.push('Other conditions: '+hp.conditions);
-    if(hp.medications)  parts.push('Current medications: '+hp.medications);
-    if(hp.screenings)   parts.push('Recent screenings: '+hp.screenings);
-    if(hp.familyHistory)parts.push('Family history: '+hp.familyHistory);
-    if(!parts.length)return '';
-    return '\n\n---\nPatient health profile:\n'+parts.join('\n')+'\n---';
-  }catch(_){return '';}
-}
-const SalusState = {
-  isRecordsConnected:  () => SalusAuth.isRecordsConnected(),
-  setRecordsConnected: (v) => SalusAuth.setRecordsConnected(v)
-};
 
 window.addEventListener('DOMContentLoaded',()=>{
   salusInitUserBar();
@@ -702,64 +656,7 @@ function setAgentState(n,state,msg){
 function showPipeline(){document.getElementById('pipelinePanel').classList.add('visible');}
 function hidePipeline(){document.getElementById('pipelinePanel').classList.remove('visible');}
 
-async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebSearch = false, model = 'claude-sonnet-4-6' }, _retry = 0) {
-  const body = {
-    model: model,
-    max_tokens: maxTokens,
-    system: systemPrompt,
-    messages: [{ role: 'user', content: userContent }]
-  };
-  if (useWebSearch) {
-    body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
-  }
-  const res = await fetch('/api/claude', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  if ((res.status === 529 || res.status === 503) && _retry < 3) {
-    await new Promise(r => setTimeout(r, (_retry + 1) * 2000));
-    return callClaude({ systemPrompt, userContent, maxTokens, useWebSearch, model }, _retry + 1);
-  }
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error('API error ' + res.status + ': ' + err);
-  }
-  return await res.json();
-}
 
-function extractText(d){return(d.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');}
-function safeParseJSON(text){
-  if(!text||!text.trim())throw new Error('Empty response');
-  let c=text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
-  // 1. Direct parse
-  try{return JSON.parse(c);}catch(_){}
-  // 2. Extract largest { } block
-  const m=c.match(/\{[\s\S]*\}/);
-  if(m){try{return JSON.parse(m[0]);}catch(_){}}
-  // 3. Partial JSON recovery — close open strings/arrays/objects from truncated response
-  try{
-    let fixed=m?m[0]:c, inStr=false, escape=false, braces=0, brackets=0;
-    for(let i=0;i<fixed.length;i++){
-      const ch=fixed[i];
-      if(escape){escape=false;continue;}
-      if(ch==='\\'&&inStr){escape=true;continue;}
-      if(ch==='"'){inStr=!inStr;continue;}
-      if(!inStr){
-        if(ch==='{')braces++;else if(ch==='}')braces--;
-        else if(ch==='[')brackets++;else if(ch===']')brackets--;
-      }
-    }
-    if(inStr)fixed+='"';
-    fixed=fixed.replace(/,\s*$/,'');
-    while(brackets>0){fixed+=']';brackets--;}
-    while(braces>0){fixed+='}';braces--;}
-    const recovered=JSON.parse(fixed);
-    console.warn('safeParseJSON: partial JSON recovery used — response was truncated');
-    return recovered;
-  }catch(_){}
-  throw new Error('Could not parse JSON. Preview: '+c.substring(0,300));
-}
 
 /* AGENT SYSTEM PROMPTS */
 const AGENT_PROFILE_SYSTEM=`You are Caedrix AI's Profile Review Agent. Your job is to review the patient health profile for completeness and flag any gaps that would significantly improve the preventive care plan.
@@ -1158,8 +1055,6 @@ function handleError(msg){
   [1,2,3,4,5].forEach(n=>{const c=document.getElementById('agentCard'+n);if(c&&c.classList.contains('running'))setAgentState(n,'error','Error');});
   setTimeout(()=>{hidePipeline();document.getElementById('generateBtn').disabled=false;const d=document.createElement('div');d.id='pipelineErrorMsg';d.style.cssText='margin-top:16px;padding:16px 20px;background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.3);border-radius:12px;font-size:13px;color:#e07070;font-family:DM Sans,sans-serif;line-height:1.5;';d.innerHTML='<strong style="color:#e88;">⚠ Error:</strong> '+msg+'<br><span style="opacity:.6;font-size:12px;">Check your API key and try again.</span>';const anchor=document.getElementById('generateCard')||document.getElementById('pipelinePanel');if(anchor)anchor.after(d);},800);
 }
-
-function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 /* ── HealthEx OAuth return handler ── */
 (function(){
