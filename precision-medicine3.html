@@ -2,13 +2,12 @@
 <html lang="en">
 <head>
 <script>
+/* Caedrix AI auth gate — runs before page renders */
 (function(){
-  var v = sessionStorage.getItem('caedrix_beta_access');
-  var exp = v ? parseInt(v, 10) : 0;
-  if(!exp || isNaN(exp) || Date.now() >= exp){
-    sessionStorage.removeItem('caedrix_beta_access');
-    var t = encodeURIComponent(window.location.href);
-    window.location.replace('login.html?redirect=' + t);
+  var u=null;try{u=JSON.parse(localStorage.getItem('caedrix_user')||'null');}catch(_){}
+  if(!u||!u.email){
+    var t=encodeURIComponent(window.location.href);
+    window.location.replace('login.html?redirect='+t);
   }
 })();
 
@@ -1075,10 +1074,10 @@ h1 em { font-style: italic; color: var(--gold); }
   background: linear-gradient(90deg, var(--teal), var(--gold));
 }
 .privacy-inner {
-  max-width: 760px;
+  max-width: 900px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 24px;
 }
 .privacy-card {
@@ -1233,21 +1232,21 @@ footer p {
 }
 .tooltip-wrap:hover .tooltip { opacity: 1; }
 /* ── Records reminder / connected bars ── */
-.salus-records-reminder {
+.caedrix-records-reminder {
   position: fixed; top: 96px; left: 0; right: 0; z-index: 98;
   background: rgba(22,45,82,0.97); backdrop-filter: blur(8px);
   border-bottom: 1px solid rgba(184,147,42,0.2);
   padding: 10px 48px; display: none;
   align-items: center; gap: 12px;
 }
-.salus-records-reminder.visible { display: flex; }
-.salus-records-reminder-text {
+.caedrix-records-reminder.visible { display: flex; }
+.caedrix-records-reminder-text {
   font-family: 'DM Sans', sans-serif; font-size: 13px;
   color: rgba(255,255,255,0.65); flex: 1;
 }
-.salus-records-reminder-text a { color: #d4aa3a; text-decoration: none; font-weight: 600; }
-.salus-records-reminder-text a:hover { text-decoration: underline; }
-.salus-records-connected-bar {
+.caedrix-records-reminder-text a { color: #d4aa3a; text-decoration: none; font-weight: 600; }
+.caedrix-records-reminder-text a:hover { text-decoration: underline; }
+.caedrix-records-connected-bar {
   position: fixed; top: 96px; left: 0; right: 0; z-index: 98;
   background: rgba(10,60,50,0.95); backdrop-filter: blur(8px);
   border-bottom: 1px solid rgba(10,124,110,0.35);
@@ -1256,23 +1255,23 @@ footer p {
   font-family: 'DM Sans', sans-serif; font-size: 12px;
   color: rgba(255,255,255,0.6);
 }
-.salus-records-connected-bar.visible { display: flex; }
-.salus-connected-dot {
+.caedrix-records-connected-bar.visible { display: flex; }
+.caedrix-connected-dot {
   width: 7px; height: 7px; border-radius: 50%;
   background: #13a090; flex-shrink: 0;
-  animation: salusPulse 2s infinite;
+  animation: caedrixPulse 2s infinite;
 }
-@keyframes salusPulse {
+@keyframes caedrixPulse {
   0%   { box-shadow: 0 0 0 0 rgba(19,160,144,0.4); }
   70%  { box-shadow: 0 0 0 5px rgba(19,160,144,0); }
   100% { box-shadow: 0 0 0 0 rgba(19,160,144,0); }
 }
 @media (max-width: 768px) {
-  .salus-records-reminder, .salus-records-connected-bar { padding: 8px 20px; }
+  .caedrix-records-reminder, .caedrix-records-connected-bar { padding: 8px 20px; }
 }
 
-/* ── Salus User Status Bar ── */
-#salusUserBar{
+/* ── Caedrix User Status Bar ── */
+#caedrixUserBar{
   position:fixed;top:96px;left:0;right:0;z-index:99;
   background:rgba(7,16,32,0.98);
   border-bottom:1px solid rgba(255,255,255,0.055);
@@ -1295,7 +1294,7 @@ footer p {
 @keyframes subsDotPulse{0%{box-shadow:0 0 0 0 rgba(82,196,136,.5);}70%{box-shadow:0 0 0 5px rgba(82,196,136,0);}100%{box-shadow:0 0 0 0 rgba(82,196,136,0);}}
 .subs-signout{padding:4px 9px;border-radius:6px;background:none;border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.22);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;transition:all .2s;}
 .subs-signout:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.5);}
-@media(max-width:768px){#salusUserBar{padding:0 16px;}.subs-email{display:none;}.subs-records span{display:none;}}
+@media(max-width:768px){#caedrixUserBar{padding:0 16px;}.subs-email{display:none;}.subs-records span{display:none;}}
 
 
 /* ── Records Interest Toggle ── */
@@ -1524,68 +1523,6 @@ footer p {
 
 </style>
   <script defer src="/_vercel/insights/script.js"></script>
-
-<style>
-/* ── Canonical nav — standardized across all pages ── */
-nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  padding: 0 48px;
-  height: 96px;
-  background: rgba(12,30,58,0.97);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(212,170,58,0.2);
-}
-.nav-logo { flex: 0 0 auto; display: flex; align-items: center; }
-.logo-img  { height: 90px; width: auto; object-fit: contain; }
-.nav-actions {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 10px;
-}
-.nav-mini {
-  padding: 8px 14px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  line-height: 1;
-  border: 1px solid transparent;
-}
-.nav-mini:hover { transform: translateY(-1px); opacity: 0.9; }
-.nav-mini-active { border-color: rgba(255,255,255,0.5); }
-.btn1 { background: linear-gradient(135deg,#d4aa3a,#b8932a); color:#0c1e3a; }
-.btn2 { background: linear-gradient(135deg,#13a090,#0a7c6e); color:#fff; }
-.btn3 { background: linear-gradient(135deg,#4a6fa5,#162d52); color:#fff; }
-.btn4 { background: linear-gradient(135deg,#9b59b6,#6b7a8d); color:#fff; }
-.btn5 { background: linear-gradient(135deg,#3a9e6a,#2d7a52); color:#fff; }
-.nav-links { margin-left: auto; display: flex; align-items: center; gap: 24px; }
-.nav-links a { color: rgba(255,255,255,0.65); text-decoration:none; font-size:13px; transition:color .2s; }
-.nav-links a:hover { color:#fff; }
-.nav-cta {
-  background: linear-gradient(135deg,#d4aa3a,#b8932a) !important;
-  color: #0c1e3a !important;
-  padding: 8px 20px !important;
-  border-radius: 6px !important;
-  font-weight: 600 !important;
-}
-@media (max-width: 1100px) {
-  nav { padding: 0 24px; }
-  .nav-mini { font-size: 11px; padding: 7px 12px; }
-}
-@media (max-width: 900px) {
-  .nav-links { display: none; }
-  .nav-actions { gap: 6px; }
-  .nav-mini { font-size: 10px; padding: 6px 10px; }
-}
-</style>
 </head>
 <body>
 
@@ -1596,35 +1533,36 @@ nav {
 <nav>
   <div class="nav-logo">
     <a href="index.html" style="display:flex;align-items:center;">
-      <img src="/salusAI-logo.jpg" class="logo-img" alt="Caedrix AI" />
+      <img src="caedrix-logo.png" class="logo-img" alt="Caedrix AI Logo" />
     </a>
   </div>
-  <div class="nav-actions">
-    <a href="precision-medicine3.html"  class="nav-mini btn1 nav-mini-active">Precision Medicine</a>
-    <a href="health-decisions.html"     class="nav-mini btn2">Health Decisions</a>
-    <a href="determine-diagnosis.html"  class="nav-mini btn4">Determine Diagnosis</a>
-    <a href="understand-diagnosis.html" class="nav-mini btn3">Understand Diagnosis</a>
-    <a href="manage-my-health.html"     class="nav-mini btn5">Manage My Health</a>
+    <div class="nav-actions">
+    <a href="precision-medicine3.html"  class="nav-mini btn-gold" style="border:1px solid rgba(212,170,58,0.6);">Precision Medicine</a>
+    <a href="health-decisions.html"    class="nav-mini btn-teal">Health Decisions</a>
+    <a href="determine-diagnosis.html"  class="nav-mini btn-plum">Determine Diagnosis</a>
+    <a href="understand-diagnosis.html" class="nav-mini btn-blue">Understand Diagnosis</a>
   </div>
   <div class="nav-links">
     <a href="#benefits">Why Connect</a>
     <a href="#connect">How It Works</a>
+    <a href="#healthex">Link Records</a>
+    <a href="#connect" class="nav-cta">Get Started →</a>
   </div>
 </nav>
-<div id="salusUserBar"></div>
+<div id="caedrixUserBar"></div>
 
 <!-- Records reminder bar (shown when records not linked) -->
-<div class="salus-records-reminder" id="salusRecordsReminder">
+<div class="caedrix-records-reminder" id="caedrixRecordsReminder">
   <span style="font-size:16px;">💡</span>
-  <span class="salus-records-reminder-text">
+  <span class="caedrix-records-reminder-text">
     A more informed response is possible if you <a href="health-decisions.html">link your medical records</a>.
   </span>
-  <button onclick="document.getElementById('salusRecordsReminder').classList.remove('visible')"
+  <button onclick="document.getElementById('caedrixRecordsReminder').classList.remove('visible')"
     style="background:none;border:none;color:rgba(255,255,255,0.3);font-size:16px;cursor:pointer;padding:0 4px;">✕</button>
 </div>
 <!-- Records connected bar -->
-<div class="salus-records-connected-bar" id="salusRecordsConnected">
-  <div class="salus-connected-dot"></div>
+<div class="caedrix-records-connected-bar" id="caedrixRecordsConnected">
+  <div class="caedrix-connected-dot"></div>
   <span>Medical records connected via <strong style="color:#13a090;">HealthEx</strong> — all Caedrix AI responses are personalized to your health history.</span>
 </div>
 
@@ -1643,9 +1581,15 @@ nav {
       </div>
       <h1>Your Complete<br><em>Health Picture.</em><br>Finally Clear.</h1>
       <p class="hero-sub">
-        When Caedrix AI sees your full medical history it can help you understand your health the way your physician does.
+        When Caedrix AI sees your full medical record — your labs, your diagnoses, your medications,
+        your history — it can help you understand your health the way your physician does.
         Not generic answers. <em style="color: rgba(255,255,255,0.8); font-style:italic;">Your</em> answers.
       </p>
+      <div class="hero-badges">
+        <div class="badge"><div class="badge-dot"></div> Works with 21,000+ providers</div>
+        <div class="badge"><div class="badge-dot"></div> HIPAA-compliant &amp; encrypted</div>
+        <div class="badge"><div class="badge-dot"></div> Your data stays yours</div>
+      </div>
       <div class="hero-ctas">
       </div>
     </div>
@@ -1657,6 +1601,7 @@ nav {
           <div class="unlock-card-icon">🔬</div>
           <div>
             <div class="unlock-card-title">What Caedrix AI Unlocks</div>
+            <div class="unlock-card-sub">With your records connected</div>
           </div>
         </div>
         <div class="unlock-items">
@@ -1665,6 +1610,13 @@ nav {
             <div class="unlock-item-text">
               <div class="unlock-item-title">Understand Your Diagnoses</div>
               <div class="unlock-item-desc">Plain-language explanations of your conditions, what they mean, and what questions to ask your doctor.</div>
+            </div>
+          </div>
+          <div class="unlock-item">
+            <div class="unlock-item-icon">📊</div>
+            <div class="unlock-item-text">
+              <div class="unlock-item-title">Read Your Lab Results</div>
+              <div class="unlock-item-desc">Understand which values are trending, what's outside range, and why it matters for you specifically.</div>
             </div>
           </div>
           <div class="unlock-item">
@@ -1715,6 +1667,7 @@ nav {
         <div class="records-interest-confirm" id="recordsInterestConfirm" style="display:none;">
           <span>✓</span> Interest noted — we'll notify you when electronic record connection is available.
         </div>
+        <div class="hub-card-note">HIPAA-compliant · Encrypted · You control access</div>
       </div>
 
       <!-- CARD 2: Personal Details -->
@@ -1730,7 +1683,7 @@ nav {
           <span>Add My Personal Details</span>
           <span class="hub-btn-arrow">→</span>
         </a>
-        <div class="hub-card-note">Used in Health Decisions · Determine Diagnosis · Manage My Health</div>
+        <div class="hub-card-note">Used in Health Decisions · Determine Diagnosis</div>
       </div>
 
       <!-- CARD 3: Health Profile -->
@@ -1746,7 +1699,7 @@ nav {
           <span>Add My Health Profile</span>
           <span class="hub-btn-arrow">→</span>
         </a>
-        <div class="hub-card-note">Used in Health Decisions · Determine Diagnosis · Manage My Health</div>
+        <div class="hub-card-note">Used in Health Decisions · Determine Diagnosis</div>
       </div>
 
     </div>
@@ -1858,6 +1811,11 @@ nav {
   </div>
   <div class="privacy-inner">
     <div class="privacy-card">
+      <span class="privacy-card-icon">🔒</span>
+      <div class="privacy-card-title">HIPAA Compliant</div>
+      <p class="privacy-card-body">All health data is handled under full HIPAA compliance, with signed Business Associate Agreements with every data partner. Your PHI is encrypted at rest and in transit.</p>
+    </div>
+    <div class="privacy-card">
       <span class="privacy-card-icon">🎛️</span>
       <div class="privacy-card-title">You Control Your Data</div>
       <p class="privacy-card-body">You decide what Caedrix AI can see. Grant access to specific providers, revoke at any time. Your data is never sold, shared with advertisers, or used for any purpose other than your health guidance.</p>
@@ -1879,27 +1837,24 @@ nav {
     Caedrix AI provides health information to help you understand your medical data and prepare for 
     conversations with your care team. It does not constitute medical advice, diagnosis, or treatment. 
     Always consult a qualified and licensed healthcare provider for medical decisions. 
-    Caedrix AI is not a substitute for professional medical care. All health information is kept private, 
-    it is never shared and never linked to your email or other personal information. Your information 
-    will never be shared or sold to any corporation, individual, or non profit entity.
+    Caedrix AI is not a substitute for professional medical care.
   </p>
 </footer>
 
-<script src="caedrix-shared.js"></script>
 <script>
 
 /* ── Records Interest Tracking ── */
-const RECORDS_INTEREST_KEY = 'salus_records_interest';
+const RECORDS_INTEREST_KEY = 'caedrix_records_interest';
 
 function handleRecordsInterest(checkbox) {
   const label   = document.getElementById('recordsInterestLabel');
   const icon    = document.getElementById('recordsInterestIcon');
   const confirm = document.getElementById('recordsInterestConfirm');
   if (checkbox.checked) {
-    sessionStorage.setItem(RECORDS_INTEREST_KEY, JSON.stringify({
+    localStorage.setItem(RECORDS_INTEREST_KEY, JSON.stringify({
       interested: true,
       timestamp: new Date().toISOString(),
-      userEmail: ''
+      userEmail: CaedrixAuth.getUser()?.email || ''
     }));
     label.classList.add('checked');
     icon.textContent = '☑';
@@ -1907,7 +1862,7 @@ function handleRecordsInterest(checkbox) {
     const rb = document.getElementById('recordsBadge');
     if (rb) { rb.textContent = '⭐ Interested'; rb.className = 'hub-card-badge partial'; }
   } else {
-    sessionStorage.removeItem(RECORDS_INTEREST_KEY);
+    localStorage.removeItem(RECORDS_INTEREST_KEY);
     label.classList.remove('checked');
     icon.textContent = '☐';
     confirm.style.display = 'none';
@@ -1917,7 +1872,7 @@ function handleRecordsInterest(checkbox) {
 
 function loadRecordsInterest() {
   try {
-    const data = JSON.parse(sessionStorage.getItem(RECORDS_INTEREST_KEY) || 'null');
+    const data = JSON.parse(localStorage.getItem(RECORDS_INTEREST_KEY) || 'null');
     if (!data?.interested) return;
     const cb = document.getElementById('recordsInterestCheck');
     if (cb) { cb.checked = true; handleRecordsInterest(cb); }
@@ -1953,7 +1908,7 @@ function renderProfileSummary() {
 
   // Personal details
   try {
-    const ctx = JSON.parse(sessionStorage.getItem('caedrix_life_context') || 'null');
+    const ctx = JSON.parse(localStorage.getItem('caedrix_life_context') || 'null');
     const personalGroup = document.getElementById('summaryPersonalGroup');
     const personalRows  = document.getElementById('summaryPersonalRows');
     if (ctx && personalGroup && personalRows) {
@@ -1974,7 +1929,7 @@ function renderProfileSummary() {
 
   // Health profile
   try {
-    const hp = JSON.parse(sessionStorage.getItem('caedrix_health_profile') || 'null');
+    const hp = JSON.parse(localStorage.getItem('caedrix_health_profile') || 'null');
     const healthGroup = document.getElementById('summaryHealthGroup');
     const healthRows  = document.getElementById('summaryHealthRows');
     if (hp && healthGroup && healthRows) {
@@ -2002,7 +1957,36 @@ function renderProfileSummary() {
   }
 }
 
+/* ── Caedrix Auth: shared state (localStorage-backed) ── */
+const CaedrixAuth = {
+  getUser:            ()  => { try{ return JSON.parse(localStorage.getItem('caedrix_user')||'null'); }catch(_){return null;} },
+  logout:             ()  => { localStorage.removeItem('caedrix_user'); sessionStorage.clear(); window.location.href='login.html'; },
+  getApiKey:          ()  => localStorage.getItem('caedrix_api_key') || sessionStorage.getItem('caedrix_api_key') || '',
+  setApiKey:          (k) => { if(k){ localStorage.setItem('caedrix_api_key',k); sessionStorage.setItem('caedrix_api_key',k); } else { localStorage.removeItem('caedrix_api_key'); sessionStorage.removeItem('caedrix_api_key'); } },
+  isRecordsConnected: ()  => localStorage.getItem('caedrix_records_connected') === 'true',
+  setRecordsConnected:(v) => v ? localStorage.setItem('caedrix_records_connected','true') : localStorage.removeItem('caedrix_records_connected')
+};
 
+function caedrixInitUserBar() {
+  const bar = document.getElementById('caedrixUserBar');
+  if (!bar) return;
+  const user    = CaedrixAuth.getUser() || {};
+  const rc      = CaedrixAuth.isRecordsConnected();
+  const initials= (user.email||'?')[0].toUpperCase();
+  const email   = user.email || '';
+  bar.innerHTML =
+    '<div class="subs-left">' +
+      '<div class="subs-avatar">'+initials+'</div>' +
+      '<span class="subs-email">'+email+'</span>' +
+    '</div>' +
+    '<div class="subs-right">' +
+      (rc
+        ? '<div class="subs-records subs-records-on"><div class="subs-rdot subs-rdot-on"></div><span>Records Linked</span></div>'
+        : '<a href="health-decisions.html" class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Link Medical Records</span></a>'
+      ) +
+      '<button class="subs-signout" onclick="CaedrixAuth.logout()">Sign out</button>' +
+    '</div>';
+}
 
 
 /* ── About You: save / load / shared context helper ── */
@@ -2015,12 +1999,12 @@ function saveLifeContext(){
     caregiver:  document.getElementById('ctx-caregiver')?.value.trim()||'',
     living:     document.getElementById('ctx-living')?.value.trim()||''
   };
-  sessionStorage.setItem(LIFE_CONTEXT_KEY,JSON.stringify(ctx));
+  localStorage.setItem(LIFE_CONTEXT_KEY,JSON.stringify(ctx));
 }
 
 function loadLifeContext(){
   try{
-    const ctx=JSON.parse(sessionStorage.getItem(LIFE_CONTEXT_KEY)||'null');
+    const ctx=JSON.parse(localStorage.getItem(LIFE_CONTEXT_KEY)||'null');
     if(!ctx)return;
     if(ctx.activities)document.getElementById('ctx-activities').value=ctx.activities;
     if(ctx.important) document.getElementById('ctx-important').value=ctx.important;
@@ -2032,7 +2016,7 @@ function loadLifeContext(){
 /* Called by other pages to inject personal context into AI prompts */
 function getCaedrixLifeContext(){
   try{
-    const ctx=JSON.parse(sessionStorage.getItem(LIFE_CONTEXT_KEY)||'null');
+    const ctx=JSON.parse(localStorage.getItem(LIFE_CONTEXT_KEY)||'null');
     if(!ctx)return '';
     const parts=[];
     if(ctx.activities)parts.push('Favorite activities: '+ctx.activities);
@@ -2078,7 +2062,7 @@ function updateHubBadges(){
 
   /* Personal details badge */
   try{
-    const ctx=JSON.parse(sessionStorage.getItem('caedrix_life_context')||'null');
+    const ctx=JSON.parse(localStorage.getItem('caedrix_life_context')||'null');
     const pb=document.getElementById('personalBadge');
     if(pb){
       const filled=ctx&&(ctx.activities||ctx.important||ctx.caregiver||ctx.living);
@@ -2088,7 +2072,7 @@ function updateHubBadges(){
 
   /* Health profile badge */
   try{
-    const hp=JSON.parse(sessionStorage.getItem('caedrix_health_profile')||'null');
+    const hp=JSON.parse(localStorage.getItem('caedrix_health_profile')||'null');
     const hb=document.getElementById('healthBadge');
     if(hb){
       const filled=hp&&(hp.age||hp.sex);
@@ -2097,7 +2081,7 @@ function updateHubBadges(){
   }catch(_){}
 }
 
-window.addEventListener('DOMContentLoaded',()=>{loadLifeContext();updateHubBadges();salusInitUserBar();loadRecordsInterest();renderProfileSummary();});
+window.addEventListener('DOMContentLoaded',()=>{loadLifeContext();updateHubBadges();caedrixInitUserBar();loadRecordsInterest();renderProfileSummary();});
 
 /* ── Progress bar ── */
 window.addEventListener('scroll', () => {
@@ -2175,13 +2159,13 @@ document.getElementById('appleScrollBtn')?.addEventListener('click', e => {
   document.getElementById('apple')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
-/* ── Salus shared state: show correct records bar ── */
+/* ── Caedrix shared state: show correct records bar ── */
 (function() {
-  const connected = SalusAuth.isRecordsConnected();
+  const connected = CaedrixAuth.isRecordsConnected();
   if (connected) {
-    document.getElementById('salusRecordsConnected').classList.add('visible');
+    document.getElementById('caedrixRecordsConnected').classList.add('visible');
   } else {
-    document.getElementById('salusRecordsReminder').classList.add('visible');
+    document.getElementById('caedrixRecordsReminder').classList.add('visible');
   }
 })();
 </script>

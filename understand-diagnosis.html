@@ -2,13 +2,12 @@
 <html lang="en">
 <head>
 <script>
+/* Caedrix AI auth gate */
 (function(){
-  var v = sessionStorage.getItem('caedrix_beta_access');
-  var exp = v ? parseInt(v, 10) : 0;
-  if(!exp || isNaN(exp) || Date.now() >= exp){
-    sessionStorage.removeItem('caedrix_beta_access');
-    var t = encodeURIComponent(window.location.href);
-    window.location.replace('login.html?redirect=' + t);
+  var u=null;try{u=JSON.parse(localStorage.getItem('caedrix_user')||'null');}catch(_){}
+  if(!u||!u.email){
+    var t=encodeURIComponent(window.location.href);
+    window.location.replace('login.html?redirect='+t);
   }
 })();
 </script>
@@ -49,7 +48,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 @media(max-width:768px){nav{padding:0 20px;}.nav-actions{gap:6px;margin-right:0;}.nav-mini{font-size:10px;padding:6px 10px;}}
 
 /* USER BAR */
-#salusUserBar{position:fixed;top:96px;left:0;right:0;z-index:99;
+#caedrixUserBar{position:fixed;top:96px;left:0;right:0;z-index:99;
   background:rgba(7,16,32,0.98);border-bottom:1px solid rgba(255,255,255,0.055);
   padding:0 48px;height:38px;display:flex;align-items:center;justify-content:space-between;
   font-family:'DM Sans',sans-serif;font-size:12px;backdrop-filter:blur(8px);}
@@ -302,87 +301,19 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .print-btn-print{background:rgba(19,160,144,0.15);color:#13c0ac;
   border:1px solid rgba(19,160,144,0.3);}
 .print-btn-print:hover{background:rgba(19,160,144,0.25);color:white;}
+.print-btn-save{background:linear-gradient(135deg,#13a090,#0a7c6e);color:white;}
+.print-btn-save:hover{opacity:0.9;}
+.print-btn-save:disabled{opacity:0.5;cursor:not-allowed;}
 
 footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0.06);
   text-align:center;font-size:11px;color:rgba(255,255,255,0.2);line-height:1.7;}
 
 @media print{
-  nav,#salusUserBar,.print-bar,.pipeline-panel,.input-card,.clarify-panel,
+  nav,#caedrixUserBar,.print-bar,.pipeline-panel,.input-card,.clarify-panel,
   .section-tabs,.reset-btn{display:none!important;}
   body{background:white!important;color:#111!important;}
   .results-section,.results-section.visible{display:block!important;}
   .section-pane{display:block!important;margin-bottom:24px;}
-}
-</style>
-
-<style>
-/* ── Canonical nav — standardized across all pages ── */
-nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  padding: 0 48px;
-  height: 96px;
-  background: rgba(12,30,58,0.97);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(212,170,58,0.2);
-}
-.nav-logo {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-}
-.logo-img {
-  height: 90px;
-  width: auto;
-  object-fit: contain;
-}
-/* Centered button bar — absolute so nav-links presence/absence never shifts it */
-.nav-actions {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 10px;
-}
-.nav-mini {
-  padding: 8px 14px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  line-height: 1;
-  border: 1px solid transparent;  /* reserves space so active border doesn't resize button */
-}
-.nav-mini:hover { transform: translateY(-1px); opacity: 0.9; }
-.nav-mini-active { border-color: rgba(255,255,255,0.5); }
-.btn1 { background: linear-gradient(135deg,#d4aa3a,#b8932a); color:#0c1e3a; }
-.btn2 { background: linear-gradient(135deg,#13a090,#0a7c6e); color:#fff; }
-.btn3 { background: linear-gradient(135deg,#4a6fa5,#162d52); color:#fff; }
-.btn4 { background: linear-gradient(135deg,#9b59b6,#6b7a8d); color:#fff; }
-.btn5 { background: linear-gradient(135deg,#3a9e6a,#2d7a52); color:#fff; }
-.nav-links { margin-left: auto; display: flex; align-items: center; gap: 24px; }
-.nav-links a { color: rgba(255,255,255,0.65); text-decoration:none; font-size:13px; transition:color .2s; }
-.nav-links a:hover { color:#fff; }
-.nav-cta {
-  background: linear-gradient(135deg,#d4aa3a,#b8932a) !important;
-  color: #0c1e3a !important;
-  padding: 8px 20px !important;
-  border-radius: 6px !important;
-  font-weight: 600 !important;
-}
-@media (max-width: 1100px) {
-  nav { padding: 0 24px; }
-  .nav-mini { font-size: 11px; padding: 7px 12px; }
-}
-@media (max-width: 900px) {
-  .nav-links { display: none; }
-  .nav-actions { gap: 6px; }
-  .nav-mini { font-size: 10px; padding: 6px 10px; }
 }
 </style>
 </head>
@@ -392,18 +323,17 @@ nav {
 <nav>
   <div class="nav-logo">
     <a href="index.html" style="display:flex;align-items:center;">
-      <img src="/salusAI-logo.jpg" class="logo-img" alt="Caedrix AI" />
+      <img src="caedrix-logo.jpg" class="logo-img" alt="Caedrix AI">
     </a>
   </div>
   <div class="nav-actions">
     <a href="precision-medicine3.html"  class="nav-mini btn1">Precision Medicine</a>
-    <a href="health-decisions.html"     class="nav-mini btn2">Health Decisions</a>
+    <a href="health-decisions.html"    class="nav-mini btn2">Health Decisions</a>
     <a href="determine-diagnosis.html"  class="nav-mini btn4">Determine Diagnosis</a>
-    <a href="understand-diagnosis.html" class="nav-mini btn3 nav-mini-active">Understand Diagnosis</a>
-    <a href="manage-my-health.html"     class="nav-mini btn5">Manage My Health</a>
+    <a href="understand-diagnosis.html" class="nav-mini btn3" style="border:1px solid rgba(74,111,165,0.6);">Understand Diagnosis</a>
   </div>
 </nav>
-<div id="salusUserBar"></div>
+<div id="caedrixUserBar"></div>
 
 <div class="page-wrap">
 
@@ -433,7 +363,10 @@ nav {
       <div class="diagnosis-input-wrap">
         <textarea id="diagnosisInput" class="diagnosis-input" rows="1"
           placeholder="e.g. Osteochondral defect, Type 2 diabetes, atrial fibrillation…"></textarea>
-        <button class="submit-btn" id="submitBtn" onclick="runAnalysis()">Research →</button>
+        <button class="submit-btn" id="submitBtn" onclick="runAnalysis()">Research — $5.99 →</button>
+      </div>
+      <div style="text-align:right;margin-top:8px;">
+        <span id="caedrixBalanceBadge" style="font-size:12px;color:rgba(255,255,255,0.4);"></span>
       </div>
     </div>
     <div class="hint-chips">
@@ -573,6 +506,7 @@ nav {
     </div>
 
     <div class="print-bar">
+      <button class="print-btn print-btn-save" id="saveRecordBtn" onclick="handleSaveToMyRecords()">📄 Save to My Records</button>
       <button class="print-btn print-btn-download" onclick="downloadResults()">⬇ Download HTML</button>
       <button class="print-btn print-btn-print" onclick="window.print()">🖨 Print</button>
     </div>
@@ -590,12 +524,30 @@ nav {
   </p>
 </footer>
 
-<script src="caedrix-shared.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="caedrix-local-storage.js"></script>
+<script src="caedrix-pdf-report.js"></script>
+<script src="caedrix-token-gate.js"></script>
 <script>
 /* ════════════════════════════════════
    AUTH
 ════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded', () => salusInitUserBar());
+const CaedrixAuth = {
+  getUser:()=>{try{return JSON.parse(localStorage.getItem('caedrix_user')||'null');}catch(_){return null;}},
+  logout:()=>{localStorage.removeItem('caedrix_user');sessionStorage.clear();window.location.href='login.html';},
+  isRecordsConnected:()=>localStorage.getItem('caedrix_records_connected')==='true'
+};
+function caedrixInitUserBar(){
+  const bar=document.getElementById('caedrixUserBar');if(!bar)return;
+  const user=CaedrixAuth.getUser()||{};
+  const initials=(user.email||'?')[0].toUpperCase();
+  bar.innerHTML='<div class="subs-left"><div class="subs-avatar">'+initials+'</div><span class="subs-email">'+(user.email||'')+'</span></div>'+
+    '<div class="subs-right"><button class="subs-signout" onclick="CaedrixAuth.logout()">Sign out</button></div>';
+}
+window.addEventListener('DOMContentLoaded',()=>{
+  caedrixInitUserBar();
+  CaedrixTokenGate.renderBalanceBadge('caedrixBalanceBadge');
+});
 
 /* ════════════════════════════════════
    STATE
@@ -615,6 +567,19 @@ function setHint(el){
 ════════════════════════════════════ */
 
 /* Reads personal context saved on the Precision Medicine page */
+function getCaedrixLifeContext(){
+  try{
+    const ctx=JSON.parse(localStorage.getItem('caedrix_life_context')||'null');
+    if(!ctx)return '';
+    const parts=[];
+    if(ctx.activities)parts.push('Favorite activities: '+ctx.activities);
+    if(ctx.important) parts.push('Important personal context: '+ctx.important);
+    if(ctx.caregiver) parts.push('Caregiver responsibilities: '+ctx.caregiver);
+    if(ctx.living)    parts.push('Living situation: '+ctx.living);
+    if(!parts.length) return '';
+    return '\n\n---\nPersonal context about this patient:\n'+parts.join('\n')+'\n---';
+  }catch(_){return '';}
+}
 
 const AGENT_ICONS={1:'💬',2:'🩺',3:'🔬',4:'⚖️',5:'✦'};
 // Track fill % when each agent completes — visual progress indicator across the 5-stage pipeline
@@ -662,7 +627,131 @@ function freezePipelineTimer(){
 /* ════════════════════════════════════
    API
 ════════════════════════════════════ */
+async function callClaude({systemPrompt,userContent,maxTokens=2500,useWebSearch=false,model='claude-sonnet-4-6'},_retry=0){
+  const body={
+    model:model,
+    max_tokens:maxTokens,
+    system:systemPrompt,
+    messages:[{role:'user',content:userContent}]
+  };
+  if(useWebSearch){
+    body.tools=[{type:'web_search_20250305',name:'web_search'}];
+  }
+  // 90s client-side timeout — if /api/claude hangs we want to fail fast, not forever
+  const ctrl=new AbortController();
+  const timeoutId=setTimeout(()=>ctrl.abort(),90000);
+  let res;
+  try{
+    res=await fetch('/api/claude',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(body),
+      signal:ctrl.signal
+    });
+  }catch(e){
+    clearTimeout(timeoutId);
+    if(e.name==='AbortError')throw new Error('Request timed out after 90s. The serverless function likely exceeded its limit. Try a more specific diagnosis or reduce max_tokens.');
+    throw e;
+  }
+  clearTimeout(timeoutId);
+  if((res.status===529||res.status===503)&&_retry<2){
+    await new Promise(r=>setTimeout(r,(_retry+1)*2000));
+    return callClaude({systemPrompt,userContent,maxTokens,useWebSearch,model},_retry+1);
+  }
+  if(!res.ok){
+    const err=await res.text();
+    throw new Error('API '+res.status+': '+err.substring(0,200));
+  }
+  return await res.json();
+}
 
+function extractText(data){
+  return (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
+}
+function safeParseJSON(text){
+  if(!text||!text.trim())throw new Error('Empty response');
+
+  // Strip markdown code fences and trim
+  let clean=text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+
+  // 1) Fast path — whole string is valid JSON
+  try{return JSON.parse(clean);}catch(_){}
+
+  // 2) Find the first '{' and walk to its matching '}' (skips preamble AND postamble)
+  const start=clean.indexOf('{');
+  if(start<0)throw new Error('No JSON object found. Preview: '+clean.substring(0,200));
+
+  const balanced=extractBalancedObject(clean,start);
+  if(balanced){
+    try{return JSON.parse(balanced);}catch(_){}
+  }
+
+  // 3) Truncated JSON — best-effort repair (closes open strings + dangling brackets)
+  const repaired=repairTruncatedJSON(clean.substring(start));
+  if(repaired){
+    try{return JSON.parse(repaired);}catch(_){}
+  }
+
+  // 4) Last resort — original greedy match
+  const m=clean.match(/\{[\s\S]*\}/);
+  if(m){try{return JSON.parse(m[0]);}catch(_){}}
+
+  throw new Error('JSON parse failed. Preview: '+clean.substring(0,200));
+}
+
+/* Walk from `start` (a '{' char) until the matching '}'. Properly tracks
+   strings and escapes so braces inside string values are ignored.
+   Returns the balanced substring, or null if the closing brace is missing. */
+function extractBalancedObject(s,start){
+  let depth=0,inStr=false,esc=false;
+  for(let i=start;i<s.length;i++){
+    const ch=s[i];
+    if(inStr){
+      if(esc){esc=false;}
+      else if(ch==='\\'){esc=true;}
+      else if(ch==='"'){inStr=false;}
+      continue;
+    }
+    if(ch==='"'){inStr=true;continue;}
+    if(ch==='{')depth++;
+    else if(ch==='}'){depth--;if(depth===0)return s.substring(start,i+1);}
+  }
+  return null;
+}
+
+/* Repair a JSON object that was truncated (typically by max_tokens):
+   - close any open string,
+   - drop dangling commas,
+   - fill missing values after a trailing colon with null,
+   - close all open brackets in reverse order.
+   Best-effort — caller must still try/catch JSON.parse. */
+function repairTruncatedJSON(text){
+  let s=text.replace(/\s+$/,'');
+  let inStr=false,esc=false;
+  const stack=[]; // '{' or '['
+  for(let i=0;i<s.length;i++){
+    const ch=s[i];
+    if(inStr){
+      if(esc){esc=false;}
+      else if(ch==='\\'){esc=true;}
+      else if(ch==='"'){inStr=false;}
+      continue;
+    }
+    if(ch==='"'){inStr=true;continue;}
+    if(ch==='{'||ch==='[')stack.push(ch);
+    else if(ch==='}'){if(stack[stack.length-1]==='{')stack.pop();}
+    else if(ch===']'){if(stack[stack.length-1]==='[')stack.pop();}
+  }
+  if(inStr)s+='"';                  // close dangling string
+  s=s.replace(/,\s*$/,'');           // drop trailing comma
+  if(/:\s*$/.test(s))s+='null';      // fill missing value after colon
+  s=s.replace(/,\s*$/,'');           // (re-check after the close-string step)
+  while(stack.length){
+    const o=stack.pop();
+    s+=(o==='{'?'}':']');
+  }
+  return s;
+}
 
 /* ════════════════════════════════════
    AGENT 1 — CLARIFIER (Haiku, fast)
@@ -841,6 +930,9 @@ async function runAnalysis(){
   const q=document.getElementById('diagnosisInput').value.trim();
   if(!q){document.getElementById('diagnosisInput').focus();return;}
 
+  const tokenOk = await CaedrixTokenGate.spendTokenOrPrompt();
+  if(!tokenOk) return;
+
   lastDiagnosis=q;
   clarifications={};
 
@@ -924,7 +1016,7 @@ async function runResearchInParallel(){
   if(clarifications.answer){
     userMsg+=`\n\nAdditional context from user: ${clarifications.answer}`;
   }
-  userMsg+=getSalusLifeContext();
+  userMsg+=getCaedrixLifeContext();
   userMsg+='\n\nReturn ONLY the JSON object. No preamble.';
 
   setAgentState(2,'running','Summarizing…');
@@ -934,14 +1026,12 @@ async function runResearchInParallel(){
   // Note: web_search consumes output tokens for server_tool_use + search result blocks,
   // so the real JSON budget is much smaller than maxTokens. Keep these generous to
   // avoid mid-JSON truncation (which is what was causing Agent 2/3 parse errors).
-  // Trials agent gets a longer timeout (180s) because web_search round-trips are slow.
   const [clin,trials]=await Promise.allSettled([
     callClaude({systemPrompt:CLINICAL_SYSTEM,userContent:userMsg,maxTokens:4000,useWebSearch:false}),
-    callClaude({systemPrompt:TRIALS_SYSTEM,userContent:userMsg,maxTokens:5000,useWebSearch:true,timeoutMs:180000})
+    callClaude({systemPrompt:TRIALS_SYSTEM,userContent:userMsg,maxTokens:5000,useWebSearch:true})
   ]);
 
   let clinData=null,trialsData=null;
-  let trialsFromFallback=false;
 
   if(clin.status==='fulfilled'){
     try{clinData=safeParseJSON(extractText(clin.value));setAgentState(2,'done','Complete');}
@@ -954,25 +1044,7 @@ async function runResearchInParallel(){
     try{trialsData=safeParseJSON(extractText(trials.value));setAgentState(3,'done','Complete');}
     catch(e){setAgentState(3,'error','Parse error');console.error('Agent 3 parse:',e);}
   }else{
-    console.error('Agent 3 fetch:',trials.reason);
-    // FALLBACK — retry without web search using the model's own knowledge.
-    // Less current than web-search trials but much faster (~15s) and gets the user *something*.
-    setAgentState(3,'running','Retrying without web search…');
-    try{
-      const r3b=await callClaude({
-        systemPrompt:TRIALS_SYSTEM+'\n\nNOTE: Web search is unavailable. Use your existing knowledge. If you cannot verify a specific trial or specialist, describe the category of trial activity or type of program instead of inventing names.',
-        userContent:userMsg,
-        maxTokens:3500,
-        useWebSearch:false,
-        timeoutMs:60000
-      });
-      trialsData=safeParseJSON(extractText(r3b));
-      trialsFromFallback=true;
-      setAgentState(3,'done','Complete (fallback)');
-    }catch(e2){
-      setAgentState(3,'error','Failed');
-      console.error('Agent 3 fallback also failed:',e2);
-    }
+    setAgentState(3,'error','Failed');console.error('Agent 3 fetch:',trials.reason);
   }
 
   if(!clinData&&!trialsData){
@@ -981,8 +1053,6 @@ async function runResearchInParallel(){
 
   // Merge into single object for review pipeline
   let merged={...(clinData||{}),...(trialsData||{})};
-  if(trialsFromFallback)merged._trialsFromFallback=true;
-  if(!trialsData)merged._trialsFailed=true;
 
   /* ── AGENT 4: Legal Review (Haiku — fast scope check) ── */
   setAgentState(4,'running','Checking scope…');
@@ -1046,6 +1116,8 @@ async function runResearchInParallel(){
    RENDER (single merged object — agent 5 already combined clinical + trials)
 ════════════════════════════════════ */
 function renderResults(c,legal){
+  window.__caedrixLastResult = c; // captured for "Save to My Records"
+  CaedrixTokenGate.renderBalanceBadge('caedrixBalanceBadge');
   // c = merged + polished JSON containing all fields from both clinical + trials agents
   const sec=document.getElementById('resultsSection');
   sec.style.display='block';
@@ -1096,24 +1168,7 @@ function renderResults(c,legal){
     '</div></div>').join('');
 
   /* PANE 2 — Trials & Centers */
-  // If Agent 3 failed entirely, c._trialsFailed is set and the section will be missing
-  // its trial/specialist/center fields. Show a clear message instead of a blank pane.
-  // If Agent 3 used the no-web-search fallback, surface that so clinician knows the
-  // data is from model knowledge (less current) rather than verified web results.
-  const trialsFailedNotice = c._trialsFailed
-    ? '<div class="trials-cta" style="background:rgba(192,57,43,0.06);border-color:rgba(192,57,43,0.25);color:rgba(255,200,200,0.85);">'
-      + '<strong>⚠ Trials & Centers lookup failed.</strong> The research agent timed out or returned an unparseable response. '
-      + 'Please regenerate, or verify trials directly at <a href="https://clinicaltrials.gov" target="_blank">ClinicalTrials.gov</a>.'
-      + '</div>'
-    : '';
-  const trialsFallbackNotice = c._trialsFromFallback
-    ? '<div class="trials-cta" style="background:rgba(184,147,42,0.06);border-color:rgba(184,147,42,0.25);">'
-      + '<strong>ℹ Web search unavailable.</strong> The trials/centers below are from model knowledge rather than a live web search. '
-      + 'They may not reflect the most current studies — please verify at <a href="https://clinicaltrials.gov" target="_blank">ClinicalTrials.gov</a>.'
-      + '</div>'
-    : '';
-
-  document.getElementById('s3TrialsOverview').innerHTML = trialsFailedNotice + trialsFallbackNotice + esc(c.trials_overview||'');
+  document.getElementById('s3TrialsOverview').textContent=c.trials_overview||'';
   document.getElementById('s3Trials').innerHTML=(c.active_trials||[]).map(tr=>
     '<div class="trial-card">'+
     '<div class="trial-top"><div class="trial-title">'+esc(tr.title)+'</div>'+
@@ -1190,6 +1245,11 @@ function handleError(err){
   },600);
 }
 
+function esc(str){
+  if(str===null||str===undefined)return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 document.getElementById('diagnosisInput').addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&e.key==='Enter')runAnalysis();
 });
@@ -1208,8 +1268,21 @@ function downloadResults(){
   const blob=new Blob([html],{type:'text/html'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download=title.replace(/[^a-z0-9]/gi,'_').toLowerCase()+'_salus.html';
+  a.download=title.replace(/[^a-z0-9]/gi,'_').toLowerCase()+'_caedrix.html';
   a.click();
+}
+
+async function handleSaveToMyRecords(){
+  const c = window.__caedrixLastResult;
+  if(!c){ return; }
+  const btn = document.getElementById('saveRecordBtn');
+  btn.disabled = true;
+  try{
+    const doc = CaedrixPDF.buildUnderstandPDF(c);
+    await CaedrixPDF.saveOrDownloadPDF(doc, 'understand-diagnosis', btn);
+  } finally {
+    setTimeout(()=>{ btn.disabled = false; }, 2500);
+  }
 }
 </script>
 </body>

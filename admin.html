@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caedrix AI — Admin: Gift Codes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0c1e3a; --teal:#0a7c6e; --teal-light:#13a090;
+  --gold:#d4aa3a; --white:#f0ece4; --text-dim:rgba(240,236,228,0.55);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh;padding:48px 24px;}
+.wrap{max-width:900px;margin:0 auto;}
+h1{font-family:'Playfair Display',serif;font-size:28px;margin-bottom:8px;}
+.sub{color:var(--text-dim);margin-bottom:32px;font-size:14px;}
+
+.card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:28px;margin-bottom:24px;}
+
+/* LOGIN GATE */
+#loginGate input{width:100%;padding:13px 16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:white;font-size:15px;margin-bottom:14px;outline:none;}
+#loginGate input:focus{border-color:rgba(19,160,144,0.6);}
+#loginGate button{width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,var(--teal-light),var(--teal));color:white;border:none;font-weight:700;font-size:14px;cursor:pointer;}
+#loginError{color:#e07070;font-size:13px;margin-top:10px;display:none;}
+
+/* FORM */
+.form-row{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+.form-row label{display:block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:6px;}
+.form-row .field{flex:1;min-width:160px;}
+.form-row input{width:100%;padding:11px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:white;font-size:14px;outline:none;}
+.form-row input:focus{border-color:rgba(19,160,144,0.6);}
+.create-btn{padding:12px 28px;border-radius:10px;background:linear-gradient(135deg,var(--teal-light),var(--teal));color:white;border:none;font-weight:700;font-size:14px;cursor:pointer;}
+.create-btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+.result-box{margin-top:16px;padding:16px 20px;border-radius:10px;background:rgba(212,170,58,0.1);border:1px solid rgba(212,170,58,0.3);font-size:14px;display:none;}
+.result-box.visible{display:block;}
+.result-box .code-display{font-family:monospace;font-size:20px;font-weight:700;color:var(--gold);margin:6px 0;}
+
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;padding:10px 12px;color:rgba(255,255,255,0.4);font-size:11px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid rgba(255,255,255,0.1);}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.06);}
+.code-mono{font-family:monospace;color:var(--gold);}
+.status-active{color:#3a9e6a;}
+.status-inactive{color:rgba(255,255,255,0.3);}
+.deactivate-btn{padding:5px 12px;border-radius:6px;background:rgba(192,57,43,0.15);border:1px solid rgba(192,57,43,0.3);color:#e07070;font-size:11px;cursor:pointer;}
+.deactivate-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.empty-state{color:rgba(255,255,255,0.3);font-size:13px;padding:20px 0;text-align:center;}
+</style>
+</head>
+<body>
+
+<div id="loginGate" class="wrap">
+  <div class="card" style="max-width:380px;margin:80px auto 0;">
+    <h1 style="font-size:20px;margin-bottom:20px;">Admin Access</h1>
+    <input type="password" id="passwordInput" placeholder="Admin password">
+    <button onclick="checkLogin()">Sign In</button>
+    <div id="loginError">Incorrect password.</div>
+  </div>
+</div>
+
+<div id="adminPanel" class="wrap" style="display:none;">
+  <h1>Gift Code Manager</h1>
+  <p class="sub">Issue free-token codes for influencers, physicians, and partners. Each code can be redeemed a limited number of times.</p>
+
+  <div class="card">
+    <div class="form-row">
+      <div class="field">
+        <label>Label (who is this for?)</label>
+        <input id="newLabel" placeholder="e.g. Dr. Smith, @healthinfluencer">
+      </div>
+      <div class="field" style="max-width:140px;">
+        <label>Tokens granted</label>
+        <input id="newTokens" type="number" min="1" value="1">
+      </div>
+      <div class="field" style="max-width:160px;">
+        <label>Max redemptions</label>
+        <input id="newMaxRedemptions" type="number" min="1" value="1">
+      </div>
+      <div class="field" style="max-width:180px;">
+        <label>Custom code <span style="opacity:0.5;">(optional)</span></label>
+        <input id="newCustomCode" placeholder="auto-generated if blank">
+      </div>
+    </div>
+    <button class="create-btn" id="createBtn" onclick="createCode()">Generate Code</button>
+    <div class="result-box" id="resultBox">
+      <div>Code created:</div>
+      <div class="code-display" id="resultCode"></div>
+      <div id="resultDetails" style="color:rgba(255,255,255,0.6);font-size:12px;"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h2 style="font-family:'Playfair Display',serif;font-size:18px;">Existing Codes</h2>
+      <button onclick="loadCodes()" style="background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;">↻ Refresh</button>
+    </div>
+    <div id="codesTableWrap">
+      <div class="empty-state">Loading…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let ADMIN_PASSWORD_CACHE = '';
+
+function checkLogin(){
+  const pw = document.getElementById('passwordInput').value;
+  if(!pw){ return; }
+  // We don't validate the password client-side — we just try an authenticated
+  // request and see if the server accepts it. This avoids hardcoding the
+  // real password anywhere in this file.
+  ADMIN_PASSWORD_CACHE = pw;
+  loadCodes(true);
+}
+
+async function authedFetch(url, options = {}) {
+  const headers = Object.assign({}, options.headers, {
+    'Authorization': 'Bearer ' + ADMIN_PASSWORD_CACHE,
+    'Content-Type': 'application/json'
+  });
+  return fetch(url, Object.assign({}, options, { headers }));
+}
+
+async function loadCodes(isLoginAttempt){
+  try{
+    const res = await authedFetch('/api/admin/list-codes');
+    if(res.status === 401){
+      if(isLoginAttempt){
+        document.getElementById('loginError').style.display = 'block';
+      }
+      return;
+    }
+    if(isLoginAttempt){
+      document.getElementById('loginGate').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+    }
+    const data = await res.json();
+    renderCodesTable(data.codes || []);
+  }catch(err){
+    document.getElementById('codesTableWrap').innerHTML =
+      '<div class="empty-state">Could not load codes. Check that the backend is configured (KV + ADMIN_PASSWORD env vars).</div>';
+  }
+}
+
+function renderCodesTable(codes){
+  const wrap = document.getElementById('codesTableWrap');
+  if(!codes.length){
+    wrap.innerHTML = '<div class="empty-state">No codes created yet.</div>';
+    return;
+  }
+  const rows = codes.map(c => `
+    <tr>
+      <td class="code-mono">${esc(c.code)}</td>
+      <td>${esc(c.label || '—')}</td>
+      <td>${c.tokensGranted}</td>
+      <td>${c.redemptions} / ${c.maxRedemptions}</td>
+      <td class="${c.active ? 'status-active' : 'status-inactive'}">${c.active ? '● Active' : '○ Inactive'}</td>
+      <td>${new Date(c.createdAt).toLocaleDateString()}</td>
+      <td>
+        ${c.active ? `<button class="deactivate-btn" onclick="deactivate('${esc(c.code)}')">Deactivate</button>` : ''}
+      </td>
+    </tr>
+  `).join('');
+  wrap.innerHTML = `
+    <table>
+      <thead><tr><th>Code</th><th>Label</th><th>Tokens</th><th>Redeemed</th><th>Status</th><th>Created</th><th></th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+async function createCode(){
+  const label = document.getElementById('newLabel').value.trim();
+  const tokensGranted = parseInt(document.getElementById('newTokens').value, 10) || 1;
+  const maxRedemptions = parseInt(document.getElementById('newMaxRedemptions').value, 10) || 1;
+  const customCode = document.getElementById('newCustomCode').value.trim();
+
+  const btn = document.getElementById('createBtn');
+  btn.disabled = true;
+  btn.textContent = 'Generating…';
+
+  try{
+    const res = await authedFetch('/api/admin/create-code', {
+      method: 'POST',
+      body: JSON.stringify({ label, tokensGranted, maxRedemptions, customCode: customCode || undefined })
+    });
+    const data = await res.json();
+    if(data.ok){
+      document.getElementById('resultCode').textContent = data.code;
+      document.getElementById('resultDetails').textContent =
+        `${data.tokensGranted} token(s) per redemption · up to ${data.maxRedemptions} redemption(s)`;
+      document.getElementById('resultBox').classList.add('visible');
+      document.getElementById('newLabel').value = '';
+      document.getElementById('newCustomCode').value = '';
+      loadCodes();
+    } else {
+      alert('Could not create code: ' + (data.error || 'unknown error'));
+    }
+  }catch(err){
+    alert('Network error creating code.');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = 'Generate Code';
+  }
+}
+
+async function deactivate(code){
+  if(!confirm(`Deactivate code "${code}"? It will no longer be redeemable.`)) return;
+  try{
+    const res = await authedFetch('/api/admin/deactivate-code', {
+      method: 'POST',
+      body: JSON.stringify({ code })
+    });
+    const data = await res.json();
+    if(data.ok){
+      loadCodes();
+    } else {
+      alert('Could not deactivate: ' + (data.error || 'unknown error'));
+    }
+  }catch(err){
+    alert('Network error deactivating code.');
+  }
+}
+
+function esc(s){
+  if(!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+document.getElementById('passwordInput').addEventListener('keydown', e=>{
+  if(e.key === 'Enter') checkLogin();
+});
+</script>
+</body>
+</html>

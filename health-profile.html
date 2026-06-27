@@ -3,13 +3,8 @@
 <head>
 <script>
 (function(){
-  var v = sessionStorage.getItem('caedrix_beta_access');
-  var exp = v ? parseInt(v, 10) : 0;
-  if(!exp || isNaN(exp) || Date.now() >= exp){
-    sessionStorage.removeItem('caedrix_beta_access');
-    var t = encodeURIComponent(window.location.href);
-    window.location.replace('login.html?redirect=' + t);
-  }
+  var u=null;try{u=JSON.parse(localStorage.getItem('caedrix_user')||'null');}catch(_){}
+  if(!u||!u.email){var t=encodeURIComponent(window.location.href);window.location.replace('login.html?redirect='+t);}
 })();
 </script>
 <meta charset="UTF-8">
@@ -43,14 +38,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .btn-green{background:linear-gradient(135deg,#3a9e6a,#2d7a52);color:white;}
 
 /* USER BAR */
-#salusUserBar{position:fixed;top:96px;left:0;right:0;z-index:99;background:rgba(7,16,32,0.98);border-bottom:1px solid rgba(255,255,255,0.055);padding:0 48px;height:38px;display:flex;align-items:center;justify-content:space-between;font-family:'DM Sans',sans-serif;font-size:12px;backdrop-filter:blur(8px);}
+#caedrixUserBar{position:fixed;top:96px;left:0;right:0;z-index:99;background:rgba(7,16,32,0.98);border-bottom:1px solid rgba(255,255,255,0.055);padding:0 48px;height:38px;display:flex;align-items:center;justify-content:space-between;font-family:'DM Sans',sans-serif;font-size:12px;backdrop-filter:blur(8px);}
 .subs-left{display:flex;align-items:center;gap:10px;}
 .subs-avatar{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,0.6);flex-shrink:0;}
 .subs-email{color:rgba(255,255,255,0.38);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .subs-right{display:flex;align-items:center;gap:10px;}
 .subs-signout{padding:4px 9px;border-radius:6px;background:none;border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.22);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;transition:all .2s;}
 .subs-signout:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.5);}
-@media(max-width:768px){#salusUserBar{padding:0 16px;}.subs-email{display:none;}}
+@media(max-width:768px){#caedrixUserBar{padding:0 16px;}.subs-email{display:none;}}
 
 /* BACKGROUND */
 .bg-layer{position:fixed;inset:0;pointer-events:none;}
@@ -117,6 +112,20 @@ label .opt{font-size:10px;font-weight:400;letter-spacing:0;text-transform:none;c
 .save-btn.saved{background:linear-gradient(135deg,#1abfad,#0a9e8e);}
 .cancel-link{font-size:13px;color:rgba(255,255,255,0.3);text-decoration:none;padding:8px;}
 .cancel-link:hover{color:rgba(255,255,255,0.6);}
+
+/* FOLDER WIDGET */
+.folder-widget{margin-bottom:32px;animation:fadeUp .6s ease .05s both;}
+.folder-status{display:flex;align-items:center;gap:14px;padding:14px 20px;border-radius:14px;font-size:13px;line-height:1.5;}
+.folder-status-action{background:rgba(19,160,144,0.07);border:1px solid rgba(19,160,144,0.25);}
+.folder-status-ok{background:rgba(58,158,106,0.08);border:1px solid rgba(58,158,106,0.25);}
+.folder-status-warn{background:rgba(184,147,42,0.08);border:1px solid rgba(184,147,42,0.25);}
+.folder-icon{font-size:18px;flex-shrink:0;}
+.folder-text{flex:1;color:rgba(255,255,255,0.65);}
+.folder-text strong{color:rgba(255,255,255,0.9);display:block;margin-bottom:2px;}
+.folder-btn{flex-shrink:0;padding:9px 18px;border-radius:10px;background:linear-gradient(135deg,#13a090,#0a7c6e);color:white;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.folder-btn:hover{opacity:0.9;}
+.folder-btn:disabled{opacity:0.35;cursor:not-allowed;}
+.folder-btn-text{flex-shrink:0;background:none;border:none;color:rgba(255,255,255,0.35);font-size:12px;cursor:pointer;text-decoration:underline;}
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -126,7 +135,7 @@ label .opt{font-size:10px;font-weight:400;letter-spacing:0;text-transform:none;c
 <nav>
   <div class="nav-logo">
     <a href="index.html" style="display:flex;align-items:center;">
-      <img src="caedrix-logo.png" class="logo-img" alt="Caedrix AI Logo" onerror="this.style.display='none'">
+      <img src="caedrix-logo.jpg" class="logo-img" alt="Caedrix AI Logo" onerror="this.style.display='none'">
     </a>
   </div>
   <div class="nav-right">
@@ -135,12 +144,11 @@ label .opt{font-size:10px;font-weight:400;letter-spacing:0;text-transform:none;c
       <a href="health-decisions.html"    class="nav-mini btn-teal">Health Decisions</a>
       <a href="determine-diagnosis.html" class="nav-mini btn-plum">Determine Diagnosis</a>
       <a href="understand-diagnosis.html" class="nav-mini btn-blue">Understand Diagnosis</a>
-      <a href="manage-my-health.html"    class="nav-mini btn-green">Manage My Health</a>
     </div>
     <a href="precision-medicine3.html" class="back-btn">← Back to Precision Medicine</a>
   </div>
 </nav>
-<div id="salusUserBar"></div>
+<div id="caedrixUserBar"></div>
 
 <div class="page-wrap">
 
@@ -150,11 +158,47 @@ label .opt{font-size:10px;font-weight:400;letter-spacing:0;text-transform:none;c
     <p class="page-sub">Your clinical background allows Caedrix AI to give you truly personalized preventive care recommendations, not just generic guidelines.</p>
   </div>
 
+  <!-- ── Local Folder Connect Widget ── -->
+  <div id="caedrixFolderWidget" class="folder-widget">
+    <div id="folderStatusUnsupported" class="folder-status folder-status-warn" style="display:none;">
+      <span class="folder-icon">⚠</span>
+      <div class="folder-text">
+        <strong>Local folder storage isn't available in this browser.</strong>
+        Chrome or Edge is required for this feature. Your profile below will still be
+        saved on this device using your browser's storage.
+      </div>
+    </div>
+    <div id="folderStatusNone" class="folder-status folder-status-action" style="display:none;">
+      <span class="folder-icon">📁</span>
+      <div class="folder-text">
+        <strong>Connect a folder on your computer</strong> to save your health profile
+        locally and let Caedrix AI use it in your searches. Nothing is sent to our servers.
+      </div>
+      <button class="folder-btn" onclick="CaedrixFolderWidget.connect()">Connect My Health Folder</button>
+    </div>
+    <div id="folderStatusNeedsPermission" class="folder-status folder-status-action" style="display:none;">
+      <span class="folder-icon">🔒</span>
+      <div class="folder-text">
+        <strong>Reconnect your health folder</strong> — your browser requires confirming
+        access again this session.
+      </div>
+      <button class="folder-btn" onclick="CaedrixFolderWidget.reconnect()">Reconnect Folder</button>
+    </div>
+    <div id="folderStatusConnected" class="folder-status folder-status-ok" style="display:none;">
+      <span class="folder-icon">✓</span>
+      <div class="folder-text"><strong>Health folder connected.</strong> Your profile is saved locally on this device.</div>
+      <button class="folder-btn-text" onclick="CaedrixFolderWidget.disconnect()">Disconnect</button>
+    </div>
+    <div id="folderStatusError" class="folder-status folder-status-warn" style="display:none;">
+      <span class="folder-icon">⚠</span>
+      <div class="folder-text" id="folderErrorText">Something went wrong connecting your folder.</div>
+    </div>
+  </div>
+
   <div class="usage-row">
     <span class="usage-label">Used in</span>
     <span class="usage-chip chip-teal">Health Decisions</span>
     <span class="usage-chip chip-plum">Determine Diagnosis</span>
-    <span class="usage-chip chip-green">Manage My Health</span>
   </div>
 
   <div class="important-note">
@@ -254,9 +298,22 @@ label .opt{font-size:10px;font-weight:400;letter-spacing:0;text-transform:none;c
 
 </div>
 
-<script src="caedrix-shared.js"></script>
+<script src="caedrix-local-storage.js"></script>
 <script>
+const CaedrixAuth={
+  getUser:()=>{try{return JSON.parse(localStorage.getItem('caedrix_user')||'null');}catch(_){return null;}},
+  logout:()=>{localStorage.removeItem('caedrix_user');sessionStorage.clear();window.location.href='login.html';}
+};
 
+function caedrixInitUserBar(){
+  const bar=document.getElementById('caedrixUserBar');if(!bar)return;
+  const user=CaedrixAuth.getUser()||{};
+  const initials=(user.email||'?')[0].toUpperCase();
+  const email=user.email||'';
+  bar.innerHTML=
+    '<div class="subs-left"><div class="subs-avatar">'+initials+'</div><span class="subs-email">'+email+'</span></div>'+
+    '<div class="subs-right"><button class="subs-signout" onclick="CaedrixAuth.logout()">Sign out</button></div>';
+}
 
 const HEALTH_PROFILE_KEY='caedrix_health_profile';
 
@@ -274,7 +331,7 @@ const FIELDS=[
 
 function loadProfile(){
   try{
-    const p=JSON.parse(sessionStorage.getItem(HEALTH_PROFILE_KEY)||'null');
+    const p=JSON.parse(localStorage.getItem(HEALTH_PROFILE_KEY)||'null');
     if(!p)return;
     FIELDS.forEach(({id,key})=>{
       const el=document.getElementById(id);
@@ -283,13 +340,34 @@ function loadProfile(){
   }catch(_){}
 }
 
-function saveAndReturn(){
+/* If a local folder is connected, prefer its copy of health-profile.json
+   over the localStorage fallback (folder is the source of truth once connected). */
+async function loadProfileFromFolder(){
+  if(!CaedrixStorage.isConnected())return;
+  try{
+    const p=await CaedrixStorage.loadJSON('health-profile.json');
+    if(!p)return;
+    FIELDS.forEach(({id,key})=>{
+      const el=document.getElementById(id);
+      if(el&&p[key])el.value=p[key];
+    });
+  }catch(_){}
+}
+
+async function saveAndReturn(){
   const profile={};
   FIELDS.forEach(({id,key})=>{
     const el=document.getElementById(id);
     if(el)profile[key]=el.value.trim();
   });
-  sessionStorage.setItem(HEALTH_PROFILE_KEY,JSON.stringify(profile));
+
+  // Always keep a localStorage copy as a fast/offline fallback
+  localStorage.setItem(HEALTH_PROFILE_KEY,JSON.stringify(profile));
+
+  // If the user has connected a local folder, save there too (source of truth)
+  if(CaedrixStorage.isConnected()){
+    try{ await CaedrixStorage.saveJSON('health-profile.json', profile); }catch(_){ /* non-fatal */ }
+  }
 
   const btn=document.getElementById('saveBtn');
   btn.classList.add('saved');
@@ -297,9 +375,54 @@ function saveAndReturn(){
   setTimeout(()=>window.location.href='precision-medicine3.html',700);
 }
 
+/* ── Local Folder Connect Widget controller ── */
+const CaedrixFolderWidget = (function () {
+  function showOnly(id) {
+    ['folderStatusUnsupported','folderStatusNone','folderStatusNeedsPermission',
+     'folderStatusConnected','folderStatusError'].forEach(elId => {
+      const el = document.getElementById(elId);
+      if (el) el.style.display = (elId === id) ? 'flex' : 'none';
+    });
+  }
+  async function init() {
+    if (!CaedrixStorage.isSupported()) { showOnly('folderStatusUnsupported'); return; }
+    const status = await CaedrixStorage.restoreConnection();
+    if (status === 'connected') { showOnly('folderStatusConnected'); await loadProfileFromFolder(); }
+    else if (status === 'needs-permission') showOnly('folderStatusNeedsPermission');
+    else showOnly('folderStatusNone');
+  }
+  async function connect() {
+    try {
+      await CaedrixStorage.connectFolder();
+      showOnly('folderStatusConnected');
+      await loadProfileFromFolder();
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+      document.getElementById('folderErrorText').textContent = 'Could not connect to that folder. Please try again.';
+      showOnly('folderStatusError');
+    }
+  }
+  async function reconnect() {
+    try {
+      await CaedrixStorage.reconnectFolder();
+      showOnly('folderStatusConnected');
+      await loadProfileFromFolder();
+    } catch (err) {
+      document.getElementById('folderErrorText').textContent = 'Permission was not granted. Click Reconnect to try again.';
+      showOnly('folderStatusError');
+    }
+  }
+  async function disconnect() {
+    await CaedrixStorage.disconnectFolder();
+    showOnly('folderStatusNone');
+  }
+  return { init, connect, reconnect, disconnect };
+})();
+
 window.addEventListener('DOMContentLoaded',()=>{
-  salusInitUserBar();
-  loadProfile();
+  caedrixInitUserBar();
+  loadProfile();             // localStorage fallback shown immediately
+  CaedrixFolderWidget.init(); // then overridden by folder data if connected
 });
 </script>
 </body>

@@ -3,7 +3,7 @@
 <head>
 <script>
 (function(){
-  var u=null;try{u=JSON.parse(localStorage.getItem('salus_user')||'null');}catch(_){}
+  var u=null;try{u=JSON.parse(localStorage.getItem('caedrix_user')||'null');}catch(_){}
   if(!u||!u.email){var t=encodeURIComponent(window.location.href);window.location.replace('login.html?redirect='+t);}
 })();
 
@@ -22,7 +22,7 @@ function comingSoon(el, evt) {
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Salus AI — Connect My Records</title>
+<title>Caedrix AI — Connect My Records</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -50,7 +50,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .btn-green{background:linear-gradient(135deg,#3a9e6a,#2d7a52);color:white;}
 
 /* USER BAR */
-#salusUserBar{position:fixed;top:96px;left:0;right:0;z-index:99;background:rgba(7,16,32,0.98);border-bottom:1px solid rgba(255,255,255,0.055);padding:0 48px;height:38px;display:flex;align-items:center;justify-content:space-between;font-family:'DM Sans',sans-serif;font-size:12px;backdrop-filter:blur(8px);}
+#caedrixUserBar{position:fixed;top:96px;left:0;right:0;z-index:99;background:rgba(7,16,32,0.98);border-bottom:1px solid rgba(255,255,255,0.055);padding:0 48px;height:38px;display:flex;align-items:center;justify-content:space-between;font-family:'DM Sans',sans-serif;font-size:12px;backdrop-filter:blur(8px);}
 .subs-left{display:flex;align-items:center;gap:10px;}
 .subs-avatar{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,0.6);flex-shrink:0;}
 .subs-email{color:rgba(255,255,255,0.38);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -63,7 +63,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .subs-rdot-off{background:rgba(255,255,255,0.18);}
 .subs-signout{padding:4px 9px;border-radius:6px;background:none;border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.22);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;transition:all .2s;}
 .subs-signout:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.5);}
-@media(max-width:768px){#salusUserBar{padding:0 16px;}.subs-email{display:none;}}
+@media(max-width:768px){#caedrixUserBar{padding:0 16px;}.subs-email{display:none;}}
 
 /* BACKGROUND */
 .bg-layer{position:fixed;inset:0;pointer-events:none;}
@@ -172,7 +172,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 <nav>
   <div class="nav-logo">
     <a href="index.html" style="display:flex;align-items:center;">
-      <img src="salusAI-logo.jpg" class="logo-img" alt="Salus AI Logo" onerror="this.style.display='none'">
+      <img src="caedrix-logo.jpg" class="logo-img" alt="Caedrix AI Logo" onerror="this.style.display='none'">
     </a>
   </div>
   <div class="nav-right">
@@ -181,12 +181,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
       <a href="health-decisions.html"    class="nav-mini btn-teal">Health Decisions</a>
       <a href="determine-diagnosis.html" class="nav-mini btn-plum">Determine Diagnosis</a>
       <a href="understand-diagnosis.html" class="nav-mini btn-blue">Understand Diagnosis</a>
-      <a href="manage-my-health.html"    class="nav-mini btn-green">Manage My Health</a>
     </div>
     <a href="precision-medicine3.html" class="back-btn">← Back to Precision Medicine</a>
   </div>
 </nav>
-<div id="salusUserBar"></div>
+<div id="caedrixUserBar"></div>
 
 <div class="page-wrap">
 
@@ -227,14 +226,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
       <div class="step-content">
         <span class="step-tag">Getting Started</span>
         <div class="step-title">Create Your HealthEx Account</div>
-        <p class="step-body">HealthEx is the secure medical record platform that Salus AI uses to access your health data. Creating an account is free and takes under two minutes. Your records are encrypted end-to-end and you control exactly what is shared.</p>
+        <p class="step-body">HealthEx is the secure medical record platform that Caedrix AI uses to access your health data. Creating an account is free and takes under two minutes. Your records are encrypted end-to-end and you control exactly what is shared.</p>
         <div class="step-actions">
           <a href="https://www.healthex.io/#get-early-access" target="_blank" rel="noopener" class="step-action step-action-gold">Create Free Account →</a>
           <a href="https://www.healthex.io/" target="_blank" rel="noopener" class="step-action step-action-outline">Learn About HealthEx</a>
         </div>
         <div class="step-note">
           <span class="step-note-icon">🔒</span>
-          HealthEx is a HIPAA-compliant medical records platform. Salus AI has a signed Business Associate Agreement (BAA) with HealthEx — your health information is protected under federal law.
+          HealthEx is a HIPAA-compliant medical records platform. Caedrix AI has a signed Business Associate Agreement (BAA) with HealthEx — your health information is protected under federal law.
         </div>
       </div>
     </div>
@@ -250,7 +249,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
         </div>
         <div class="step-note">
           <span class="step-note-icon">💡</span>
-          You can link multiple providers — primary care, specialists, hospitals, and labs. The more records connected, the more complete the picture Salus AI can provide.
+          You can link multiple providers — primary care, specialists, hospitals, and labs. The more records connected, the more complete the picture Caedrix AI can provide.
         </div>
       </div>
     </div>
@@ -259,14 +258,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
       <div class="step-num-wrap"><div class="step-circle">3</div></div>
       <div class="step-content">
         <span class="step-tag">Authorize Access</span>
-        <div class="step-title">Grant Salus AI Access to Your Records</div>
-        <p class="step-body">Once your providers are linked in HealthEx, authorize Salus AI to read your health data. You choose exactly what Salus AI can see — and you can revoke access at any time. This one-time authorization activates your Precision Medicine tier.</p>
+        <div class="step-title">Grant Caedrix AI Access to Your Records</div>
+        <p class="step-body">Once your providers are linked in HealthEx, authorize Caedrix AI to read your health data. You choose exactly what Caedrix AI can see — and you can revoke access at any time. This one-time authorization activates your Precision Medicine tier.</p>
         <div class="dev-note-title">Developer Implementation Note</div>
         <div class="dev-note">
           HealthEx OAuth 2.0 + PKCE Flow — this button requires a dynamic server-side authorization request.<br><br>
-          STEP A — Register Salus AI as OAuth client (one-time):<br>
+          STEP A — Register Caedrix AI as OAuth client (one-time):<br>
           &nbsp;&nbsp;POST https://api.healthex.io/oauth/register<br>
-          &nbsp;&nbsp;{ "client_name": "Salus AI", "redirect_uris": ["https://salusai.health/auth/healthex/callback"],<br>
+          &nbsp;&nbsp;{ "client_name": "Caedrix AI", "redirect_uris": ["https://caedrix.com/auth/healthex/callback"],<br>
           &nbsp;&nbsp;&nbsp;&nbsp;"scope": "patient/*.read offline_access" }<br><br>
           STEP B — Backend route /auth/healthex:<br>
           &nbsp;&nbsp;1. Generate code_verifier = base64url(32 random bytes)<br>
@@ -277,12 +276,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
           Docs: https://docs.healthex.io/mcp-server/oauth-flow
         </div>
         <div class="step-actions">
-          <button class="step-action step-action-gold btn-coming-soon" id="authorizeBtn" onclick="comingSoon(this, event); return false;">Authorize Salus AI →</button>
+          <button class="step-action step-action-gold btn-coming-soon" id="authorizeBtn" onclick="comingSoon(this, event); return false;">Authorize Caedrix AI →</button>
         </div>
         <div id="authStatus" style="display:none;margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;line-height:1.5;"></div>
         <div class="step-note">
           <span class="step-note-icon">🛡️</span>
-          Salus AI reads your records to provide personalized guidance. We never sell, share, or use your health data for any purpose other than powering your health coach. Full details in our <a href="#">Privacy Policy</a>.
+          Caedrix AI reads your records to provide personalized guidance. We never sell, share, or use your health data for any purpose other than powering your health coach. Full details in our <a href="#">Privacy Policy</a>.
         </div>
       </div>
     </div>
@@ -292,7 +291,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
       <div class="step-content">
         <span class="step-tag">Confirm Connection</span>
         <div class="step-title">Mark Your Records as Connected</div>
-        <p class="step-body">Once you have authorized HealthEx and your records are linked, click below to activate the personalized features across Salus AI. This tells Salus AI to use your records when generating recommendations on Health Decisions, Determine Diagnosis, and Manage My Health.</p>
+        <p class="step-body">Once you have authorized HealthEx and your records are linked, click below to activate the personalized features across Caedrix AI. This tells Caedrix AI to use your records when generating recommendations on Health Decisions and Determine Diagnosis.</p>
         <div class="step-actions">
           <button class="step-action step-action-teal btn-coming-soon" onclick="comingSoon(this, event); return false;">✓ My Records Are Connected</button>
         </div>
@@ -335,28 +334,28 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 </div><!-- /page-wrap -->
 
 <script>
-const SalusAuth={
-  getUser:()=>{try{return JSON.parse(localStorage.getItem('salus_user')||'null');}catch(_){return null;}},
-  logout:()=>{localStorage.removeItem('salus_user');sessionStorage.clear();window.location.href='login.html';},
-  isRecordsConnected:()=>localStorage.getItem('salus_records_connected')==='true',
-  setRecordsConnected:(v)=>v?localStorage.setItem('salus_records_connected','true'):localStorage.removeItem('salus_records_connected')
+const CaedrixAuth={
+  getUser:()=>{try{return JSON.parse(localStorage.getItem('caedrix_user')||'null');}catch(_){return null;}},
+  logout:()=>{localStorage.removeItem('caedrix_user');sessionStorage.clear();window.location.href='login.html';},
+  isRecordsConnected:()=>localStorage.getItem('caedrix_records_connected')==='true',
+  setRecordsConnected:(v)=>v?localStorage.setItem('caedrix_records_connected','true'):localStorage.removeItem('caedrix_records_connected')
 };
 
-function salusInitUserBar(){
-  const bar=document.getElementById('salusUserBar');if(!bar)return;
-  const user=SalusAuth.getUser()||{};
+function caedrixInitUserBar(){
+  const bar=document.getElementById('caedrixUserBar');if(!bar)return;
+  const user=CaedrixAuth.getUser()||{};
   const initials=(user.email||'?')[0].toUpperCase();
-  const rc=SalusAuth.isRecordsConnected();
+  const rc=CaedrixAuth.isRecordsConnected();
   bar.innerHTML=
     '<div class="subs-left"><div class="subs-avatar">'+initials+'</div><span class="subs-email">'+(user.email||'')+'</span></div>'+
     '<div class="subs-right">'+
       (rc?'<div class="subs-records subs-records-on"><div class="subs-rdot subs-rdot-on"></div><span>Records Linked</span></div>':'<div class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Not Connected</span></div>')+
-      '<button class="subs-signout" onclick="SalusAuth.logout()">Sign out</button>'+
+      '<button class="subs-signout" onclick="CaedrixAuth.logout()">Sign out</button>'+
     '</div>';
 }
 
 function updateStatusBanner(){
-  const rc=SalusAuth.isRecordsConnected();
+  const rc=CaedrixAuth.isRecordsConnected();
   const banner=document.getElementById('statusBanner');
   const dot=document.getElementById('statusDot');
   const title=document.getElementById('statusTitle');
@@ -366,7 +365,7 @@ function updateStatusBanner(){
     banner.classList.add('connected');
     dot.classList.add('connected');
     title.textContent='Records connected via HealthEx';
-    sub.textContent='Your Salus AI responses are personalized to your medical history.';
+    sub.textContent='Your Caedrix AI responses are personalized to your medical history.';
     toggle.textContent='Disconnect';
   }else{
     banner.classList.remove('connected');
@@ -378,19 +377,19 @@ function updateStatusBanner(){
 }
 
 function markConnected(){
-  SalusAuth.setRecordsConnected(true);
+  CaedrixAuth.setRecordsConnected(true);
   updateStatusBanner();
-  salusInitUserBar();
+  caedrixInitUserBar();
   const btn=event.target;
   btn.textContent='✓ Connected!';
   btn.style.background='linear-gradient(135deg,#1abfad,#0a9e8e)';
 }
 
 function toggleRecordsStatus(){
-  const rc=SalusAuth.isRecordsConnected();
-  SalusAuth.setRecordsConnected(!rc);
+  const rc=CaedrixAuth.isRecordsConnected();
+  CaedrixAuth.setRecordsConnected(!rc);
   updateStatusBanner();
-  salusInitUserBar();
+  caedrixInitUserBar();
 }
 
 /* ── HealthEx OAuth 2.0 + PKCE (fully client-side) ── */
@@ -432,7 +431,7 @@ async function startHealthExAuth(){
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({
-          client_name:'Salus AI',
+          client_name:'Caedrix AI',
           redirect_uris:[HEALTHEX_REDIRECT],
           scope:HEALTHEX_SCOPE,
           grant_types:['authorization_code'],
@@ -462,13 +461,13 @@ async function startHealthExAuth(){
     url.searchParams.set('scope',HEALTHEX_SCOPE);
     url.searchParams.set('code_challenge',challenge);
     url.searchParams.set('code_challenge_method','S256');
-    url.searchParams.set('state','salus-'+Date.now());
+    url.searchParams.set('state','caedrix-'+Date.now());
 
     window.location.href=url.toString();
 
   }catch(err){
     btn.disabled=false;
-    btn.textContent='Authorize Salus AI →';
+    btn.textContent='Authorize Caedrix AI →';
     setAuthStatus('⚠ '+err.message+'<br><span style="opacity:.7;font-size:12px;">Check your network connection and try again.</span>',false);
   }
 }
@@ -522,9 +521,9 @@ async function startHealthExAuth(){
     if(tokens.refresh_token) localStorage.setItem('healthex_refresh_token',tokens.refresh_token);
     sessionStorage.removeItem('healthex_pkce_verifier');
 
-    SalusAuth.setRecordsConnected(true);
+    CaedrixAuth.setRecordsConnected(true);
     updateStatusBanner();
-    salusInitUserBar();
+    caedrixInitUserBar();
 
     setAuthStatus('✓ HealthEx authorization complete — your records are now linked.',true);
     const btn=document.getElementById('authorizeBtn');
@@ -536,7 +535,7 @@ async function startHealthExAuth(){
 })();
 
 window.addEventListener('DOMContentLoaded',()=>{
-  salusInitUserBar();
+  caedrixInitUserBar();
   updateStatusBanner();
 });
 </script>
