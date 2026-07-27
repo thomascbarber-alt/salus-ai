@@ -3,7 +3,7 @@
  * ===================================================
  * Handles, on any search page:
  *   - Displaying the user's current token balance
- *   - "Buy tokens" UI ($5.99 single / $24.99 five-pack) -> Stripe Checkout
+ *   - "Buy tokens" UI ($2.99 single / $12.50 five-pack) -> Stripe Checkout
  *   - Redeeming a gift code
  *   - Gating the actual search behind a server-verified token spend
  *
@@ -26,8 +26,8 @@
 
 const CaedrixTokenGate = (function () {
 
-  const PRICE_SINGLE = '$5.99';
-  const PRICE_FIVE = '$24.99';
+  const PRICE_SINGLE = '$2.99';
+  const PRICE_FIVE = '$12.50';
 
   function getUserEmail() {
     try {
