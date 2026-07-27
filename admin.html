@@ -106,13 +106,17 @@ td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.06);}
 let ADMIN_PASSWORD_CACHE = '';
 
 function checkLogin(){
-  const pw = document.getElementById('passwordInput').value;
+  const pw = document.getElementById('passwordInput').value.trim();
   if(!pw){ return; }
-  // We don't validate the password client-side — we just try an authenticated
-  // request and see if the server accepts it. This avoids hardcoding the
-  // real password anywhere in this file.
   ADMIN_PASSWORD_CACHE = pw;
-  loadCodes(true);
+  const btn = document.querySelector('#loginGate button');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+  loadCodes(true).finally(()=>{
+    btn.disabled = false;
+    btn.textContent = originalText;
+  });
 }
 
 async function authedFetch(url, options = {}) {
@@ -126,21 +130,34 @@ async function authedFetch(url, options = {}) {
 async function loadCodes(isLoginAttempt){
   try{
     const res = await authedFetch('/api/admin/list-codes');
-    if(res.status === 401){
+    if(!res.ok){
       if(isLoginAttempt){
-        document.getElementById('loginError').style.display = 'block';
+        let detail = '';
+        try{ const errData = await res.json(); detail = errData.message || errData.error || ''; }catch(_){}
+        const errEl = document.getElementById('loginError');
+        errEl.textContent = res.status === 401
+          ? 'Incorrect password.'
+          : ('Server error (' + res.status + ')' + (detail ? ': ' + detail : '') + ' — check that ADMIN_PASSWORD and your Redis/KV env vars are set in Vercel.');
+        errEl.style.display = 'block';
       }
       return;
     }
     if(isLoginAttempt){
       document.getElementById('loginGate').style.display = 'none';
       document.getElementById('adminPanel').style.display = 'block';
+      document.getElementById('loginError').style.display = 'none';
     }
     const data = await res.json();
     renderCodesTable(data.codes || []);
   }catch(err){
-    document.getElementById('codesTableWrap').innerHTML =
-      '<div class="empty-state">Could not load codes. Check that the backend is configured (KV + ADMIN_PASSWORD env vars).</div>';
+    if(isLoginAttempt){
+      const errEl = document.getElementById('loginError');
+      errEl.textContent = 'Could not reach the server. Check that admin.html is deployed and /api/admin/list-codes is live.';
+      errEl.style.display = 'block';
+    } else {
+      document.getElementById('codesTableWrap').innerHTML =
+        '<div class="empty-state">Could not load codes. Check that the backend is configured (KV + ADMIN_PASSWORD env vars).</div>';
+    }
   }
 }
 

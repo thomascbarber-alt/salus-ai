@@ -53,6 +53,11 @@ const CaedrixTokenGate = (function () {
   async function renderBalanceBadge(elementId) {
     const el = document.getElementById(elementId);
     if (!el) return;
+    if (!getUserEmail()) {
+      el.textContent = '';
+      el.dataset.tokens = 0;
+      return;
+    }
     const tokens = await fetchBalance();
     el.textContent = tokens === 1 ? '1 search remaining' : `${tokens} searches remaining`;
     el.dataset.tokens = tokens;
@@ -67,9 +72,10 @@ const CaedrixTokenGate = (function () {
   async function spendTokenOrPrompt() {
     const email = getUserEmail();
     if (!email) {
-      // Shouldn't normally happen since pages already gate on login, but
-      // fail safe rather than silently letting a search through.
-      window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
+      // No account yet — that's fine, they haven't bought anything.
+      // Show the paywall so they can buy or redeem a code; email is
+      // collected there, only at the moment of purchase.
+      showPaywall();
       return false;
     }
 
@@ -107,6 +113,11 @@ const CaedrixTokenGate = (function () {
           <h2 class="cpw-title">You're out of searches</h2>
           <p class="cpw-sub">Each Caedrix AI search is reviewed by a 5-agent pipeline for accuracy. Buy more searches below, or redeem a gift code.</p>
 
+          <div class="cpw-email-row" id="cpwEmailRow">
+            <input type="email" id="cpwEmailInput" placeholder="Email address" class="cpw-input cpw-email-input" autocomplete="email">
+            <div class="cpw-email-note">Used to save your searches — no password needed.</div>
+          </div>
+
           <div class="cpw-packs">
             <button class="cpw-pack" onclick="CaedrixTokenGate.buy('single')">
               <div class="cpw-pack-price">${PRICE_SINGLE}</div>
@@ -136,6 +147,9 @@ const CaedrixTokenGate = (function () {
         #caedrixPaywallModal .cpw-icon{font-size:32px;text-align:center;margin-bottom:12px;}
         #caedrixPaywallModal .cpw-title{font-family:'Playfair Display',serif;font-size:22px;color:white;text-align:center;margin-bottom:10px;}
         #caedrixPaywallModal .cpw-sub{font-family:'DM Sans',sans-serif;font-size:13px;color:rgba(255,255,255,0.55);text-align:center;line-height:1.6;margin-bottom:26px;}
+        #caedrixPaywallModal .cpw-email-row{margin-bottom:18px;}
+        #caedrixPaywallModal .cpw-email-input{width:100%;text-transform:none;}
+        #caedrixPaywallModal .cpw-email-note{font-size:11px;color:rgba(255,255,255,0.35);margin-top:6px;text-align:center;}
         #caedrixPaywallModal .cpw-packs{display:flex;gap:12px;margin-bottom:22px;}
         #caedrixPaywallModal .cpw-pack{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:18px 12px;cursor:pointer;text-align:center;transition:all .2s;position:relative;}
         #caedrixPaywallModal .cpw-pack:hover{background:rgba(19,160,144,0.1);border-color:rgba(19,160,144,0.4);}
@@ -161,7 +175,36 @@ const CaedrixTokenGate = (function () {
 
   function showPaywall() {
     ensureModal();
+    const email = getUserEmail();
+    const emailRow = document.getElementById('cpwEmailRow');
+    const emailInput = document.getElementById('cpwEmailInput');
+    if (emailRow) emailRow.style.display = email ? 'none' : 'block';
+    if (emailInput && !email) emailInput.value = '';
     document.getElementById('caedrixPaywallModal').style.display = 'block';
+  }
+
+  /**
+   * Returns the email to use for this purchase/redemption. If the user
+   * already has an account (caedrix_user in localStorage), uses that.
+   * Otherwise reads + validates the email field in the modal — this is
+   * the ONLY point where email is required, right at the moment of
+   * buying tokens or redeeming a code, never before.
+   */
+  function getOrCollectEmail() {
+    const existing = getUserEmail();
+    if (existing) return existing;
+
+    const input = document.getElementById('cpwEmailInput');
+    const val = input ? input.value.trim() : '';
+    if (!val || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+      showMsg('Please enter a valid email address to continue.', 'error');
+      if (input) input.focus();
+      return null;
+    }
+    try {
+      localStorage.setItem('caedrix_user', JSON.stringify({ email: val }));
+    } catch (_) {}
+    return val;
   }
 
   function hidePaywall(evt) {
@@ -170,7 +213,7 @@ const CaedrixTokenGate = (function () {
   }
 
   async function buy(pack) {
-    const email = getUserEmail();
+    const email = getOrCollectEmail();
     if (!email) return;
     try {
       const res = await fetch('/api/create-checkout-session', {
@@ -190,7 +233,8 @@ const CaedrixTokenGate = (function () {
   }
 
   async function redeem() {
-    const email = getUserEmail();
+    const email = getOrCollectEmail();
+    if (!email) return;
     const input = document.getElementById('cpwCodeInput');
     const code = input.value.trim();
     if (!code) return;
@@ -233,7 +277,8 @@ const CaedrixTokenGate = (function () {
     showPaywall,
     hidePaywall,
     buy,
-    redeem
+    redeem,
+    getOrCollectEmail
   };
 
 })();

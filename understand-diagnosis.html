@@ -2,14 +2,9 @@
 <html lang="en">
 <head>
 <script>
-/* Caedrix AI auth gate */
-(function(){
-  var u=null;try{u=JSON.parse(localStorage.getItem('caedrix_user')||'null');}catch(_){}
-  if(!u||!u.email){
-    var t=encodeURIComponent(window.location.href);
-    window.location.replace('login.html?redirect='+t);
-  }
-})();
+/* Caedrix AI — no forced login here. Visitors can view and ask questions
+   freely; an account (email) is only created at the moment they buy
+   tokens or redeem a code, inside the paywall modal. */
 </script>
 
 <meta charset="UTF-8">
@@ -539,15 +534,95 @@ const CaedrixAuth = {
 };
 function caedrixInitUserBar(){
   const bar=document.getElementById('caedrixUserBar');if(!bar)return;
-  const user=CaedrixAuth.getUser()||{};
+  const user=CaedrixAuth.getUser();
+  if(!user||!user.email){
+    bar.innerHTML='<div class="subs-left"><span class="subs-email" style="opacity:.6;">Not signed in yet</span></div>'+
+      '<div class="subs-right"><span class="subs-email" style="opacity:.5;font-size:12px;">Sign in happens automatically when you buy searches</span></div>';
+    return;
+  }
   const initials=(user.email||'?')[0].toUpperCase();
   bar.innerHTML='<div class="subs-left"><div class="subs-avatar">'+initials+'</div><span class="subs-email">'+(user.email||'')+'</span></div>'+
     '<div class="subs-right"><button class="subs-signout" onclick="CaedrixAuth.logout()">Sign out</button></div>';
 }
-window.addEventListener('DOMContentLoaded',()=>{
+window.addEventListener('DOMContentLoaded',async ()=>{
   caedrixInitUserBar();
+  await initFolderConnection();
   CaedrixTokenGate.renderBalanceBadge('caedrixBalanceBadge');
 });
+
+/* ══════════════════════════════════════════════════════
+   LOCAL FOLDER HEALTH CONTEXT
+   (source of truth once a folder is connected — see
+   caedrix-local-storage.js. Falls back to localStorage
+   copies when no folder is connected on this device.)
+══════════════════════════════════════════════════════ */
+let folderConnected = false;
+let cachedHealthContextBlock = '';
+
+async function initFolderConnection() {
+  try {
+    if (typeof CaedrixStorage === 'undefined' || !CaedrixStorage.isSupported()) {
+      folderConnected = false;
+      return;
+    }
+    const status = await CaedrixStorage.restoreConnection();
+    folderConnected = (status === 'connected');
+  } catch (_) {
+    folderConnected = false;
+  }
+}
+
+async function getCaedrixMergedProfile() {
+  let personalDetails = null, healthProfile = null, medicalRecordCount = 0;
+  if (folderConnected && typeof CaedrixStorage !== 'undefined') {
+    try {
+      const ctx = await CaedrixStorage.getLocalHealthContext();
+      if (ctx && ctx.connected) {
+        personalDetails = ctx.personalDetails;
+        healthProfile = ctx.healthProfile;
+        medicalRecordCount = (ctx.medicalRecordFiles || []).length;
+      }
+    } catch (_) { /* fall through to localStorage below */ }
+  }
+  if (!personalDetails) {
+    try { personalDetails = JSON.parse(localStorage.getItem('caedrix_life_context') || 'null'); } catch (_) {}
+  }
+  if (!healthProfile) {
+    try { healthProfile = JSON.parse(localStorage.getItem('caedrix_health_profile') || 'null'); } catch (_) {}
+  }
+  return { personalDetails, healthProfile, medicalRecordCount };
+}
+
+async function buildCaedrixHealthContextBlock() {
+  const { personalDetails, healthProfile, medicalRecordCount } = await getCaedrixMergedProfile();
+  const parts = [];
+  if (personalDetails) {
+    const p = [];
+    if (personalDetails.activities) p.push('Favorite activities: ' + personalDetails.activities);
+    if (personalDetails.important)  p.push('Important personal context: ' + personalDetails.important);
+    if (personalDetails.caregiver)  p.push('Caregiver responsibilities: ' + personalDetails.caregiver);
+    if (personalDetails.living)     p.push('Living situation: ' + personalDetails.living);
+    if (p.length) parts.push('Personal context about this patient:\n' + p.join('\n'));
+  }
+  if (healthProfile) {
+    const h = [];
+    if (healthProfile.age)           h.push('Age: ' + healthProfile.age);
+    if (healthProfile.sex)           h.push('Biological sex: ' + healthProfile.sex);
+    if (healthProfile.smoking)       h.push('Smoking status: ' + healthProfile.smoking);
+    if (healthProfile.diabetes)      h.push('Diabetes: ' + healthProfile.diabetes);
+    if (healthProfile.heartDisease)  h.push('Heart disease: ' + healthProfile.heartDisease);
+    if (healthProfile.conditions)    h.push('Other conditions: ' + healthProfile.conditions);
+    if (healthProfile.medications)   h.push('Current medications: ' + healthProfile.medications);
+    if (healthProfile.screenings)    h.push('Recent screenings: ' + healthProfile.screenings);
+    if (healthProfile.familyHistory) h.push('Family history: ' + healthProfile.familyHistory);
+    if (h.length) parts.push('Patient health profile:\n' + h.join('\n'));
+  }
+  if (medicalRecordCount > 0) {
+    parts.push(`Patient has ${medicalRecordCount} uploaded medical record document(s) on file, indicating an engaged, documented patient.`);
+  }
+  if (!parts.length) return '';
+  return '\n\n---\n' + parts.join('\n\n') + '\n---';
+}
 
 /* ════════════════════════════════════
    STATE
@@ -935,6 +1010,7 @@ async function runAnalysis(){
 
   lastDiagnosis=q;
   clarifications={};
+  cachedHealthContextBlock = await buildCaedrixHealthContextBlock();
 
   document.getElementById('submitBtn').disabled=true;
   document.getElementById('diagnosisInput').disabled=true;
@@ -1016,7 +1092,7 @@ async function runResearchInParallel(){
   if(clarifications.answer){
     userMsg+=`\n\nAdditional context from user: ${clarifications.answer}`;
   }
-  userMsg+=getCaedrixLifeContext();
+  userMsg+=cachedHealthContextBlock;
   userMsg+='\n\nReturn ONLY the JSON object. No preamble.';
 
   setAgentState(2,'running','Summarizing…');

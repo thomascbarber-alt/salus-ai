@@ -2,14 +2,9 @@
 <html lang="en">
 <head>
 <script>
-/* Caedrix AI auth gate — runs before page renders */
-(function(){
-  var u=null;try{u=JSON.parse(localStorage.getItem('caedrix_user')||'null');}catch(_){}
-  if(!u||!u.email){
-    var t=encodeURIComponent(window.location.href);
-    window.location.replace('login.html?redirect='+t);
-  }
-})();
+/* Caedrix AI — no forced login here. Visitors can view and ask questions
+   freely; an account (email) is only created at the moment they buy
+   tokens or redeem a code, inside the paywall modal. */
 
 function comingSoon(el, evt) {
   if (evt) { evt.preventDefault(); evt.stopPropagation(); }
@@ -1249,7 +1244,13 @@ const CaedrixAuth = {
 function caedrixInitUserBar() {
   const bar = document.getElementById('caedrixUserBar');
   if (!bar) return;
-  const user    = CaedrixAuth.getUser() || {};
+  const user = CaedrixAuth.getUser();
+  if (!user || !user.email) {
+    bar.innerHTML =
+      '<div class="subs-left"><span class="subs-email" style="opacity:.6;">Not signed in yet</span></div>' +
+      '<div class="subs-right"><span class="subs-email" style="opacity:.5;font-size:12px;">Sign in happens automatically when you buy searches</span></div>';
+    return;
+  }
   const rc      = CaedrixAuth.isRecordsConnected();
   const initials= (user.email||'?')[0].toUpperCase();
   const email   = user.email || '';
@@ -1285,14 +1286,100 @@ const CaedrixState = {
 /* ══════════════════════════════════════════════════════
    PAGE LOAD — restore API key + records state
 ══════════════════════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   caedrixInitUserBar();
-  renderProfileContextBox();
+  await initFolderConnection();
+  await renderProfileContextBox();
   CaedrixTokenGate.renderBalanceBadge('caedrixBalanceBadge');
   if (CaedrixState.isRecordsConnected()) {
     recordsConnected = true;
   }
 });
+
+/* ══════════════════════════════════════════════════════
+   LOCAL FOLDER HEALTH CONTEXT
+   (source of truth once a folder is connected — see
+   caedrix-local-storage.js. Falls back to localStorage
+   copies when no folder is connected on this device.)
+══════════════════════════════════════════════════════ */
+let folderConnected = false;
+let cachedHealthContextBlock = '';
+
+async function initFolderConnection() {
+  try {
+    if (typeof CaedrixStorage === 'undefined' || !CaedrixStorage.isSupported()) {
+      folderConnected = false;
+      return;
+    }
+    const status = await CaedrixStorage.restoreConnection();
+    folderConnected = (status === 'connected');
+  } catch (_) {
+    folderConnected = false;
+  }
+}
+
+/* Fetches personalDetails + healthProfile, preferring the connected local
+   folder over the localStorage fallback (same precedence used on
+   personal-details.html / health-profile.html when saving). */
+async function getCaedrixMergedProfile() {
+  let personalDetails = null, healthProfile = null, medicalRecordCount = 0;
+
+  if (folderConnected && typeof CaedrixStorage !== 'undefined') {
+    try {
+      const ctx = await CaedrixStorage.getLocalHealthContext();
+      if (ctx && ctx.connected) {
+        personalDetails = ctx.personalDetails;
+        healthProfile = ctx.healthProfile;
+        medicalRecordCount = (ctx.medicalRecordFiles || []).length;
+      }
+    } catch (_) { /* fall through to localStorage below */ }
+  }
+  if (!personalDetails) {
+    try { personalDetails = JSON.parse(localStorage.getItem('caedrix_life_context') || 'null'); } catch (_) {}
+  }
+  if (!healthProfile) {
+    try { healthProfile = JSON.parse(localStorage.getItem('caedrix_health_profile') || 'null'); } catch (_) {}
+  }
+  return { personalDetails, healthProfile, medicalRecordCount };
+}
+
+/* Builds the text block sent to the AI. Replaces the old
+   getCaedrixHealthProfile()/getCaedrixLifeContext() calls, which only
+   ever looked at localStorage and silently missed folder-only data. */
+async function buildCaedrixHealthContextBlock() {
+  const { personalDetails, healthProfile, medicalRecordCount } = await getCaedrixMergedProfile();
+  const parts = [];
+
+  if (personalDetails) {
+    const p = [];
+    if (personalDetails.activities) p.push('Favorite activities: ' + personalDetails.activities);
+    if (personalDetails.important)  p.push('Important personal context: ' + personalDetails.important);
+    if (personalDetails.caregiver)  p.push('Caregiver responsibilities: ' + personalDetails.caregiver);
+    if (personalDetails.living)     p.push('Living situation: ' + personalDetails.living);
+    if (p.length) parts.push('Personal context about this patient:\n' + p.join('\n'));
+  }
+
+  if (healthProfile) {
+    const h = [];
+    if (healthProfile.age)           h.push('Age: ' + healthProfile.age);
+    if (healthProfile.sex)           h.push('Biological sex: ' + healthProfile.sex);
+    if (healthProfile.smoking)       h.push('Smoking status: ' + healthProfile.smoking);
+    if (healthProfile.diabetes)      h.push('Diabetes: ' + healthProfile.diabetes);
+    if (healthProfile.heartDisease)  h.push('Heart disease: ' + healthProfile.heartDisease);
+    if (healthProfile.conditions)    h.push('Other conditions: ' + healthProfile.conditions);
+    if (healthProfile.medications)   h.push('Current medications: ' + healthProfile.medications);
+    if (healthProfile.screenings)    h.push('Recent screenings: ' + healthProfile.screenings);
+    if (healthProfile.familyHistory) h.push('Family history: ' + healthProfile.familyHistory);
+    if (h.length) parts.push('Patient health profile:\n' + h.join('\n'));
+  }
+
+  if (medicalRecordCount > 0) {
+    parts.push(`Patient has ${medicalRecordCount} uploaded medical record document(s) on file, indicating an engaged, documented patient.`);
+  }
+
+  if (!parts.length) return '';
+  return '\n\n---\n' + parts.join('\n\n') + '\n---';
+}
 
 /* ══════════════════════════════════════════════════════
    SCROLL PROGRESS
@@ -1342,7 +1429,7 @@ window.addEventListener('scroll', () => {
 /* ══════════════════════════════════════════════════════
    RECORDS
 ══════════════════════════════════════════════════════ */
-function renderProfileContextBox() {
+async function renderProfileContextBox() {
   const PERSONAL_LABELS = {
     activities: 'Favorite Activities', important: 'Important Context',
     caregiver: 'Caregiver Role',       living: 'Living Situation'
@@ -1356,8 +1443,8 @@ function renderProfileContextBox() {
     exerciseHabits: 'Exercise Habits', riskFactors: 'Risk Factors'
   };
   let hasAny = false;
+  const { personalDetails: ctx, healthProfile: hp } = await getCaedrixMergedProfile();
   try {
-    const ctx = JSON.parse(localStorage.getItem('caedrix_life_context') || 'null');
     const group = document.getElementById('ctxPersonalGroup');
     const rows  = document.getElementById('ctxPersonalRows');
     if (ctx && group && rows) {
@@ -1369,7 +1456,6 @@ function renderProfileContextBox() {
     }
   } catch(_) {}
   try {
-    const hp = JSON.parse(localStorage.getItem('caedrix_health_profile') || 'null');
     const group = document.getElementById('ctxHealthGroup');
     const rows  = document.getElementById('ctxHealthRows');
     if (hp && group && rows) {
@@ -1660,6 +1746,7 @@ async function runAnalysis() {
   clarifyingHistory   = [];
   clarifyRound        = 0;
   finalClarifications = {};
+  cachedHealthContextBlock = await buildCaedrixHealthContextBlock();
 
   document.getElementById('submitBtn').disabled = true;
   document.getElementById('questionInput').disabled = true;
@@ -1683,7 +1770,7 @@ async function runClarifyAgent() {
   setAgentState(1, 'running', 'Reading your question…');
 
   // Build clarify message with full history
-  let msg = `The patient's health question: "${lastQuestion}"${getCaedrixHealthProfile()}${getCaedrixLifeContext()}`;
+  let msg = `The patient's health question: "${lastQuestion}"${cachedHealthContextBlock}`;
   if (clarifyingHistory.length > 0) {
     msg += `\nPrevious clarification rounds (${clarifyingHistory.length}):\n`;
     clarifyingHistory.forEach(r => {
@@ -1775,7 +1862,7 @@ function submitClarifications() {
 ══════════════════════════════════════════════════════ */
 async function runMainPipeline() {
   // Build analysis message
-  let userMsg = `The patient asks: "${lastQuestion}"${getCaedrixHealthProfile()}${getCaedrixLifeContext()}`;
+  let userMsg = `The patient asks: "${lastQuestion}"${cachedHealthContextBlock}`;
   const hasClarifications = Object.keys(finalClarifications).some(k => finalClarifications[k]);
   if (hasClarifications) {
     userMsg += '\n\nClarifying information provided by the patient:\n';
@@ -1784,11 +1871,10 @@ async function runMainPipeline() {
     });
   }
   // Determine what personal data is available
-  const hasHealthProfile = getCaedrixHealthProfile().length > 0;
-  const hasLifeContext   = getCaedrixLifeContext().length > 0;
+  const hasPersonalizedContext = cachedHealthContextBlock.length > 0;
   if (recordsConnected) {
     userMsg += '\n\nNote: This patient has linked their medical records via HealthEx. Personalize your analysis accordingly.';
-  } else if (hasHealthProfile || hasLifeContext) {
+  } else if (hasPersonalizedContext) {
     userMsg += '\n\nIMPORTANT: The patient has provided their personal health profile and/or personal context above. These are real, self-reported health details about this specific patient. You MUST use this information to personalize your analysis — do not treat this as a generic query. Reference the specific details provided (age, conditions, medications, activities, living situation, etc.) in your how_it_applies fields and key_takeaway. Populate patient_context_used with a summary of which profile details you applied.';
   } else {
     userMsg += '\n\nNo personal health profile or records are available. Provide high-quality general guidance and note that adding a health profile on the Precision Medicine page would allow a more personalized analysis.';
@@ -1903,7 +1989,7 @@ function renderResults(result, accuracy, legal, originalQuestion) {
     '"' + (result.question_understood || originalQuestion) + '"';
 
   const now = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  const hasProfileData = getCaedrixHealthProfile().length > 0 || getCaedrixLifeContext().length > 0;
+  const hasProfileData = cachedHealthContextBlock.length > 0;
   const personalizationChip = recordsConnected
     ? '<div class="results-meta-chip">🏥 Personalized to your records</div>'
     : hasProfileData
@@ -1923,7 +2009,7 @@ function renderResults(result, accuracy, legal, originalQuestion) {
   ].filter(Boolean).join(' · ');
   document.getElementById('agentNote').textContent = accuracyNote || 'Reviewed by Caedrix AI 5-agent pipeline.';
 
-  const hasProfileData = getCaedrixHealthProfile().length > 0 || getCaedrixLifeContext().length > 0;
+  const hasProfileData = cachedHealthContextBlock.length > 0;
   if (result.patient_context_used && (recordsConnected || hasProfileData)) {
     document.getElementById('contextBox').style.display = 'flex';
     document.getElementById('contextBody').textContent = result.patient_context_used;
