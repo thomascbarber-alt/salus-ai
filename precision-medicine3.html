@@ -2,14 +2,9 @@
 <html lang="en">
 <head>
 <script>
-/* Caedrix AI auth gate — runs before page renders */
-(function(){
-  var u=null;try{u=JSON.parse(localStorage.getItem('caedrix_user')||'null');}catch(_){}
-  if(!u||!u.email){
-    var t=encodeURIComponent(window.location.href);
-    window.location.replace('login.html?redirect='+t);
-  }
-})();
+/* Caedrix AI — no forced login here. Visitors can view and use the page
+   freely; an account (email) is only created at the moment they buy
+   tokens or redeem a code, inside the paywall modal on a search page. */
 
 function comingSoon(el, evt) {
   if (evt) { evt.preventDefault(); evt.stopPropagation(); }
@@ -1970,7 +1965,13 @@ const CaedrixAuth = {
 function caedrixInitUserBar() {
   const bar = document.getElementById('caedrixUserBar');
   if (!bar) return;
-  const user    = CaedrixAuth.getUser() || {};
+  const user = CaedrixAuth.getUser();
+  if (!user || !user.email) {
+    bar.innerHTML =
+      '<div class="subs-left"><span class="subs-email" style="opacity:.6;">Not signed in yet</span></div>' +
+      '<div class="subs-right"><span class="subs-email" style="opacity:.5;font-size:12px;">Sign in happens automatically when you buy searches</span></div>';
+    return;
+  }
   const rc      = CaedrixAuth.isRecordsConnected();
   const initials= (user.email||'?')[0].toUpperCase();
   const email   = user.email || '';

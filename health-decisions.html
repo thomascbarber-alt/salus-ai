@@ -2009,7 +2009,6 @@ function renderResults(result, accuracy, legal, originalQuestion) {
   ].filter(Boolean).join(' · ');
   document.getElementById('agentNote').textContent = accuracyNote || 'Reviewed by Caedrix AI 5-agent pipeline.';
 
-  const hasProfileData = cachedHealthContextBlock.length > 0;
   if (result.patient_context_used && (recordsConnected || hasProfileData)) {
     document.getElementById('contextBox').style.display = 'flex';
     document.getElementById('contextBody').textContent = result.patient_context_used;
