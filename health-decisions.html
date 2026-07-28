@@ -1294,6 +1294,12 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (CaedrixState.isRecordsConnected()) {
     recordsConnected = true;
   }
+  const savedDraft = CaedrixTokenGate.getAndClearResumeDraft();
+  if (savedDraft) {
+    document.getElementById('questionInput').value = savedDraft;
+    document.getElementById('questionInput').dispatchEvent(new Event('input'));
+    document.getElementById('questionCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
 });
 
 /* ══════════════════════════════════════════════════════
@@ -1646,6 +1652,7 @@ ALWAYS respond with a JSON object matching this exact schema:
 
 RULES:
 - Always include 2-4 options unless the question genuinely only has one answer.
+- ALWAYS populate "discuss_with_doctor" with at least 2-4 specific, useful questions the patient could bring to their next physician visit — this field must never be empty, even for simple or general questions. If the topic is broad, ask about how it applies to the patient's specific situation, risk factors, or next steps.
 - Evidence levels: high = RCT/meta-analysis/major guideline; moderate = observational studies/consensus; low = expert opinion/limited data
 - Stay within scope: help patients understand options, not prescribe. Never say "you should do X."
 - If the message contains patient health profile data (age, sex, conditions, medications, etc.) or personal context (activities, living situation, etc.), you MUST use that information to personalize the analysis. Populate patient_context_used with a concise summary of the specific profile details that shaped your answer. Do not default to generic guidance when patient data is present.
@@ -1727,7 +1734,7 @@ PLAIN LANGUAGE RULES:
 - Assume the reader has a general education level but no medical background.
 - Preserve ALL factual content and accuracy — reword the language, never the meaning.
 - Apply every correction flagged by the Accuracy and Legal reviewers. Remove hallucinated citations, fix factual errors, and remove any prescriptive language.
-- Keep all valid evidence citations intact. Ensure "discuss_with_doctor" questions are specific and useful, not vague.
+- Keep all valid evidence citations intact. Ensure "discuss_with_doctor" contains at least 2-4 specific, useful questions — if it arrives empty or too generic, write appropriate ones yourself based on the analysis.
 
 Return ONLY the final corrected and polished version of the Agent 2 JSON schema.
 Same schema, no extra fields, no preamble, no markdown fences.`;
@@ -1739,7 +1746,7 @@ async function runAnalysis() {
   const q = document.getElementById('questionInput').value.trim();
   if (!q) { document.getElementById('questionInput').focus(); return; }
 
-  const tokenOk = await CaedrixTokenGate.spendTokenOrPrompt();
+  const tokenOk = await CaedrixTokenGate.spendTokenOrPrompt(q);
   if (!tokenOk) return;
 
   lastQuestion        = q;

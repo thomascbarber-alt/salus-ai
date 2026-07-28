@@ -548,6 +548,12 @@ window.addEventListener('DOMContentLoaded',async ()=>{
   caedrixInitUserBar();
   await initFolderConnection();
   CaedrixTokenGate.renderBalanceBadge('caedrixBalanceBadge');
+  const savedDraft = CaedrixTokenGate.getAndClearResumeDraft();
+  if (savedDraft) {
+    document.getElementById('diagnosisInput').value = savedDraft;
+    document.getElementById('diagnosisInput').dispatchEvent(new Event('input'));
+    document.getElementById('diagnosisInput').scrollIntoView({behavior:'smooth',block:'center'});
+  }
 });
 
 /* ══════════════════════════════════════════════════════
@@ -899,6 +905,7 @@ RULES:
 - Evidence levels: high=guideline/RCT; moderate=observational/consensus; low=emerging/case series
 - Clinician tone — assume the reader knows anatomy and pharmacology
 - No drug doses or prescriptive language
+- questions_for_doctor must always contain at least 3-4 specific questions — never empty
 - Return ONLY valid JSON`;
 
 /* ════════════════════════════════════
@@ -1005,7 +1012,7 @@ async function runAnalysis(){
   const q=document.getElementById('diagnosisInput').value.trim();
   if(!q){document.getElementById('diagnosisInput').focus();return;}
 
-  const tokenOk = await CaedrixTokenGate.spendTokenOrPrompt();
+  const tokenOk = await CaedrixTokenGate.spendTokenOrPrompt(q);
   if(!tokenOk) return;
 
   lastDiagnosis=q;

@@ -445,6 +445,12 @@ window.addEventListener('DOMContentLoaded',async ()=>{
   caedrixInitUserBar();
   await initFolderConnection();
   CaedrixTokenGate.renderBalanceBadge('caedrixBalanceBadge');
+  const savedDraft = CaedrixTokenGate.getAndClearResumeDraft();
+  if (savedDraft) {
+    document.getElementById('symptomInput').value = savedDraft;
+    document.getElementById('symptomInput').dispatchEvent(new Event('input'));
+    document.getElementById('inputCard').scrollIntoView({behavior:'smooth',block:'center'});
+  }
 });
 
 /* ══════════════════════════════════════════════════════
@@ -666,6 +672,7 @@ RULES:
 - Be honest about uncertainty — medicine is probabilistic
 - NEVER say "you have X" — always frame as "this could be" or "a possible explanation is"
 - clinical_summary and recent_research must always be populated strings, never null or empty
+- questions_for_doctor must always contain at least 3-5 specific, useful questions — never empty, even when the differential is fairly clear
 - Return ONLY valid JSON`;
 
 const AGENT_ACCURACY_SYSTEM=`Review the differential diagnosis JSON for accuracy. Respond ONLY:
@@ -692,7 +699,7 @@ Return the EXACT same JSON schema. Start with { and end with }. Return ONLY vali
 async function runAnalysis(){
   const symptoms=document.getElementById('symptomInput').value.trim();
   if(!symptoms){document.getElementById('symptomInput').focus();return;}
-  const tokenOk = await CaedrixTokenGate.spendTokenOrPrompt();
+  const tokenOk = await CaedrixTokenGate.spendTokenOrPrompt(symptoms);
   if(!tokenOk) return;
   lastSymptoms=symptoms;
   cachedHealthContextBlock = await buildCaedrixHealthContextBlock();
