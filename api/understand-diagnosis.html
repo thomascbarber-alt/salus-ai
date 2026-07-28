@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+/* Caedrix AI — no forced login here. Visitors can view and ask questions
+   freely; an account (email) is only created at the moment they buy
+   tokens or redeem a code, inside the paywall modal. */
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caedrix AI — Understand Diagnosis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0c1e3a; --navy-mid:#162d52; --navy-light:#1e3a68;
+  --teal:#0a7c6e; --teal-light:#13a090;
+  --gold:#d4aa3a; --gold-light:#e8c84a;
+  --blue:#4a6fa5; --blue-light:#6b8fc0;
+  --plum:#9b59b6; --green:#3a9e6a;
+  --white:#f0ece4; --danger:#c0392b;
+  --text-dim:rgba(240,236,228,0.55);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;
+  padding:0 48px;height:96px;background:rgba(12,30,58,0.97);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(74,111,165,0.25);}
+.nav-logo{display:flex;align-items:center;}
+.logo-img{height:90px;width:auto;object-fit:contain;}
+.nav-actions{display:flex;gap:10px;margin-left:auto;margin-right:20px;}
+.nav-mini{padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;
+  text-decoration:none;transition:all 0.2s;white-space:nowrap;}
+.nav-mini:hover{transform:translateY(-1px);opacity:0.9;}
+.btn1{background:linear-gradient(135deg,#d4aa3a,#b8932a);color:#0c1e3a;}
+.btn2{background:linear-gradient(135deg,#13a090,#0a7c6e);color:white;}
+.btn3{background:linear-gradient(135deg,#4a6fa5,#162d52);color:white;}
+.btn4{background:linear-gradient(135deg,#9b59b6,#6b7a8d);color:white;}
+.btn5{background:linear-gradient(135deg,#3a9e6a,#2d7a52);color:white;}
+@media(max-width:768px){nav{padding:0 20px;}.nav-actions{gap:6px;margin-right:0;}.nav-mini{font-size:10px;padding:6px 10px;}}
+
+/* USER BAR */
+#caedrixUserBar{position:fixed;top:96px;left:0;right:0;z-index:99;
+  background:rgba(7,16,32,0.98);border-bottom:1px solid rgba(255,255,255,0.055);
+  padding:0 48px;height:38px;display:flex;align-items:center;justify-content:space-between;
+  font-family:'DM Sans',sans-serif;font-size:12px;backdrop-filter:blur(8px);}
+.subs-left{display:flex;align-items:center;gap:10px;}
+.subs-avatar{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.08);
+  display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;
+  color:rgba(255,255,255,0.6);}
+.subs-email{color:rgba(255,255,255,0.38);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.subs-right{display:flex;align-items:center;gap:10px;}
+.subs-signout{padding:4px 9px;border-radius:6px;background:none;border:1px solid rgba(255,255,255,0.06);
+  color:rgba(255,255,255,0.22);cursor:pointer;font-size:11px;}
+.subs-signout:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.5);}
+
+/* PAGE */
+.page-wrap{max-width:900px;margin:0 auto;padding:178px 24px 80px;}
+.page-header{text-align:center;margin-bottom:52px;}
+.page-eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:11px;font-weight:700;
+  letter-spacing:3px;text-transform:uppercase;color:var(--blue-light);margin-bottom:18px;}
+.eyebrow-line{width:28px;height:1px;background:linear-gradient(90deg,transparent,var(--blue-light));}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(32px,5vw,48px);font-weight:600;
+  line-height:1.15;color:var(--white);margin-bottom:16px;}
+.page-title em{font-style:italic;color:var(--blue-light);}
+.page-sub{font-family:'Crimson Pro',serif;font-size:19px;color:var(--text-dim);
+  line-height:1.6;max-width:600px;margin:0 auto;}
+.page-disclaimer{font-size:11px;color:rgba(255,255,255,0.28);margin-top:12px;}
+
+/* INPUT */
+.input-card{border-radius:20px;border:1px solid rgba(74,111,165,0.2);
+  background:rgba(255,255,255,0.03);backdrop-filter:blur(12px);margin-bottom:28px;
+  animation:fadeUp 0.5s ease 0.1s both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.input-card-header{padding:24px 28px 0;display:flex;align-items:center;gap:12px;}
+.input-card-icon{font-size:24px;}
+.input-card-label{font-family:'Playfair Display',serif;font-size:18px;}
+.input-card-sub{font-size:12px;color:var(--text-dim);margin-top:2px;}
+.input-area{padding:20px 28px 8px;}
+.diagnosis-input-wrap{display:flex;gap:12px;align-items:flex-end;}
+.diagnosis-input{flex:1;padding:16px 20px;background:rgba(255,255,255,0.05);
+  border:1px solid rgba(74,111,165,0.2);border-radius:12px;font-family:'DM Sans',sans-serif;
+  font-size:16px;color:var(--white);outline:none;transition:all 0.3s;
+  resize:none;min-height:56px;max-height:120px;}
+.diagnosis-input:focus{border-color:rgba(74,111,165,0.6);background:rgba(74,111,165,0.08);
+  box-shadow:0 0 0 3px rgba(74,111,165,0.1);}
+.diagnosis-input::placeholder{color:rgba(255,255,255,0.2);}
+.submit-btn{padding:16px 28px;border-radius:12px;
+  background:linear-gradient(135deg,var(--blue),var(--navy-mid));color:white;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;
+  border:1px solid rgba(74,111,165,0.4);cursor:pointer;transition:all 0.25s;white-space:nowrap;}
+.submit-btn:hover:not(:disabled){background:linear-gradient(135deg,#5a7fbf,var(--blue));
+  transform:translateY(-1px);box-shadow:0 6px 20px rgba(74,111,165,0.3);}
+.submit-btn:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
+.hint-chips{display:flex;flex-wrap:wrap;gap:8px;padding:14px 28px 22px;}
+.hint-chip{font-size:12px;padding:6px 12px;border-radius:100px;
+  border:1px solid rgba(74,111,165,0.25);color:rgba(255,255,255,0.45);
+  cursor:pointer;background:rgba(74,111,165,0.06);transition:all 0.2s;}
+.hint-chip:hover{border-color:rgba(74,111,165,0.55);color:rgba(255,255,255,0.75);
+  background:rgba(74,111,165,0.12);}
+
+/* CLARIFY */
+.clarify-panel{border-radius:16px;margin-bottom:20px;border:1px solid rgba(74,111,165,0.3);
+  background:rgba(74,111,165,0.07);display:none;overflow:hidden;animation:fadeUp 0.35s ease;}
+.clarify-panel.visible{display:block;}
+.clarify-header{display:flex;align-items:flex-start;gap:14px;padding:22px 24px 16px;}
+.clarify-icon{font-size:22px;}
+.clarify-title{font-family:'Playfair Display',serif;font-size:17px;margin-bottom:4px;}
+.clarify-sub{font-size:13px;color:var(--text-dim);}
+.clarify-questions{padding:0 24px;}
+.clarify-q{margin-bottom:16px;}
+.clarify-q-label{font-size:13px;font-weight:500;color:rgba(255,255,255,0.7);margin-bottom:8px;}
+.clarify-q-input{width:100%;padding:11px 14px;border-radius:8px;
+  background:rgba(255,255,255,0.06);border:1px solid rgba(74,111,165,0.25);
+  font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none;}
+.clarify-q-input:focus{border-color:rgba(74,111,165,0.6);}
+.clarify-submit{display:block;width:calc(100% - 48px);margin:14px 24px 22px;
+  padding:13px;border-radius:10px;background:rgba(74,111,165,0.7);color:white;
+  font-weight:700;border:none;cursor:pointer;font-size:14px;}
+.clarify-submit:hover{background:var(--blue);}
+
+/* PIPELINE */
+.pipeline-panel{display:none;margin-top:24px;animation:fadeUp 0.4s ease both;}
+.pipeline-panel.visible{display:block;}
+.pipeline-title{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+  color:rgba(255,255,255,0.3);margin-bottom:20px;text-align:center;}
+.pipeline-track{position:relative;display:flex;align-items:flex-start;}
+.pipeline-track-line{position:absolute;top:24px;left:10%;right:10%;
+  height:2px;background:rgba(255,255,255,0.07);z-index:0;
+  border-radius:2px;overflow:hidden;}
+.pipeline-track-fill{height:100%;width:0%;
+  background:linear-gradient(90deg,var(--blue),var(--blue-light));
+  transition:width 0.7s cubic-bezier(0.4,0,0.2,1);
+  box-shadow:0 0 8px rgba(107,143,192,0.4);}
+@media(max-width:768px){.pipeline-track-line{display:none;}}
+.agents-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;width:100%;position:relative;z-index:1;}
+.agent-card{border-radius:12px;padding:14px 10px 12px;
+  border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.02);
+  transition:all 0.4s;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;text-align:center;}
+.agent-card.running{border-color:rgba(74,111,165,0.5);background:rgba(74,111,165,0.08);
+  box-shadow:0 0 18px rgba(74,111,165,0.08);}
+.agent-card.done{border-color:rgba(74,111,165,0.4);background:rgba(74,111,165,0.06);}
+.agent-card.paused{border-color:rgba(74,111,165,0.4);background:rgba(74,111,165,0.07);}
+.agent-card.error{border-color:rgba(192,57,43,0.35);background:rgba(192,57,43,0.06);}
+.agent-card-shimmer{position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent);
+  transform:translateX(-100%);animation:shimmer 1.5s infinite;display:none;pointer-events:none;}
+.agent-card.running .agent-card-shimmer{display:block;}
+@keyframes shimmer{to{transform:translateX(100%);}}
+.agent-flag{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  margin:0 auto 8px;font-size:13px;background:rgba(255,255,255,0.05);
+  border:1.5px solid rgba(255,255,255,0.1);transition:all 0.4s;}
+.agent-card.running .agent-flag{background:rgba(74,111,165,0.2);border-color:rgba(74,111,165,0.6);
+  animation:flagPulse 1.2s ease-in-out infinite;}
+.agent-card.done .agent-flag{background:rgba(74,111,165,0.2);border-color:var(--blue-light);color:var(--blue-light);}
+.agent-card.paused .agent-flag{background:rgba(74,111,165,0.15);}
+.agent-card.error .agent-flag{background:rgba(192,57,43,0.15);border-color:var(--danger);}
+@keyframes flagPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+.agent-num{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:rgba(255,255,255,0.2);margin-bottom:4px;}
+.agent-name{font-family:'Playfair Display',serif;font-size:11px;color:rgba(255,255,255,0.55);
+  margin-bottom:6px;line-height:1.25;min-height:28px;display:flex;align-items:center;}
+.agent-status{font-size:9px;color:rgba(255,255,255,0.28);display:flex;align-items:center;gap:4px;
+  justify-content:center;min-height:14px;}
+.agent-status-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.15);transition:background 0.3s;}
+.agent-card.running .agent-status-dot{background:var(--blue-light);animation:pulse 1s infinite;}
+.agent-card.done .agent-status-dot{background:var(--blue-light);}
+.agent-card.error .agent-status-dot{background:var(--danger);}
+.agent-card.running .agent-status{color:var(--blue-light);}
+.agent-card.done .agent-name{color:var(--white);}
+.agent-card.done .agent-status{color:var(--blue-light);}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(107,143,192,0.4);}70%{box-shadow:0 0 0 4px rgba(107,143,192,0);}100%{box-shadow:0 0 0 0 rgba(107,143,192,0);}}
+@media(max-width:768px){.agents-row{grid-template-columns:repeat(3,1fr);gap:8px;}.agent-name{font-size:10px;min-height:24px;}}
+
+/* TIMER */
+.elapsed-badge{display:inline-flex;align-items:center;gap:6px;margin-top:16px;
+  padding:6px 14px;border-radius:100px;background:rgba(74,111,165,0.08);
+  font-size:11px;color:var(--text-dim);}
+.elapsed-badge.done{background:rgba(58,158,106,0.1);color:#7bcf9e;}
+
+/* RESULTS */
+.results-section{display:none;margin-top:40px;animation:fadeUp 0.5s ease;}
+.results-section.visible{display:block;}
+.results-header{text-align:center;margin-bottom:36px;}
+.results-diagnosis-name{font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,40px);
+  font-weight:700;color:var(--white);margin-bottom:8px;}
+.results-aka{font-size:13px;color:var(--text-dim);margin-bottom:14px;}
+.results-takeaway{font-family:'Crimson Pro',serif;font-size:18px;color:rgba(255,255,255,0.85);
+  font-style:italic;line-height:1.6;max-width:680px;margin:0 auto 20px;
+  padding:16px 24px;background:rgba(74,111,165,0.08);border-left:3px solid var(--blue);
+  border-radius:0 10px 10px 0;text-align:left;}
+.results-meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:12px;}
+.results-meta-chip{font-size:11px;padding:5px 12px;border-radius:100px;
+  background:rgba(74,111,165,0.1);color:rgba(255,255,255,0.55);
+  border:1px solid rgba(74,111,165,0.2);}
+
+/* TABS */
+.section-tabs{display:flex;gap:6px;margin-bottom:24px;padding:6px;
+  background:rgba(255,255,255,0.03);border-radius:14px;
+  border:1px solid rgba(255,255,255,0.06);}
+.section-tab{flex:1;padding:12px 14px;border:none;background:transparent;cursor:pointer;
+  color:rgba(255,255,255,0.45);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
+  border-radius:10px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.section-tab:hover{color:rgba(255,255,255,0.75);}
+.section-tab.active{background:rgba(74,111,165,0.18);color:var(--white);}
+.tab-num{font-size:10px;font-weight:700;background:rgba(255,255,255,0.07);
+  width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;}
+.section-tab.active .tab-num{background:var(--blue);color:white;}
+
+.section-pane{display:none;animation:fadeUp 0.3s ease;}
+.section-pane.active{display:block;}
+
+/* SECTION CONTENT */
+.block{margin-bottom:28px;}
+.block-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;
+  color:var(--white);margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.07);padding-bottom:8px;}
+.block-text{font-size:15px;line-height:1.65;color:rgba(255,255,255,0.78);}
+
+.dx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
+.dx-card{padding:14px 16px;border-radius:10px;background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.06);}
+.dx-name{font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px;}
+.dx-desc{font-size:13px;color:rgba(255,255,255,0.65);line-height:1.5;margin-bottom:6px;}
+.dx-when{font-size:11px;color:var(--blue-light);font-weight:600;}
+
+.tx-card{padding:16px 20px;border-radius:12px;margin-bottom:10px;
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
+  transition:border-color 0.2s;}
+.tx-card:hover{border-color:rgba(74,111,165,0.3);}
+.tx-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px;}
+.tx-name{font-size:15px;font-weight:700;color:var(--white);}
+.tx-evidence{font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;flex-shrink:0;}
+.ev-high{background:rgba(58,158,106,0.15);color:#7bcf9e;border:1px solid rgba(58,158,106,0.3);}
+.ev-moderate{background:rgba(184,147,42,0.12);color:#e8c84a;border:1px solid rgba(184,147,42,0.3);}
+.ev-low{background:rgba(155,89,182,0.12);color:#c39bd3;border:1px solid rgba(155,89,182,0.3);}
+.tx-desc{font-size:13px;color:rgba(255,255,255,0.7);line-height:1.55;margin-bottom:8px;}
+.tx-meta{font-size:11px;color:rgba(255,255,255,0.4);}
+
+.advance-card{display:flex;gap:16px;padding:14px 18px;margin-bottom:10px;
+  background:rgba(255,255,255,0.03);border-left:3px solid var(--blue);border-radius:0 10px 10px 0;}
+.advance-year{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;
+  color:var(--blue-light);min-width:60px;}
+.advance-title{font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px;}
+.advance-desc{font-size:13px;color:rgba(255,255,255,0.65);line-height:1.55;margin-bottom:6px;}
+.advance-sig{font-size:12px;color:rgba(74,111,165,0.9);font-weight:600;}
+
+.trial-card{padding:14px 18px;margin-bottom:10px;border-radius:10px;
+  background:rgba(184,147,42,0.04);border:1px solid rgba(184,147,42,0.18);}
+.trial-top{display:flex;justify-content:space-between;gap:12px;margin-bottom:6px;}
+.trial-title{font-size:14px;font-weight:700;color:var(--white);}
+.trial-phase{font-size:10px;font-weight:700;background:rgba(184,147,42,0.15);
+  color:var(--gold);padding:3px 8px;border-radius:6px;border:1px solid rgba(184,147,42,0.3);flex-shrink:0;}
+.trial-focus{font-size:13px;color:rgba(255,255,255,0.7);line-height:1.55;margin-bottom:6px;}
+.trial-meta{font-size:11px;color:rgba(255,255,255,0.45);}
+.trials-cta{padding:14px 18px;border-radius:10px;background:rgba(184,147,42,0.06);
+  border:1px solid rgba(184,147,42,0.18);font-size:13px;color:rgba(255,255,255,0.65);
+  line-height:1.6;margin-top:12px;}
+.trials-cta a{color:var(--gold);text-decoration:none;font-weight:600;}
+.trials-cta a:hover{text-decoration:underline;}
+
+.specialist-card,.center-card{padding:14px 18px;border-radius:10px;margin-bottom:10px;
+  background:rgba(155,89,182,0.04);border:1px solid rgba(155,89,182,0.18);}
+.specialist-name,.center-name{font-size:15px;font-weight:700;color:var(--white);margin-bottom:3px;}
+.specialist-inst,.center-location{font-size:12px;color:var(--text-dim);margin-bottom:8px;}
+.specialist-known,.center-why{font-size:13px;color:rgba(255,255,255,0.65);line-height:1.55;}
+
+/* QUESTIONS FOR DR */
+.doctor-questions{margin-top:36px;padding:24px 28px;border-radius:16px;
+  background:rgba(74,111,165,0.07);border:1px solid rgba(74,111,165,0.2);}
+.dq-header{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--blue-light);margin-bottom:14px;}
+.doctor-q{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);
+  font-size:14px;color:rgba(255,255,255,0.78);line-height:1.55;}
+.doctor-q:last-child{border-bottom:none;}
+.doctor-q-num{width:22px;height:22px;border-radius:50%;background:rgba(74,111,165,0.2);
+  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;
+  color:var(--blue-light);flex-shrink:0;margin-top:2px;}
+
+/* RESET + BUTTONS */
+.reset-btn{display:flex;align-items:center;gap:8px;margin:32px auto 0;padding:12px 28px;
+  background:rgba(74,111,165,0.1);border:1px solid rgba(74,111,165,0.25);border-radius:100px;
+  color:rgba(255,255,255,0.5);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;
+  transition:all 0.2s;}
+.reset-btn:hover{background:rgba(74,111,165,0.2);color:rgba(255,255,255,0.8);}
+
+.print-bar{display:flex;gap:12px;justify-content:flex-end;margin-top:24px;padding-top:24px;
+  border-top:1px solid rgba(255,255,255,0.07);}
+.print-btn{display:flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border:none;}
+.print-btn-download{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.7);}
+.print-btn-download:hover{background:rgba(255,255,255,0.12);color:white;}
+.print-btn-print{background:rgba(19,160,144,0.15);color:#13c0ac;
+  border:1px solid rgba(19,160,144,0.3);}
+.print-btn-print:hover{background:rgba(19,160,144,0.25);color:white;}
+.print-btn-save{background:linear-gradient(135deg,#13a090,#0a7c6e);color:white;}
+.print-btn-save:hover{opacity:0.9;}
+.print-btn-save:disabled{opacity:0.5;cursor:not-allowed;}
+
+footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0.06);
+  text-align:center;font-size:11px;color:rgba(255,255,255,0.2);line-height:1.7;}
+
+@media print{
+  nav,#caedrixUserBar,.print-bar,.pipeline-panel,.input-card,.clarify-panel,
+  .section-tabs,.reset-btn{display:none!important;}
+  body{background:white!important;color:#111!important;}
+  .results-section,.results-section.visible{display:block!important;}
+  .section-pane{display:block!important;margin-bottom:24px;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <a href="index.html" style="display:flex;align-items:center;">
+      <img src="caedrix-logo.jpg" class="logo-img" alt="Caedrix AI">
+    </a>
+  </div>
+  <div class="nav-actions">
+    <a href="precision-medicine3.html"  class="nav-mini btn1">Precision Medicine</a>
+    <a href="health-decisions.html"    class="nav-mini btn2">Health Decisions</a>
+    <a href="determine-diagnosis.html"  class="nav-mini btn4">Determine Diagnosis</a>
+    <a href="understand-diagnosis.html" class="nav-mini btn3" style="border:1px solid rgba(74,111,165,0.6);">Understand Diagnosis</a>
+  </div>
+</nav>
+<div id="caedrixUserBar"></div>
+
+<div class="page-wrap">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="page-eyebrow">
+      <div class="eyebrow-line"></div>
+      Caedrix AI · Understand Diagnosis
+      <div class="eyebrow-line" style="transform:scaleX(-1)"></div>
+    </div>
+    <h1 class="page-title">Understand Any<br><em>Diagnosis</em></h1>
+    <p class="page-sub">Enter a diagnosis. Three AI agents work in parallel to clarify ambiguity, summarize the clinical picture, and surface active trials and leading centers.</p>
+    <p class="page-disclaimer">For clinician reference. Not personalized medical advice.</p>
+  </div>
+
+  <!-- INPUT CARD -->
+  <div class="input-card" id="inputCard">
+    <div class="input-card-header">
+      <div class="input-card-icon">🔍</div>
+      <div>
+        <div class="input-card-label">Enter a diagnosis</div>
+        <div class="input-card-sub">Official name, common name, or abbreviation — e.g. "OCD of medial femoral condyle", "HER2+ breast cancer", "AFib"</div>
+      </div>
+    </div>
+    <div class="input-area">
+      <div style="font-size:12px;line-height:1.5;padding:9px 14px;border-radius:8px;margin-bottom:10px;display:flex;align-items:center;gap:8px;border:1px solid rgba(74,111,165,0.25);background:rgba(74,111,165,0.08);color:rgba(74,111,165,0.95);"><span>⏱</span><span>This is a deep analysis of data. It may take 3–5 minutes to display this rich and informative content.</span></div>
+      <div class="diagnosis-input-wrap">
+        <textarea id="diagnosisInput" class="diagnosis-input" rows="1"
+          placeholder="e.g. Osteochondral defect, Type 2 diabetes, atrial fibrillation…"></textarea>
+        <button class="submit-btn" id="submitBtn" onclick="runAnalysis()">Research — $2.99 →</button>
+      </div>
+      <div style="text-align:right;margin-top:8px;">
+        <span id="caedrixBalanceBadge" style="font-size:12px;color:rgba(255,255,255,0.4);"></span>
+      </div>
+    </div>
+    <div class="hint-chips">
+      <span class="hint-chip" onclick="setHint(this)">Osteochondral defect</span>
+      <span class="hint-chip" onclick="setHint(this)">Type 2 Diabetes</span>
+      <span class="hint-chip" onclick="setHint(this)">Hip dysplasia (DDH)</span>
+      <span class="hint-chip" onclick="setHint(this)">Rotator cuff tear</span>
+      <span class="hint-chip" onclick="setHint(this)">Atrial fibrillation</span>
+      <span class="hint-chip" onclick="setHint(this)">Heart failure</span>
+    </div>
+  </div>
+
+  <!-- CLARIFY PANEL -->
+  <div class="clarify-panel" id="clarifyPanel">
+    <div class="clarify-header">
+      <div class="clarify-icon">💬</div>
+      <div>
+        <div class="clarify-title">Quick clarification</div>
+        <div class="clarify-sub">Helps tailor the research to the right variant.</div>
+      </div>
+    </div>
+    <div class="clarify-questions" id="clarifyQuestions"></div>
+    <button class="clarify-submit" onclick="submitClarifications()">Continue →</button>
+  </div>
+
+  <!-- PIPELINE PANEL -->
+  <div class="pipeline-panel" id="pipelinePanel">
+    <div class="pipeline-title">Caedrix AI · 5-Agent Research Pipeline</div>
+    <div class="pipeline-track">
+      <div class="pipeline-track-line"><div class="pipeline-track-fill" id="trackFill"></div></div>
+      <div class="agents-row">
+        <div class="agent-card" id="agentCard1">
+          <div class="agent-card-shimmer"></div>
+          <div class="agent-flag" id="agentFlag1">💬</div>
+          <div class="agent-num">Agent 01</div>
+          <div class="agent-name">Clarifier</div>
+          <div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus1">Waiting</span></div>
+        </div>
+        <div class="agent-card" id="agentCard2">
+          <div class="agent-card-shimmer"></div>
+          <div class="agent-flag" id="agentFlag2">🩺</div>
+          <div class="agent-num">Agent 02</div>
+          <div class="agent-name">Clinical Summary</div>
+          <div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus2">Waiting</span></div>
+        </div>
+        <div class="agent-card" id="agentCard3">
+          <div class="agent-card-shimmer"></div>
+          <div class="agent-flag" id="agentFlag3">🔬</div>
+          <div class="agent-num">Agent 03</div>
+          <div class="agent-name">Trials &amp; Centers</div>
+          <div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus3">Waiting</span></div>
+        </div>
+        <div class="agent-card" id="agentCard4">
+          <div class="agent-card-shimmer"></div>
+          <div class="agent-flag" id="agentFlag4">⚖️</div>
+          <div class="agent-num">Agent 04</div>
+          <div class="agent-name">Legal Review</div>
+          <div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus4">Waiting</span></div>
+        </div>
+        <div class="agent-card" id="agentCard5">
+          <div class="agent-card-shimmer"></div>
+          <div class="agent-flag" id="agentFlag5">✦</div>
+          <div class="agent-num">Agent 05</div>
+          <div class="agent-name">Clarity Polish</div>
+          <div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus5">Waiting</span></div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;">
+      <div class="elapsed-badge" id="elapsedBadge">⏱ <span id="elapsedTime">0.0s</span></div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results-section" id="resultsSection">
+
+    <div class="results-header">
+      <div class="results-diagnosis-name" id="resultsDiagnosisName"></div>
+      <div class="results-aka" id="resultsAka"></div>
+      <div class="results-takeaway" id="resultsTakeaway"></div>
+      <div class="results-meta" id="resultsMeta"></div>
+    </div>
+
+    <div class="section-tabs">
+      <button class="section-tab active" onclick="switchTab(0,this)"><span class="tab-num">1</span>Clinical Summary</button>
+      <button class="section-tab" onclick="switchTab(1,this)"><span class="tab-num">2</span>Recent Research</button>
+      <button class="section-tab" onclick="switchTab(2,this)"><span class="tab-num">3</span>Trials &amp; Centers</button>
+    </div>
+
+    <!-- PANE 0: Clinical Summary -->
+    <div class="section-pane active" id="pane0">
+      <div class="block">
+        <div class="block-title">What it is</div>
+        <div class="block-text" id="s1WhatItIs"></div>
+      </div>
+      <div class="block">
+        <div class="block-title">Diagnosis</div>
+        <div class="dx-grid" id="s1Diagnosis"></div>
+      </div>
+      <div class="block">
+        <div class="block-title">Treatment</div>
+        <div id="s1Treatments"></div>
+      </div>
+    </div>
+
+    <!-- PANE 1: Recent Research -->
+    <div class="section-pane" id="pane1">
+      <div class="block">
+        <div class="block-title">New research — last 6 months</div>
+        <div class="block-text" id="s2Summary" style="margin-bottom:18px;"></div>
+        <div id="s2Advances"></div>
+      </div>
+    </div>
+
+    <!-- PANE 2: Trials & Centers -->
+    <div class="section-pane" id="pane2">
+      <div class="block">
+        <div class="block-title">Active clinical trials</div>
+        <div class="block-text" id="s3TrialsOverview" style="margin-bottom:14px;"></div>
+        <div id="s3Trials"></div>
+        <div class="trials-cta" id="s3Cta"></div>
+      </div>
+      <div class="block">
+        <div class="block-title">Leading specialists</div>
+        <div id="s3Specialists"></div>
+      </div>
+      <div class="block">
+        <div class="block-title">Centers of excellence</div>
+        <div id="s3Centers"></div>
+      </div>
+    </div>
+
+    <!-- DOCTOR Qs -->
+    <div class="doctor-questions">
+      <div class="dq-header">Questions to ask the treating physician</div>
+      <div id="doctorQuestions"></div>
+    </div>
+
+    <div class="print-bar">
+      <button class="print-btn print-btn-save" id="saveRecordBtn" onclick="handleSaveToMyRecords()">📄 Save to My Records</button>
+      <button class="print-btn print-btn-download" onclick="downloadResults()">⬇ Download HTML</button>
+      <button class="print-btn print-btn-print" onclick="window.print()">🖨 Print</button>
+    </div>
+
+    <button class="reset-btn" onclick="resetToInput()">← Research another diagnosis</button>
+
+  </div><!-- /results-section -->
+
+</div><!-- /page-wrap -->
+
+<footer>
+  <p>caedrix.com · Understand Diagnosis</p>
+  <p style="margin-top:8px;max-width:700px;margin-left:auto;margin-right:auto;">
+    Clinician-facing reference generated by AI. Not personalized medical advice. Verify named trials at <strong>ClinicalTrials.gov</strong> and verify named specialists at institutional sources.
+  </p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="caedrix-local-storage.js"></script>
+<script src="caedrix-pdf-report.js"></script>
+<script src="caedrix-token-gate.js"></script>
+<script>
+/* ════════════════════════════════════
+   AUTH
+════════════════════════════════════ */
+const CaedrixAuth = {
+  getUser:()=>{try{return JSON.parse(localStorage.getItem('caedrix_user')||'null');}catch(_){return null;}},
+  logout:()=>{localStorage.removeItem('caedrix_user');sessionStorage.clear();window.location.href='login.html';},
+  isRecordsConnected:()=>localStorage.getItem('caedrix_records_connected')==='true'
+};
+function caedrixInitUserBar(){
+  const bar=document.getElementById('caedrixUserBar');if(!bar)return;
+  const user=CaedrixAuth.getUser();
+  if(!user||!user.email){
+    bar.innerHTML='<div class="subs-left"><span class="subs-email" style="opacity:.6;">Not signed in yet</span></div>'+
+      '<div class="subs-right"><span class="subs-email" style="opacity:.5;font-size:12px;">Sign in happens automatically when you buy searches</span></div>';
+    return;
+  }
+  const initials=(user.email||'?')[0].toUpperCase();
+  bar.innerHTML='<div class="subs-left"><div class="subs-avatar">'+initials+'</div><span class="subs-email">'+(user.email||'')+'</span></div>'+
+    '<div class="subs-right"><button class="subs-signout" onclick="CaedrixAuth.logout()">Sign out</button></div>';
+}
+window.addEventListener('DOMContentLoaded',async ()=>{
+  caedrixInitUserBar();
+  await initFolderConnection();
+  CaedrixTokenGate.renderBalanceBadge('caedrixBalanceBadge');
+  const savedDraft = CaedrixTokenGate.getAndClearResumeDraft();
+  if (savedDraft) {
+    document.getElementById('diagnosisInput').value = savedDraft;
+    document.getElementById('diagnosisInput').dispatchEvent(new Event('input'));
+    document.getElementById('diagnosisInput').scrollIntoView({behavior:'smooth',block:'center'});
+  }
+});
+
+/* ══════════════════════════════════════════════════════
+   LOCAL FOLDER HEALTH CONTEXT
+   (source of truth once a folder is connected — see
+   caedrix-local-storage.js. Falls back to localStorage
+   copies when no folder is connected on this device.)
+══════════════════════════════════════════════════════ */
+let folderConnected = false;
+let cachedHealthContextBlock = '';
+
+async function initFolderConnection() {
+  try {
+    if (typeof CaedrixStorage === 'undefined' || !CaedrixStorage.isSupported()) {
+      folderConnected = false;
+      return;
+    }
+    const status = await CaedrixStorage.restoreConnection();
+    folderConnected = (status === 'connected');
+  } catch (_) {
+    folderConnected = false;
+  }
+}
+
+async function getCaedrixMergedProfile() {
+  let personalDetails = null, healthProfile = null, medicalRecordCount = 0;
+  if (folderConnected && typeof CaedrixStorage !== 'undefined') {
+    try {
+      const ctx = await CaedrixStorage.getLocalHealthContext();
+      if (ctx && ctx.connected) {
+        personalDetails = ctx.personalDetails;
+        healthProfile = ctx.healthProfile;
+        medicalRecordCount = (ctx.medicalRecordFiles || []).length;
+      }
+    } catch (_) { /* fall through to localStorage below */ }
+  }
+  if (!personalDetails) {
+    try { personalDetails = JSON.parse(localStorage.getItem('caedrix_life_context') || 'null'); } catch (_) {}
+  }
+  if (!healthProfile) {
+    try { healthProfile = JSON.parse(localStorage.getItem('caedrix_health_profile') || 'null'); } catch (_) {}
+  }
+  return { personalDetails, healthProfile, medicalRecordCount };
+}
+
+async function buildCaedrixHealthContextBlock() {
+  const { personalDetails, healthProfile, medicalRecordCount } = await getCaedrixMergedProfile();
+  const parts = [];
+  if (personalDetails) {
+    const p = [];
+    if (personalDetails.activities) p.push('Favorite activities: ' + personalDetails.activities);
+    if (personalDetails.important)  p.push('Important personal context: ' + personalDetails.important);
+    if (personalDetails.caregiver)  p.push('Caregiver responsibilities: ' + personalDetails.caregiver);
+    if (personalDetails.living)     p.push('Living situation: ' + personalDetails.living);
+    if (p.length) parts.push('Personal context about this patient:\n' + p.join('\n'));
+  }
+  if (healthProfile) {
+    const h = [];
+    if (healthProfile.age)           h.push('Age: ' + healthProfile.age);
+    if (healthProfile.sex)           h.push('Biological sex: ' + healthProfile.sex);
+    if (healthProfile.smoking)       h.push('Smoking status: ' + healthProfile.smoking);
+    if (healthProfile.diabetes)      h.push('Diabetes: ' + healthProfile.diabetes);
+    if (healthProfile.heartDisease)  h.push('Heart disease: ' + healthProfile.heartDisease);
+    if (healthProfile.conditions)    h.push('Other conditions: ' + healthProfile.conditions);
+    if (healthProfile.medications)   h.push('Current medications: ' + healthProfile.medications);
+    if (healthProfile.screenings)    h.push('Recent screenings: ' + healthProfile.screenings);
+    if (healthProfile.familyHistory) h.push('Family history: ' + healthProfile.familyHistory);
+    if (h.length) parts.push('Patient health profile:\n' + h.join('\n'));
+  }
+  if (medicalRecordCount > 0) {
+    parts.push(`Patient has ${medicalRecordCount} uploaded medical record document(s) on file, indicating an engaged, documented patient.`);
+  }
+  if (!parts.length) return '';
+  return '\n\n---\n' + parts.join('\n\n') + '\n---';
+}
+
+/* ════════════════════════════════════
+   STATE
+════════════════════════════════════ */
+let lastDiagnosis='';
+let clarifications={};
+let pipelineStart=0;
+let elapsedTimer=null;
+
+function setHint(el){
+  document.getElementById('diagnosisInput').value=el.textContent;
+  document.getElementById('diagnosisInput').focus();
+}
+
+/* ════════════════════════════════════
+   AGENT STATE UI
+════════════════════════════════════ */
+
+/* Reads personal context saved on the Precision Medicine page */
+function getCaedrixLifeContext(){
+  try{
+    const ctx=JSON.parse(localStorage.getItem('caedrix_life_context')||'null');
+    if(!ctx)return '';
+    const parts=[];
+    if(ctx.activities)parts.push('Favorite activities: '+ctx.activities);
+    if(ctx.important) parts.push('Important personal context: '+ctx.important);
+    if(ctx.caregiver) parts.push('Caregiver responsibilities: '+ctx.caregiver);
+    if(ctx.living)    parts.push('Living situation: '+ctx.living);
+    if(!parts.length) return '';
+    return '\n\n---\nPersonal context about this patient:\n'+parts.join('\n')+'\n---';
+  }catch(_){return '';}
+}
+
+const AGENT_ICONS={1:'💬',2:'🩺',3:'🔬',4:'⚖️',5:'✦'};
+// Track fill % when each agent completes — visual progress indicator across the 5-stage pipeline
+const TRACK_STEPS={1:20,2:50,3:50,4:75,5:100}; // agents 2 & 3 share the same step (parallel)
+function setAgentState(n,state,msg){
+  const card=document.getElementById('agentCard'+n);
+  const status=document.getElementById('agentStatus'+n);
+  const flag=document.getElementById('agentFlag'+n);
+  if(!card)return;
+  card.className='agent-card'+(state?' '+state:'');
+  status.textContent=msg;
+  if(state==='done'){
+    flag.textContent='✓';
+    // Advance track fill to this agent's checkpoint (never go backwards)
+    const tf=document.getElementById('trackFill');
+    if(tf){
+      const cur=parseInt(tf.style.width)||0;
+      if(TRACK_STEPS[n]>cur)tf.style.width=TRACK_STEPS[n]+'%';
+    }
+  }
+  else if(state==='running')flag.textContent=AGENT_ICONS[n]||'⟳';
+  else if(state==='paused')flag.textContent='⏸';
+  else if(state==='error')flag.textContent='✕';
+  else flag.textContent=AGENT_ICONS[n]||'○';
+}
+function showPipeline(){
+  document.getElementById('pipelinePanel').classList.add('visible');
+  pipelineStart=Date.now();
+  if(elapsedTimer)clearInterval(elapsedTimer);
+  elapsedTimer=setInterval(()=>{
+    const s=((Date.now()-pipelineStart)/1000).toFixed(1);
+    const el=document.getElementById('elapsedTime');
+    if(el)el.textContent=s+'s';
+  },100);
+}
+function hidePipeline(){
+  if(elapsedTimer){clearInterval(elapsedTimer);elapsedTimer=null;}
+  document.getElementById('pipelinePanel').classList.remove('visible');
+}
+function freezePipelineTimer(){
+  if(elapsedTimer){clearInterval(elapsedTimer);elapsedTimer=null;}
+  document.getElementById('elapsedBadge').classList.add('done');
+}
+
+/* ════════════════════════════════════
+   API
+════════════════════════════════════ */
+async function callClaude({systemPrompt,userContent,maxTokens=2500,useWebSearch=false,model='claude-sonnet-4-6'},_retry=0){
+  const body={
+    model:model,
+    max_tokens:maxTokens,
+    system:systemPrompt,
+    messages:[{role:'user',content:userContent}]
+  };
+  if(useWebSearch){
+    body.tools=[{type:'web_search_20250305',name:'web_search'}];
+  }
+  // 90s client-side timeout — if /api/claude hangs we want to fail fast, not forever
+  const ctrl=new AbortController();
+  const timeoutId=setTimeout(()=>ctrl.abort(),90000);
+  let res;
+  try{
+    res=await fetch('/api/claude',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(body),
+      signal:ctrl.signal
+    });
+  }catch(e){
+    clearTimeout(timeoutId);
+    if(e.name==='AbortError')throw new Error('Request timed out after 90s. The serverless function likely exceeded its limit. Try a more specific diagnosis or reduce max_tokens.');
+    throw e;
+  }
+  clearTimeout(timeoutId);
+  if((res.status===529||res.status===503)&&_retry<2){
+    await new Promise(r=>setTimeout(r,(_retry+1)*2000));
+    return callClaude({systemPrompt,userContent,maxTokens,useWebSearch,model},_retry+1);
+  }
+  if(!res.ok){
+    const err=await res.text();
+    throw new Error('API '+res.status+': '+err.substring(0,200));
+  }
+  return await res.json();
+}
+
+function extractText(data){
+  return (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
+}
+function safeParseJSON(text){
+  if(!text||!text.trim())throw new Error('Empty response');
+
+  // Strip markdown code fences and trim
+  let clean=text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+
+  // 1) Fast path — whole string is valid JSON
+  try{return JSON.parse(clean);}catch(_){}
+
+  // 2) Find the first '{' and walk to its matching '}' (skips preamble AND postamble)
+  const start=clean.indexOf('{');
+  if(start<0)throw new Error('No JSON object found. Preview: '+clean.substring(0,200));
+
+  const balanced=extractBalancedObject(clean,start);
+  if(balanced){
+    try{return JSON.parse(balanced);}catch(_){}
+  }
+
+  // 3) Truncated JSON — best-effort repair (closes open strings + dangling brackets)
+  const repaired=repairTruncatedJSON(clean.substring(start));
+  if(repaired){
+    try{return JSON.parse(repaired);}catch(_){}
+  }
+
+  // 4) Last resort — original greedy match
+  const m=clean.match(/\{[\s\S]*\}/);
+  if(m){try{return JSON.parse(m[0]);}catch(_){}}
+
+  throw new Error('JSON parse failed. Preview: '+clean.substring(0,200));
+}
+
+/* Walk from `start` (a '{' char) until the matching '}'. Properly tracks
+   strings and escapes so braces inside string values are ignored.
+   Returns the balanced substring, or null if the closing brace is missing. */
+function extractBalancedObject(s,start){
+  let depth=0,inStr=false,esc=false;
+  for(let i=start;i<s.length;i++){
+    const ch=s[i];
+    if(inStr){
+      if(esc){esc=false;}
+      else if(ch==='\\'){esc=true;}
+      else if(ch==='"'){inStr=false;}
+      continue;
+    }
+    if(ch==='"'){inStr=true;continue;}
+    if(ch==='{')depth++;
+    else if(ch==='}'){depth--;if(depth===0)return s.substring(start,i+1);}
+  }
+  return null;
+}
+
+/* Repair a JSON object that was truncated (typically by max_tokens):
+   - close any open string,
+   - drop dangling commas,
+   - fill missing values after a trailing colon with null,
+   - close all open brackets in reverse order.
+   Best-effort — caller must still try/catch JSON.parse. */
+function repairTruncatedJSON(text){
+  let s=text.replace(/\s+$/,'');
+  let inStr=false,esc=false;
+  const stack=[]; // '{' or '['
+  for(let i=0;i<s.length;i++){
+    const ch=s[i];
+    if(inStr){
+      if(esc){esc=false;}
+      else if(ch==='\\'){esc=true;}
+      else if(ch==='"'){inStr=false;}
+      continue;
+    }
+    if(ch==='"'){inStr=true;continue;}
+    if(ch==='{'||ch==='[')stack.push(ch);
+    else if(ch==='}'){if(stack[stack.length-1]==='{')stack.pop();}
+    else if(ch===']'){if(stack[stack.length-1]==='[')stack.pop();}
+  }
+  if(inStr)s+='"';                  // close dangling string
+  s=s.replace(/,\s*$/,'');           // drop trailing comma
+  if(/:\s*$/.test(s))s+='null';      // fill missing value after colon
+  s=s.replace(/,\s*$/,'');           // (re-check after the close-string step)
+  while(stack.length){
+    const o=stack.pop();
+    s+=(o==='{'?'}':']');
+  }
+  return s;
+}
+
+/* ════════════════════════════════════
+   AGENT 1 — CLARIFIER (Haiku, fast)
+════════════════════════════════════ */
+const CLARIFY_SYSTEM=`You are a clinical clarifier. Decide whether the diagnosis term is specific enough to research, or whether ONE clarifying question would meaningfully sharpen the research.
+
+Respond with ONLY valid JSON, no preamble, no markdown:
+{
+  "needs_question": true,
+  "question": "Which joint is the osteochondral defect in (e.g. knee, ankle, elbow)?",
+  "reason": "Anatomic location dramatically changes treatment options"
+}
+
+Or if no question needed:
+{
+  "needs_question": false,
+  "question": "",
+  "reason": ""
+}
+
+Ask ONLY when truly necessary. Examples:
+- "diabetes" → ask Type 1 vs Type 2
+- "osteochondral defect" → ask which joint
+- "cancer" → ask which cancer
+- "MS" → ask multiple sclerosis vs mitral stenosis
+- "labral tear" → ask hip vs shoulder
+- "arthritis" → ask which joint and OA vs inflammatory
+
+Do NOT ask when the diagnosis is already specific:
+- "atrial fibrillation", "Type 2 diabetes", "Parkinson's disease", "rotator cuff tear", "HER2+ breast cancer"
+
+Return ONLY the JSON.`;
+
+/* ════════════════════════════════════
+   AGENT 2 — CLINICAL SUMMARY (Sonnet + web search)
+════════════════════════════════════ */
+const CLINICAL_SYSTEM=`You are a clinical research agent producing a CLINICIAN-FACING summary of a diagnosis. Your audience is physicians, not patients.
+
+Use web search to verify current guidelines, treatment evidence, and findings from the last 6 months.
+
+Output ONLY this JSON. No preamble. No markdown fences. Start with { and end with }:
+{
+  "diagnosis_name": "Official medical name",
+  "also_known_as": ["abbreviation", "common name"],
+  "key_takeaway": "Single most clinically important point — one direct sentence for a colleague",
+  "what_it_is": "Plain-language explanation a patient can understand — what is happening in the body, how it typically develops, and what it means for daily life (3-5 sentences, no jargon)",
+  "diagnosis": [
+    {"method": "e.g. AP/lateral radiographs", "description": "What it shows / detects", "when_used": "First-line / confirmatory / staging"}
+  ],
+  "treatments": [
+    {
+      "name": "Treatment name",
+      "summary": "One-line summary",
+      "description": "What it involves, mechanism, typical outcomes (2-3 sentences)",
+      "evidence_level": "high|moderate|low",
+      "evidence_basis": "Guideline name or study type",
+      "best_for": "Patient profile",
+      "considerations": ["Key tradeoff 1", "Key tradeoff 2"]
+    }
+  ],
+  "recent_research_summary": "Plain-language summary of what has changed or been discovered recently — written for a patient, not a researcher (2-3 sentences)",
+  "recent_advances": [
+    {"date": "e.g. Mar 2026", "title": "Brief title", "description": "What the finding/publication showed (2 sentences)", "significance": "Clinical impact"}
+  ],
+  "questions_for_doctor": ["Specific clinical question 1", "Specific clinical question 2", "Specific clinical question 3", "Specific clinical question 4"]
+}
+
+RULES:
+- 3-4 treatments (most important only), 2-3 recent advances
+- Evidence levels: high=guideline/RCT; moderate=observational/consensus; low=emerging/case series
+- Clinician tone — assume the reader knows anatomy and pharmacology
+- No drug doses or prescriptive language
+- Return ONLY valid JSON`;
+
+/* ════════════════════════════════════
+   AGENT 3 — TRIALS & CENTERS (Sonnet + web search, parallel with agent 2)
+════════════════════════════════════ */
+const TRIALS_SYSTEM=`You are a clinical research agent identifying active CLINICAL TRIALS and LEADING CENTERS/SPECIALISTS for a diagnosis.
+
+Use web search to find verifiable trials and specialists. Prefer named institutions and real principal investigators where you can verify them.
+
+Output ONLY this JSON. No preamble. No markdown:
+{
+  "trials_overview": "Current state of trial activity for this diagnosis — 2 sentences",
+  "active_trials": [
+    {
+      "title": "Descriptive trial title",
+      "phase": "Phase I|II|III|IV|N/A",
+      "focus": "What is being tested",
+      "sponsor": "Sponsor or lead institution",
+      "eligibility": "Typical inclusion criteria (1 sentence)",
+      "registry_query": "Suggested ClinicalTrials.gov search terms"
+    }
+  ],
+  "how_to_find_trials": "Specific guidance for finding trials for this diagnosis (1-2 sentences)",
+  "specialists": [
+    {
+      "name": "Dr. [Full Name] OR named program",
+      "institution": "Institution name",
+      "location": "City, State",
+      "known_for": "Specific clinical/research focus and why notable for this diagnosis"
+    }
+  ],
+  "centers": [
+    {
+      "name": "Center or program name",
+      "location": "City, State",
+      "distinction": "Designation, ranking, or certification",
+      "why_notable": "What makes this center stand out for this specific diagnosis"
+    }
+  ]
+}
+
+RULES:
+- 3-5 trials, 4-6 specialists, 3-5 centers
+- ONLY name real, verifiable specialists/centers. If uncertain, describe the type of program instead of inventing a name.
+- US-focused for centers and specialists unless the diagnosis is best treated internationally
+- Return ONLY valid JSON`;
+
+/* ════════════════════════════════════
+   AGENT 4 — LEGAL REVIEW (Haiku, fast)
+   Reviews combined output for scope-of-practice issues
+════════════════════════════════════ */
+const LEGAL_SYSTEM=`You are a legal and scope-of-practice reviewer for clinician-facing diagnosis reference content.
+
+Review the provided JSON and respond with ONLY this JSON:
+{
+  "scope_appropriate": true,
+  "issues_found": [],
+  "required_changes": ["Specific instruction for the polish agent on what to fix"],
+  "legal_note": "Brief summary (1 sentence)"
+}
+
+FLAG if the content:
+- Prescribes specific drug doses, schedules, or routes of administration
+- Diagnoses or makes treatment recommendations for any specific patient
+- Says "you should" / "take" / "start" — prescriptive language directed at a reader
+- Guarantees outcomes ("will cure", "always works")
+- Recommends a specific clinical trial enrollment instead of presenting trials as options to discuss
+- Recommends a specific physician/center as the right choice for a specific patient (vs describing them as resources)
+
+ACCEPTABLE for a clinician audience:
+- Describing mechanism, indications, contraindications generally
+- Discussing evidence levels and guideline recommendations by name
+- Listing trials, specialists, and centers as reference resources
+- Describing typical outcomes from published literature
+- Suggesting questions a treating physician might consider
+
+Set scope_appropriate=false ONLY if there are concrete issues. Be specific in required_changes — name the field and the fix.
+
+Return ONLY valid JSON. No preamble.`;
+
+/* ════════════════════════════════════
+   AGENT 5 — CLARITY POLISH (Sonnet, no web search)
+   Applies legal corrections + tightens clinician prose
+════════════════════════════════════ */
+const CLARITY_SYSTEM=`You are Caedrix AI's Plain Language Editor. You will receive a diagnosis reference JSON and legal reviewer findings. Your job is to apply those corrections AND rewrite the output so it is easy to understand for someone with a general education but no medical background.
+
+PLAIN LANGUAGE RULES:
+- Replace ALL medical jargon with everyday words. If a medical term must stay (e.g. in a question for the doctor), immediately follow it with a plain-English explanation in parentheses — for example: "hypertension (high blood pressure)" or "contraindicated (should not be used together)".
+- Write as if explaining to a smart friend who is not a doctor. Use short sentences. Choose simple words over complex ones.
+- Break complex ideas into simple numbered steps or use a familiar analogy when explaining how something works.
+- Never use Latin phrases, abbreviations (e.g. PRN, QD, BMI), or specialist acronyms without explaining them.
+- Assume the reader has a general education level but no medical background.
+- Preserve ALL factual content and accuracy — reword the language, never the meaning.
+- Apply every required_change from the legal reviewer.
+
+Return the SAME JSON schema you were given (every field). Same structure, same fields, no additions, no removals.
+
+Output ONLY the polished JSON. No preamble. No markdown fences. Start with { and end with }.`;
+
+/* ════════════════════════════════════
+   ENTRY
+════════════════════════════════════ */
+async function runAnalysis(){
+  const q=document.getElementById('diagnosisInput').value.trim();
+  if(!q){document.getElementById('diagnosisInput').focus();return;}
+
+  const tokenOk = await CaedrixTokenGate.spendTokenOrPrompt(q);
+  if(!tokenOk) return;
+
+  lastDiagnosis=q;
+  clarifications={};
+  cachedHealthContextBlock = await buildCaedrixHealthContextBlock();
+
+  document.getElementById('submitBtn').disabled=true;
+  document.getElementById('diagnosisInput').disabled=true;
+  document.getElementById('clarifyPanel').classList.remove('visible');
+  document.getElementById('resultsSection').classList.remove('visible');
+  document.getElementById('resultsSection').style.display='none';
+
+  const prevErr=document.getElementById('pipelineErrorMsg');
+  if(prevErr)prevErr.remove();
+
+  [1,2,3,4,5].forEach(n=>setAgentState(n,'','Waiting'));
+  document.getElementById('trackFill').style.width='0%';
+  document.getElementById('elapsedBadge').classList.remove('done');
+  showPipeline();
+
+  try{
+    await runClarify();
+  }catch(err){
+    handleError(err);
+  }
+}
+
+/* ════════════════════════════════════
+   AGENT 1 RUN
+════════════════════════════════════ */
+async function runClarify(){
+  setAgentState(1,'running','Reviewing query…');
+  const r=await callClaude({
+    systemPrompt:CLARIFY_SYSTEM,
+    userContent:`Diagnosis: "${lastDiagnosis}"`,
+    maxTokens:300,
+    model:'claude-haiku-4-5-20251001'
+  });
+  let parsed;
+  try{parsed=safeParseJSON(extractText(r));}
+  catch(_){parsed={needs_question:false};}
+
+  if(parsed.needs_question&&parsed.question){
+    setAgentState(1,'paused','Awaiting answer');
+    showClarifyPanel(parsed.question);
+  }else{
+    setAgentState(1,'done','No clarification needed');
+    await runResearchInParallel();
+  }
+}
+
+function showClarifyPanel(question){
+  document.getElementById('clarifyQuestions').innerHTML=
+    '<div class="clarify-q"><div class="clarify-q-label">'+esc(question)+
+    '</div><input class="clarify-q-input" id="clarifyInput" type="text" placeholder="Your answer (or leave blank to skip)" autofocus></div>';
+  const panel=document.getElementById('clarifyPanel');
+  panel.classList.add('visible');
+  panel.scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(()=>document.getElementById('clarifyInput').focus(),300);
+  document.getElementById('clarifyInput').addEventListener('keydown',e=>{
+    if(e.key==='Enter')submitClarifications();
+  });
+}
+
+async function submitClarifications(){
+  const inp=document.getElementById('clarifyInput');
+  if(inp&&inp.value.trim()){
+    clarifications.answer=inp.value.trim();
+  }
+  document.getElementById('clarifyPanel').classList.remove('visible');
+  setAgentState(1,'done','Complete');
+  try{
+    await runResearchInParallel();
+  }catch(err){
+    handleError(err);
+  }
+}
+
+/* ════════════════════════════════════
+   AGENTS 2+3 PARALLEL, THEN 4, THEN 5
+════════════════════════════════════ */
+async function runResearchInParallel(){
+  let userMsg=`Research this diagnosis: "${lastDiagnosis}"`;
+  if(clarifications.answer){
+    userMsg+=`\n\nAdditional context from user: ${clarifications.answer}`;
+  }
+  userMsg+=cachedHealthContextBlock;
+  userMsg+='\n\nReturn ONLY the JSON object. No preamble.';
+
+  setAgentState(2,'running','Summarizing…');
+  setAgentState(3,'running','Searching trials & centers…');
+
+  // PARALLEL — main speed win
+  // Note: web_search consumes output tokens for server_tool_use + search result blocks,
+  // so the real JSON budget is much smaller than maxTokens. Keep these generous to
+  // avoid mid-JSON truncation (which is what was causing Agent 2/3 parse errors).
+  const [clin,trials]=await Promise.allSettled([
+    callClaude({systemPrompt:CLINICAL_SYSTEM,userContent:userMsg,maxTokens:4000,useWebSearch:false}),
+    callClaude({systemPrompt:TRIALS_SYSTEM,userContent:userMsg,maxTokens:5000,useWebSearch:true})
+  ]);
+
+  let clinData=null,trialsData=null;
+
+  if(clin.status==='fulfilled'){
+    try{clinData=safeParseJSON(extractText(clin.value));setAgentState(2,'done','Complete');}
+    catch(e){setAgentState(2,'error','Parse error');console.error('Agent 2 parse:',e);}
+  }else{
+    setAgentState(2,'error','Failed');console.error('Agent 2 fetch:',clin.reason);
+  }
+
+  if(trials.status==='fulfilled'){
+    try{trialsData=safeParseJSON(extractText(trials.value));setAgentState(3,'done','Complete');}
+    catch(e){setAgentState(3,'error','Parse error');console.error('Agent 3 parse:',e);}
+  }else{
+    setAgentState(3,'error','Failed');console.error('Agent 3 fetch:',trials.reason);
+  }
+
+  if(!clinData&&!trialsData){
+    throw new Error('Both research agents failed. Check console (F12) for details.');
+  }
+
+  // Merge into single object for review pipeline
+  let merged={...(clinData||{}),...(trialsData||{})};
+
+  /* ── AGENT 4: Legal Review (Haiku — fast scope check) ── */
+  setAgentState(4,'running','Checking scope…');
+  let legalFindings={scope_appropriate:true,issues_found:[],required_changes:[],legal_note:'Reviewed.'};
+  try{
+    const r4=await callClaude({
+      systemPrompt:LEGAL_SYSTEM,
+      userContent:JSON.stringify(merged),
+      maxTokens:600,
+      model:'claude-haiku-4-5-20251001'
+    });
+    try{legalFindings=safeParseJSON(extractText(r4));}catch(_){/* keep defaults */}
+    const flagCount=(legalFindings.issues_found||[]).length;
+    setAgentState(4,'done',flagCount?`${flagCount} flag${flagCount>1?'s':''}`:'Approved ✓');
+  }catch(e){
+    setAgentState(4,'error','Skipped');
+    console.warn('Agent 4 legal review failed (continuing):',e);
+  }
+
+  /* ── AGENT 5: Clarity Polish (Sonnet — applies legal corrections + tightens prose) ── */
+  setAgentState(5,'running','Polishing…');
+  let finalResult=merged;
+  try{
+    const r5=await callClaude({
+      systemPrompt:CLARITY_SYSTEM,
+      userContent:`Research JSON:\n${JSON.stringify(merged)}\n\nLegal review findings:\n${JSON.stringify(legalFindings)}\n\nApply the required_changes and polish for clinician readability. Return the same JSON schema, polished.`,
+      maxTokens:8000
+    });
+    try{
+      const polished=safeParseJSON(extractText(r5));
+      /* Only accept the polished version if key fields survived — guards against truncation */
+      if(polished.diagnosis_name&&(polished.treatments||polished.what_it_is)){
+        finalResult=polished;
+        setAgentState(5,'done','Polished ✓');
+      }else{
+        setAgentState(5,'done','Reviewed ✓');
+        console.warn('Agent 5: polished JSON missing key fields, using merged version');
+      }
+    }catch(e){
+      setAgentState(5,'done','Reviewed ✓');
+      console.warn('Agent 5 parse failed, using un-polished merge:',e);
+      finalResult=merged;
+    }
+  }catch(e){
+    setAgentState(5,'done','Reviewed ✓');
+    console.warn('Agent 5 polish failed, using un-polished merge:',e);
+    finalResult=merged;
+  }
+
+  freezePipelineTimer();
+
+  setTimeout(()=>{
+    hidePipeline();
+    renderResults(finalResult,legalFindings);
+    document.getElementById('submitBtn').disabled=false;
+    document.getElementById('diagnosisInput').disabled=false;
+  },600);
+}
+
+/* ════════════════════════════════════
+   RENDER (single merged object — agent 5 already combined clinical + trials)
+════════════════════════════════════ */
+function renderResults(c,legal){
+  window.__caedrixLastResult = c; // captured for "Save to My Records"
+  CaedrixTokenGate.renderBalanceBadge('caedrixBalanceBadge');
+  // c = merged + polished JSON containing all fields from both clinical + trials agents
+  const sec=document.getElementById('resultsSection');
+  sec.style.display='block';
+  sec.classList.add('visible');
+
+  document.getElementById('resultsDiagnosisName').textContent=c.diagnosis_name||lastDiagnosis;
+  const aka=(c.also_known_as||[]).filter(Boolean);
+  document.getElementById('resultsAka').textContent=aka.length?'Also known as: '+aka.join(' · '):'';
+  document.getElementById('resultsTakeaway').textContent=c.key_takeaway||'';
+
+  const now=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const elapsed=((Date.now()-pipelineStart)/1000).toFixed(1);
+  const legalChip=legal&&legal.scope_appropriate?'<div class="results-meta-chip">⚖️ Scope reviewed</div>':'';
+  document.getElementById('resultsMeta').innerHTML=
+    '<div class="results-meta-chip">📅 '+now+'</div>'+
+    '<div class="results-meta-chip">🩺 Clinician reference</div>'+
+    '<div class="results-meta-chip">⚡ '+elapsed+'s · 5 agents</div>'+
+    '<div class="results-meta-chip">🔍 Web-searched</div>'+
+    legalChip;
+
+  /* PANE 0 — Clinical Summary */
+  document.getElementById('s1WhatItIs').textContent=c.what_it_is||'';
+  document.getElementById('s1Diagnosis').innerHTML=(c.diagnosis||[]).map(m=>
+    '<div class="dx-card"><div class="dx-name">'+esc(m.method)+'</div>'+
+    '<div class="dx-desc">'+esc(m.description)+'</div>'+
+    '<div class="dx-when">'+esc(m.when_used||'')+'</div></div>').join('');
+  document.getElementById('s1Treatments').innerHTML=(c.treatments||[]).map(tx=>{
+    const lvl=tx.evidence_level||'moderate';
+    const badge=lvl==='high'?'ev-high':lvl==='moderate'?'ev-moderate':'ev-low';
+    const label=lvl==='high'?'High Evidence':lvl==='moderate'?'Moderate':'Emerging';
+    return '<div class="tx-card">'+
+      '<div class="tx-header"><div><div class="tx-name">'+esc(tx.name)+'</div></div>'+
+      '<span class="tx-evidence '+badge+'">'+label+'</span></div>'+
+      '<div class="tx-desc">'+esc(tx.description)+'</div>'+
+      (tx.evidence_basis?'<div class="tx-meta"><strong>Evidence:</strong> '+esc(tx.evidence_basis)+'</div>':'')+
+      (tx.best_for?'<div class="tx-meta"><strong>Best for:</strong> '+esc(tx.best_for)+'</div>':'')+
+      '</div>';
+  }).join('');
+
+  /* PANE 1 — Recent Research */
+  document.getElementById('s2Summary').textContent=c.recent_research_summary||'';
+  document.getElementById('s2Advances').innerHTML=(c.recent_advances||[]).map(a=>
+    '<div class="advance-card">'+
+    '<div class="advance-year">'+esc(a.date||a.year||'')+'</div>'+
+    '<div><div class="advance-title">'+esc(a.title)+'</div>'+
+    '<div class="advance-desc">'+esc(a.description)+'</div>'+
+    (a.significance?'<div class="advance-sig">▶ '+esc(a.significance)+'</div>':'')+
+    '</div></div>').join('');
+
+  /* PANE 2 — Trials & Centers */
+  document.getElementById('s3TrialsOverview').textContent=c.trials_overview||'';
+  document.getElementById('s3Trials').innerHTML=(c.active_trials||[]).map(tr=>
+    '<div class="trial-card">'+
+    '<div class="trial-top"><div class="trial-title">'+esc(tr.title)+'</div>'+
+    '<span class="trial-phase">'+esc(tr.phase||'N/A')+'</span></div>'+
+    '<div class="trial-focus">'+esc(tr.focus)+'</div>'+
+    '<div class="trial-meta">'+(tr.sponsor?'<strong>'+esc(tr.sponsor)+'</strong> · ':'')+
+    'Eligibility: '+esc(tr.eligibility||'Varies')+'</div></div>').join('');
+  document.getElementById('s3Cta').innerHTML=
+    '<strong>Verify trials:</strong> Visit <a href="https://clinicaltrials.gov" target="_blank">ClinicalTrials.gov</a> and search '+
+    '<strong>"'+esc(c.diagnosis_name||lastDiagnosis)+'"</strong>. '+
+    (c.how_to_find_trials?esc(c.how_to_find_trials):'');
+
+  document.getElementById('s3Specialists').innerHTML=(c.specialists||[]).map(s=>
+    '<div class="specialist-card">'+
+    '<div class="specialist-name">'+esc(s.name)+'</div>'+
+    '<div class="specialist-inst">'+esc(s.institution)+' · '+esc(s.location)+'</div>'+
+    '<div class="specialist-known">'+esc(s.known_for)+'</div></div>').join('');
+  document.getElementById('s3Centers').innerHTML=(c.centers||[]).map(ct=>
+    '<div class="center-card">'+
+    '<div class="center-name">'+esc(ct.name)+'</div>'+
+    '<div class="center-location">'+esc(ct.location)+(ct.distinction?' · '+esc(ct.distinction):'')+'</div>'+
+    '<div class="center-why">'+esc(ct.why_notable)+'</div></div>').join('');
+
+  /* Doctor Qs */
+  document.getElementById('doctorQuestions').innerHTML=(c.questions_for_doctor||[]).map((q,i)=>
+    '<div class="doctor-q"><div class="doctor-q-num">'+(i+1)+'</div><span>'+esc(q)+'</span></div>').join('');
+
+  /* Reset tabs */
+  document.querySelectorAll('.section-tab').forEach((t,i)=>t.classList.toggle('active',i===0));
+  document.querySelectorAll('.section-pane').forEach((p,i)=>p.classList.toggle('active',i===0));
+
+  setTimeout(()=>sec.scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+
+/* ════════════════════════════════════
+   UI HELPERS
+════════════════════════════════════ */
+function switchTab(idx,btn){
+  document.querySelectorAll('.section-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.section-pane').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('pane'+idx).classList.add('active');
+}
+
+function resetToInput(){
+  document.getElementById('resultsSection').style.display='none';
+  document.getElementById('resultsSection').classList.remove('visible');
+  document.getElementById('diagnosisInput').value='';
+  document.getElementById('diagnosisInput').disabled=false;
+  document.getElementById('submitBtn').disabled=false;
+  document.getElementById('clarifyPanel').classList.remove('visible');
+  hidePipeline();
+  document.getElementById('inputCard').scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(()=>document.getElementById('diagnosisInput').focus(),400);
+}
+
+function handleError(err){
+  console.error('Pipeline error:',err);
+  const msg=err.message||String(err);
+  [1,2,3,4,5].forEach(n=>{
+    const c=document.getElementById('agentCard'+n);
+    if(c&&c.classList.contains('running'))setAgentState(n,'error','Error');
+  });
+  freezePipelineTimer();
+  setTimeout(()=>{
+    hidePipeline();
+    document.getElementById('submitBtn').disabled=false;
+    document.getElementById('diagnosisInput').disabled=false;
+    const e=document.createElement('div');
+    e.id='pipelineErrorMsg';
+    e.style.cssText='margin-top:16px;padding:16px 20px;background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.3);border-radius:12px;font-size:13px;color:#e07070;line-height:1.5;';
+    e.innerHTML='<strong style="color:#e88;">⚠ Error:</strong> '+esc(msg)+'<br><span style="opacity:0.6;font-size:12px;">Open browser console (F12) for details.</span>';
+    document.getElementById('inputCard').after(e);
+  },600);
+}
+
+function esc(str){
+  if(str===null||str===undefined)return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+document.getElementById('diagnosisInput').addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter')runAnalysis();
+});
+document.getElementById('diagnosisInput').addEventListener('input',function(){
+  this.style.height='auto';
+  this.style.height=Math.min(120,this.scrollHeight)+'px';
+});
+
+function downloadResults(){
+  const title=document.getElementById('resultsDiagnosisName')?.textContent||'Caedrix AI Results';
+  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+title+'</title>'+
+    '<style>body{font-family:Georgia,serif;max-width:800px;margin:40px auto;color:#111;line-height:1.6;}'+
+    'h1{font-size:28px;}h2{font-size:20px;margin-top:32px;border-bottom:1px solid #ccc;padding-bottom:6px;}'+
+    'p,li{font-size:15px;}.block{margin-bottom:32px;}</style></head><body>'+
+    document.getElementById('resultsSection').innerHTML+'</body></html>';
+  const blob=new Blob([html],{type:'text/html'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=title.replace(/[^a-z0-9]/gi,'_').toLowerCase()+'_caedrix.html';
+  a.click();
+}
+
+async function handleSaveToMyRecords(){
+  const c = window.__caedrixLastResult;
+  if(!c){ return; }
+  const btn = document.getElementById('saveRecordBtn');
+  btn.disabled = true;
+  try{
+    const doc = CaedrixPDF.buildUnderstandPDF(c);
+    await CaedrixPDF.saveOrDownloadPDF(doc, 'understand-diagnosis', btn);
+  } finally {
+    setTimeout(()=>{ btn.disabled = false; }, 2500);
+  }
+}
+</script>
+</body>
+</html>

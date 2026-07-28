@@ -31,7 +31,7 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const { email, pack } = req.body || {};
+  const { email, pack, returnUrl } = req.body || {};
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     res.status(400).json({ error: 'INVALID_EMAIL' });
@@ -40,6 +40,14 @@ module.exports = async (req, res) => {
   if (pack !== 'single' && pack !== 'five') {
     res.status(400).json({ error: 'INVALID_PACK', message: 'pack must be "single" or "five"' });
     return;
+  }
+
+  // Only accept a same-origin relative path for returnUrl (e.g.
+  // "/health-decisions.html") to avoid this becoming an open redirect.
+  // Falls back to the hub page if missing or unsafe.
+  let returnPath = '/precision-medicine3.html';
+  if (typeof returnUrl === 'string' && returnUrl.startsWith('/') && !returnUrl.startsWith('//')) {
+    returnPath = returnUrl;
   }
 
   const stripe = Stripe(STRIPE_SECRET_KEY);
@@ -55,8 +63,8 @@ module.exports = async (req, res) => {
       // email + tokensToGrant travel through to the webhook, which is the
       // ONLY place tokens actually get credited (never trust the client).
       metadata: { email: email.trim().toLowerCase(), tokensToGrant: String(tokensToGrant), pack },
-      success_url: `${PUBLIC_SITE_URL}/precision-medicine3.html?purchase=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${PUBLIC_SITE_URL}/precision-medicine3.html?purchase=cancelled`,
+      success_url: `${PUBLIC_SITE_URL}${returnPath}?purchase=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${PUBLIC_SITE_URL}${returnPath}?purchase=cancelled`,
     });
 
     res.status(200).json({ url: session.url });

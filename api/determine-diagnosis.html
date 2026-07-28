@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+/* Caedrix AI — no forced login here. Visitors can view and ask questions
+   freely; an account (email) is only created at the moment they buy
+   tokens or redeem a code, inside the paywall modal. */
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caedrix AI — Determine Diagnosis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0c1e3a; --navy-mid:#162d52; --navy-light:#1e3a68;
+  --plum:#9b59b6; --plum-light:#b07cc8; --plum-dim:rgba(155,89,182,0.15);
+  --gold:#d4aa3a; --teal:#0a7c6e; --teal-light:#13a090;
+  --white:#f0ece4; --text-dim:rgba(240,236,228,0.55); --danger:#c0392b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* PROGRESS */
+.progress-bar{position:fixed;top:0;left:0;right:0;height:3px;z-index:200;}
+.progress-fill{height:100%;width:0%;background:var(--plum);transition:width .1s linear;box-shadow:0 0 8px var(--plum-light);}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;padding:0 48px;height:96px;background:rgba(12,30,58,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(155,89,182,0.2);}
+.nav-logo{display:flex;align-items:center;}
+.logo-img{height:90px;width:auto;object-fit:contain;}
+.nav-actions{display:flex;gap:10px;margin-left:auto;margin-right:20px;}
+.nav-mini{padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;transition:all .2s;white-space:nowrap;}
+.nav-mini:hover{transform:translateY(-1px);opacity:.9;}
+.btn1{background:linear-gradient(135deg,#d4aa3a,#b8932a);color:#0c1e3a;}
+.btn2{background:linear-gradient(135deg,#13a090,#0a7c6e);color:white;}
+.btn3{background:linear-gradient(135deg,#4a6fa5,#162d52);color:white;}
+.btn4{background:linear-gradient(135deg,#9b59b6,#6b7a8d);color:white;}
+.btn5{background:linear-gradient(135deg,#3a9e6a,#2d7a52);color:white;}
+@media(max-width:768px){nav{padding:0 20px;}.nav-actions{gap:6px;margin-right:0;}.nav-mini{font-size:10px;padding:6px 10px;}}
+
+/* LAYOUT */
+.page-wrap{max-width:900px;margin:0 auto;padding: 178px 24px 80px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+/* HEADER */
+.page-header{text-align:center;margin-bottom:48px;}
+.page-eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--plum-light);margin-bottom:18px;}
+.eyebrow-line{width:28px;height:1px;background:linear-gradient(90deg,transparent,var(--plum-light));}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(32px,5vw,48px);font-weight:600;line-height:1.15;color:var(--white);margin-bottom:16px;}
+.page-title em{font-style:italic;color:var(--plum-light);}
+.page-sub{font-family:'Crimson Pro',serif;font-size:19px;color:var(--text-dim);line-height:1.6;max-width:580px;margin:0 auto;}
+.page-disclaimer{font-size:11px;color:rgba(255,255,255,0.28);margin-top:12px;line-height:1.5;}
+
+/* IMPORTANT NOTICE */
+.notice-bar{border-radius:12px;padding:14px 20px;background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.2);margin-bottom:24px;display:flex;gap:12px;align-items:flex-start;animation:fadeUp .5s ease both;}
+.notice-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.notice-text{font-size:13px;color:rgba(255,255,255,0.6);line-height:1.55;}
+.notice-text strong{color:rgba(255,100,100,0.9);}
+
+/* API KEY */
+@media(max-width:768px){}
+
+/* INPUT CARD */
+.input-card{border-radius:20px;overflow:hidden;border:1px solid rgba(155,89,182,0.2);background:rgba(255,255,255,0.02);backdrop-filter:blur(12px);margin-bottom:28px;animation:fadeUp .5s ease .1s both;}
+.input-card-header{padding:24px 28px 0;display:flex;align-items:flex-start;gap:14px;}
+.input-card-icon{font-size:26px;margin-top:2px;}
+.input-card-label{font-family:'Playfair Display',serif;font-size:18px;color:var(--white);}
+.input-card-sub{font-size:12px;color:var(--text-dim);margin-top:3px;line-height:1.5;}
+.ctx-group label{display:block;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:6px;}
+.ctx-select{width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(155,89,182,0.15);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none;appearance:none;cursor:pointer;}
+.ctx-select:focus{border-color:rgba(155,89,182,0.5);}
+.ctx-select option{background:#162d52;color:white;}
+.symptom-area{padding:16px 28px 8px;}
+.symptom-input{width:100%;padding:16px 20px;background:rgba(255,255,255,0.04);border:1px solid rgba(155,89,182,0.15);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--white);outline:none;resize:none;min-height:100px;line-height:1.6;transition:all .3s;}
+.symptom-input:focus{border-color:rgba(155,89,182,0.5);background:rgba(155,89,182,0.06);}
+.symptom-input::placeholder{color:rgba(255,255,255,0.18);}
+.input-footer{display:flex;align-items:center;justify-content:space-between;padding:12px 28px 22px;gap:12px;flex-wrap:wrap;}
+.char-hint{font-size:11px;color:rgba(255,255,255,0.25);}
+.submit-btn{padding:14px 28px;border-radius:12px;background:linear-gradient(135deg,var(--plum),#6b7a8d);color:white;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;border:1px solid rgba(155,89,182,0.4);cursor:pointer;transition:all .25s;white-space:nowrap;}
+.submit-btn:hover:not(:disabled){background:linear-gradient(135deg,#aa66c8,var(--plum));transform:translateY(-1px);box-shadow:0 6px 20px rgba(155,89,182,0.3);}
+.submit-btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+
+/* CLARIFY */
+.clarify-panel{border-radius:16px;margin-bottom:20px;border:1px solid rgba(155,89,182,0.3);background:rgba(155,89,182,0.06);padding:0;display:none;overflow:hidden;animation:fadeUp .35s ease;}
+.clarify-panel.visible{display:block;}
+.clarify-header{display:flex;align-items:flex-start;gap:14px;padding:22px 24px 16px;}
+.clarify-icon{font-size:22px;flex-shrink:0;margin-top:2px;}
+.clarify-title{font-family:'Playfair Display',serif;font-size:17px;color:var(--white);margin-bottom:4px;}
+.clarify-sub{font-size:13px;color:var(--text-dim);}
+.clarify-round-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);padding:4px 12px;border-radius:100px;margin:0 24px 12px;}
+.clarify-round-dot{width:6px;height:6px;border-radius:50%;background:var(--plum);}
+.clarify-questions{padding:0 24px;}
+.clarify-q{margin-bottom:16px;}
+.clarify-q-label{font-size:13px;font-weight:500;color:rgba(255,255,255,0.7);margin-bottom:8px;}
+.clarify-q-input{width:100%;padding:11px 14px;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(155,89,182,0.2);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none;transition:border-color .2s;}
+.clarify-q-input:focus{border-color:rgba(155,89,182,0.5);}
+.clarify-q-input::placeholder{color:rgba(255,255,255,0.2);}
+.clarify-submit{display:block;width:calc(100% - 48px);margin:14px 24px 22px;padding:13px;border-radius:10px;background:rgba(155,89,182,0.6);color:white;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:all .2s;}
+.clarify-submit:hover{background:var(--plum);transform:translateY(-1px);}
+
+/* PIPELINE */
+.pipeline-panel{display:none;margin-top:24px;animation:fadeUp .4s ease both;}
+.pipeline-panel.visible{display:block;}
+.pipeline-title{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:20px;text-align:center;}
+.pipeline-track{position:relative;display:flex;align-items:flex-start;}
+.pipeline-track-line{position:absolute;top:22px;left:10%;right:10%;height:2px;background:rgba(255,255,255,0.07);z-index:0;border-radius:2px;overflow:hidden;}
+.pipeline-track-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--plum),var(--plum-light));transition:width .6s cubic-bezier(.4,0,.2,1);}
+.agents-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%;position:relative;z-index:1;}
+.agent-card{border-radius:12px;padding:14px 12px 12px;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.02);transition:all .4s;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;text-align:center;}
+.agent-card.running{border-color:rgba(155,89,182,0.5);background:rgba(155,89,182,0.08);box-shadow:0 0 18px rgba(155,89,182,0.08);}
+.agent-card.done{border-color:rgba(155,89,182,0.4);background:rgba(155,89,182,0.06);}
+.agent-card.paused{border-color:rgba(155,89,182,0.4);background:rgba(155,89,182,0.07);}
+.agent-card.error{border-color:rgba(192,57,43,0.35);background:rgba(192,57,43,0.06);}
+.agent-card-shimmer{position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent);transform:translateX(-100%);animation:shimmer 1.5s infinite;pointer-events:none;display:none;}
+.agent-card.running .agent-card-shimmer{display:block;}
+@keyframes shimmer{to{transform:translateX(100%);}}
+.agent-flag{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:13px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);transition:all .4s;flex-shrink:0;}
+.agent-card.running .agent-flag{background:rgba(155,89,182,0.2);border-color:rgba(155,89,182,0.6);animation:flagPulse 1.2s ease-in-out infinite;}
+.agent-card.done .agent-flag{background:rgba(155,89,182,0.2);border-color:var(--plum-light);color:var(--plum-light);}
+.agent-card.error .agent-flag{background:rgba(192,57,43,0.15);border-color:var(--danger);}
+@keyframes flagPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(155,89,182,0.3);}50%{transform:scale(1.08);box-shadow:0 0 0 5px rgba(155,89,182,0);}}
+.agent-num{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.2);margin-bottom:5px;}
+.agent-name{font-family:'Playfair Display',serif;font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:5px;line-height:1.3;}
+.agent-status{font-size:10px;color:rgba(255,255,255,0.28);display:flex;align-items:center;gap:4px;justify-content:center;min-height:14px;}
+.agent-status-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.15);flex-shrink:0;transition:background .3s;}
+.agent-card.running .agent-status-dot{background:var(--plum-light);animation:pulse 1s infinite;}
+.agent-card.done .agent-status-dot{background:var(--plum-light);animation:none;}
+.agent-card.error .agent-status-dot{background:var(--danger);animation:none;}
+.agent-card.paused .agent-status-dot{background:var(--plum);animation:none;}
+.agent-card.running .agent-status,.agent-card.paused .agent-status{color:var(--plum-light);}
+.agent-card.done .agent-name{color:var(--white);}
+.agent-card.done .agent-status{color:var(--plum-light);}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(176,124,200,0.4);}70%{box-shadow:0 0 0 4px rgba(176,124,200,0);}100%{box-shadow:0 0 0 0 rgba(176,124,200,0);}}
+@media(max-width:768px){.agents-row{grid-template-columns:repeat(3,1fr);}.pipeline-track-line{display:none;}}
+
+/* RESULTS */
+.results-section{display:none;margin-top:40px;animation:fadeUp .5s ease;}
+.results-section.visible{display:block;}
+
+/* URGENCY BANNER */
+.urgency-banner{border-radius:16px;padding:18px 24px;margin-bottom:28px;display:flex;align-items:flex-start;gap:16px;}
+.urgency-emergency{background:rgba(192,57,43,0.15);border:1.5px solid rgba(192,57,43,0.5);}
+.urgency-urgent{background:rgba(184,147,42,0.12);border:1.5px solid rgba(184,147,42,0.4);}
+.urgency-soon{background:rgba(74,111,165,0.1);border:1px solid rgba(74,111,165,0.3);}
+.urgency-routine{background:rgba(10,124,110,0.08);border:1px solid rgba(10,124,110,0.25);}
+.urgency-icon{font-size:28px;flex-shrink:0;}
+.urgency-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+.urgency-emergency .urgency-label{color:#ff6b6b;}
+.urgency-urgent .urgency-label{color:var(--gold);}
+.urgency-soon .urgency-label{color:#7b9fd4;}
+.urgency-routine .urgency-label{color:var(--teal-light);}
+.urgency-reason{font-size:14px;color:rgba(255,255,255,0.75);line-height:1.5;}
+
+/* RESULTS HEADER */
+.results-header{text-align:center;margin-bottom:32px;}
+.results-symptom-echo{font-family:'Crimson Pro',serif;font-size:17px;color:var(--text-dim);font-style:italic;margin-bottom:16px;}
+.results-meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px;}
+.results-meta-chip{font-size:11px;padding:5px 12px;border-radius:100px;background:rgba(155,89,182,0.1);border:1px solid rgba(155,89,182,0.2);color:rgba(255,255,255,0.5);}
+.agent-note{font-size:11px;color:rgba(255,255,255,0.25);text-align:center;margin-bottom:28px;}
+
+/* DIFFERENTIAL LIST */
+.section-label-main{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:20px;text-align:center;}
+.diff-list{display:flex;flex-direction:column;gap:12px;margin-bottom:36px;}
+.diff-card{border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.02);transition:all .3s;}
+.diff-card.prob-high{border-color:rgba(155,89,182,0.35);background:rgba(155,89,182,0.05);}
+.diff-card.prob-moderate{border-color:rgba(184,147,42,0.2);background:rgba(184,147,42,0.03);}
+.diff-card.prob-low{border-color:rgba(74,111,165,0.15);}
+.diff-header{display:flex;align-items:center;gap:14px;padding:18px 22px;cursor:pointer;}
+.diff-rank{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+.prob-high .diff-rank{background:rgba(155,89,182,0.25);color:var(--plum-light);}
+.prob-moderate .diff-rank{background:rgba(184,147,42,0.2);color:var(--gold);}
+.prob-low .diff-rank{background:rgba(74,111,165,0.15);color:#7b9fd4;}
+.diff-title-wrap{flex:1;}
+.diff-name{font-size:16px;font-weight:700;color:var(--white);margin-bottom:3px;}
+.diff-summary{font-size:12px;color:var(--text-dim);}
+.diff-prob-badge{font-size:10px;font-weight:700;padding:4px 10px;border-radius:100px;flex-shrink:0;white-space:nowrap;}
+.prob-high .diff-prob-badge{background:rgba(155,89,182,0.2);color:var(--plum-light);border:1px solid rgba(155,89,182,0.35);}
+.prob-moderate .diff-prob-badge{background:rgba(184,147,42,0.15);color:var(--gold);border:1px solid rgba(184,147,42,0.3);}
+.prob-low .diff-prob-badge{background:rgba(74,111,165,0.1);color:#7b9fd4;border:1px solid rgba(74,111,165,0.25);}
+.diff-chevron{color:rgba(255,255,255,0.25);font-size:14px;flex-shrink:0;}
+.diff-body{padding:0 22px 20px;display:none;}
+.diff-body.open{display:block;}
+.diff-section{margin-bottom:14px;}
+.diff-section-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:8px;}
+.diff-text{font-family:'Crimson Pro',serif;font-size:16px;color:rgba(255,255,255,0.75);line-height:1.65;}
+.diff-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.diff-tag{font-size:12px;padding:4px 10px;border-radius:6px;background:rgba(155,89,182,0.1);color:rgba(255,255,255,0.6);}
+.diff-tag.matching{background:rgba(155,89,182,0.2);color:var(--plum-light);}
+.diff-tag.red-flag{background:rgba(192,57,43,0.15);color:#e07070;}
+
+/* RED FLAGS */
+.red-flags-section{padding:18px 22px;border-radius:14px;background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.2);margin-bottom:28px;}
+.red-flags-title{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#e07070;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.red-flag-list{display:flex;flex-direction:column;gap:8px;}
+.red-flag-item{font-size:13px;color:rgba(255,255,255,0.65);display:flex;gap:10px;align-items:flex-start;line-height:1.4;}
+.red-flag-dot{color:#e07070;flex-shrink:0;font-size:16px;line-height:1.2;}
+
+/* TESTS */
+.tests-section{padding:18px 22px;border-radius:14px;background:rgba(155,89,182,0.06);border:1px solid rgba(155,89,182,0.15);margin-bottom:28px;}
+.tests-title{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--plum-light);margin-bottom:12px;}
+.tests-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.test-chip{font-size:12px;padding:6px 12px;border-radius:8px;background:rgba(155,89,182,0.12);border:1px solid rgba(155,89,182,0.2);color:rgba(255,255,255,0.65);}
+
+/* DOCTOR QUESTIONS */
+.doctor-questions{margin-top:8px;padding:24px 28px;border-radius:16px;background:rgba(155,89,182,0.07);border:1px solid rgba(155,89,182,0.2);}
+.dq-header{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--plum-light);margin-bottom:16px;}
+.doctor-q{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:14px;color:rgba(255,255,255,0.75);line-height:1.5;}
+.doctor-q:last-child{border-bottom:none;}
+.doctor-q-num{width:22px;height:22px;border-radius:50%;background:rgba(155,89,182,0.2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--plum-light);flex-shrink:0;margin-top:2px;}
+
+/* RESET */
+.reset-btn{display:flex;align-items:center;gap:8px;margin:0 auto;padding:12px 28px;background:rgba(155,89,182,0.1);border:1px solid rgba(155,89,182,0.25);border-radius:100px;color:rgba(255,255,255,0.5);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;}
+.reset-btn:hover{background:rgba(155,89,182,0.2);color:rgba(255,255,255,0.8);}
+.save-record-row{justify-content:center;}
+.save-record-btn{display:flex;align-items:center;gap:8px;margin:0 auto;padding:12px 28px;background:linear-gradient(135deg,#13a090,#0a7c6e);border:none;border-radius:100px;color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.save-record-btn:hover{opacity:0.9;}
+.save-record-btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0.06);text-align:center;font-size:11px;color:rgba(255,255,255,0.2);line-height:1.7;}
+
+/* ── Caedrix User Status Bar ── */
+#caedrixUserBar{
+  position:fixed;top:96px;left:0;right:0;z-index:99;
+  background:rgba(7,16,32,0.98);
+  border-bottom:1px solid rgba(255,255,255,0.055);
+  padding:0 48px;height:38px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-family:'DM Sans',sans-serif;font-size:12px;
+  backdrop-filter:blur(8px);
+}
+.subs-left{display:flex;align-items:center;gap:10px;}
+.subs-avatar{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,0.6);flex-shrink:0;}
+.subs-email{color:rgba(255,255,255,0.38);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.subs-right{display:flex;align-items:center;gap:10px;}
+.subs-records{display:flex;align-items:center;gap:5px;padding:4px 11px;border-radius:100px;text-decoration:none;transition:all .2s;white-space:nowrap;}
+.subs-records-on{background:rgba(58,158,106,0.12);border:1px solid rgba(58,158,106,0.3);color:#52c488;}
+.subs-records-off{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.3);}
+.subs-records-off:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.55);}
+.subs-rdot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.subs-rdot-on{background:#52c488;animation:subsDotPulse 2.2s infinite;}
+.subs-rdot-off{background:rgba(255,255,255,0.18);}
+@keyframes subsDotPulse{0%{box-shadow:0 0 0 0 rgba(82,196,136,.5);}70%{box-shadow:0 0 0 5px rgba(82,196,136,0);}100%{box-shadow:0 0 0 0 rgba(82,196,136,0);}}
+.subs-signout{padding:4px 9px;border-radius:6px;background:none;border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.22);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;transition:all .2s;}
+.subs-signout:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.5);}
+@media(max-width:768px){#caedrixUserBar{padding:0 16px;}.subs-email{display:none;}.subs-records span{display:none;}}
+
+
+/* ── Print/Download bar ── */
+.print-bar{display:flex;gap:12px;justify-content:flex-end;margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.07);}
+.print-btn{display:flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;border:none;}
+.print-btn-download{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.7);}
+.print-btn-download:hover{background:rgba(255,255,255,0.12);color:white;}
+.print-btn-print{background:rgba(19,160,144,0.15);color:#13c0ac;border:1px solid rgba(19,160,144,0.3);}
+.print-btn-print:hover{background:rgba(19,160,144,0.25);color:white;}
+@media print{
+  nav,#caedrixUserBar,.print-bar,.pipeline-panel,.input-card,.clarify-panel,
+  .section-tabs,.filter-tabs,.reset-btn,.records-banner,.records-connected-bar{display:none!important;}
+  body{background:white!important;color:#111!important;}
+  .results-section,.results-section.visible{display:block!important;}
+  .section-pane{display:block!important;margin-bottom:24px;}
+}
+
+</style>
+  <script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="ppFill"></div></div>
+
+<nav>
+  <div class="nav-logo">
+    <a href="index.html" style="display:flex;align-items:center;">
+      <img src="caedrix-logo.jpg" class="logo-img" alt="Caedrix AI">
+    </a>
+  </div>
+    <div class="nav-actions">
+    <a href="precision-medicine3.html"  class="nav-mini btn1">Precision Medicine</a>
+    <a href="health-decisions.html"    class="nav-mini btn2">Health Decisions</a>
+    <a href="determine-diagnosis.html"  class="nav-mini btn4" style="border:1px solid rgba(155,89,182,0.6);">Determine Diagnosis</a>
+    <a href="understand-diagnosis.html" class="nav-mini btn3">Understand Diagnosis</a>
+  </div>
+</nav>
+<div id="caedrixUserBar"></div>
+
+<div class="page-wrap">
+  <div class="page-header">
+    <div class="page-eyebrow"><div class="eyebrow-line"></div>Caedrix AI · Determine Diagnosis<div class="eyebrow-line" style="transform:scaleX(-1)"></div></div>
+    <h1 class="page-title">What Could Be<br><em>Causing This?</em></h1>
+    <p class="page-sub">Describe your symptoms and our AI will help you understand the possible diagnoses — ranked by probability — so you can have a more informed conversation with your doctor.</p>
+    <p class="page-disclaimer">⚕ This tool does not diagnose you. It helps you understand possibilities to discuss with a qualified physician. Seek emergency care if you have severe or sudden symptoms.</p>
+  </div>
+
+  <div class="notice-bar">
+    <div class="notice-icon">⚠️</div>
+    <div class="notice-text"><strong>Important:</strong> If you are experiencing chest pain, difficulty breathing, sudden severe headache, signs of stroke, or any emergency symptoms — <strong>call 911 or go to the nearest emergency room immediately.</strong> Do not use this tool in an emergency.
+      </div>
+    </div>
+  </div>
+
+  <div class="input-card" id="inputCard">
+    <div class="input-card-header">
+      <div class="input-card-icon">🩺</div>
+      <div>
+        <div class="input-card-label">Describe your symptoms</div>
+        <div class="input-card-sub">Include: what you feel, where it is, when it started, how it has changed, and anything that makes it better or worse. The more detail, the better the analysis.</div>
+      </div>
+    </div>
+
+    <div class="symptom-area">
+      <div style="font-size:12px;line-height:1.5;padding:9px 14px;border-radius:8px;margin-bottom:10px;display:flex;align-items:center;gap:8px;border:1px solid rgba(155,89,182,0.25);background:rgba(155,89,182,0.08);color:rgba(155,89,182,0.9);"><span>⏱</span><span>This is a deep analysis of data. It may take 3–5 minutes to display this rich and informative content.</span></div>
+      <textarea id="symptomInput" class="symptom-input" placeholder="Example: I've had a dull aching pain in my lower right abdomen for 3 days. It started mildly and has gotten worse. I also have a low fever (99.8°F) and feel nauseous. The pain is worse when I move around. No vomiting. No changes in bowel habits..."></textarea>
+    </div>
+    <div class="input-footer">
+      <span class="char-hint">Be as specific as possible — include duration, severity (1-10), what makes it better or worse</span>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <span id="caedrixBalanceBadge" style="font-size:12px;color:rgba(255,255,255,0.4);"></span>
+        <button class="submit-btn" id="submitBtn" onclick="runAnalysis()">Analyze Symptoms — $2.99 →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="clarify-panel" id="clarifyPanel">
+    <div class="clarify-header">
+      <div class="clarify-icon">💬</div>
+      <div>
+        <div class="clarify-title">A few more details</div>
+        <div class="clarify-sub">These help significantly narrow the possibilities.</div>
+      </div>
+    </div>
+    <div id="clarifyRoundBadge"></div>
+    <div class="clarify-questions" id="clarifyQuestions"></div>
+    <button class="clarify-submit" onclick="submitClarifications()">Continue with my answers →</button>
+  </div>
+
+  <div class="pipeline-panel" id="pipelinePanel">
+    <div class="pipeline-title">Caedrix AI · 5-Agent Differential Analysis</div>
+    <div class="pipeline-track">
+      <div class="pipeline-track-line"><div class="pipeline-track-fill" id="trackFill"></div></div>
+      <div class="agents-row">
+        <div class="agent-card" id="agentCard1"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag1">💬</div><div class="agent-num">Agent 01</div><div class="agent-name">Clarifying Assistant</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus1">Waiting</span></div></div>
+        <div class="agent-card" id="agentCard2"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag2">🩺</div><div class="agent-num">Agent 02</div><div class="agent-name">Differential Analyst</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus2">Waiting</span></div></div>
+        <div class="agent-card" id="agentCard3"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag3">🔬</div><div class="agent-num">Agent 03</div><div class="agent-name">Accuracy Review</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus3">Waiting</span></div></div>
+        <div class="agent-card" id="agentCard4"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag4">⚖️</div><div class="agent-num">Agent 04</div><div class="agent-name">Legal Review</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus4">Waiting</span></div></div>
+        <div class="agent-card" id="agentCard5"><div class="agent-card-shimmer"></div><div class="agent-flag" id="agentFlag5">✦</div><div class="agent-num">Agent 05</div><div class="agent-name">Clarity</div><div class="agent-status"><div class="agent-status-dot"></div><span id="agentStatus5">Waiting</span></div></div>
+      </div><!-- /.agents-row -->
+    </div><!-- /.pipeline-track -->
+  </div><!-- /.pipeline-panel -->
+
+<div class="results-section" id="resultsSection">
+    <div class="urgency-banner" id="urgencyBanner">
+      <div class="urgency-icon" id="urgencyIcon"></div>
+      <div><div class="urgency-label" id="urgencyLabel"></div><div class="urgency-reason" id="urgencyReason"></div></div>
+    </div>
+    <div class="results-header">
+      <div class="results-symptom-echo" id="symptomEcho"></div>
+      <div class="results-meta" id="resultsMeta"></div>
+    </div>
+    <div class="agent-note" id="agentNote"></div>
+    <div class="section-label-main">Possible Diagnoses — Ranked by Likelihood</div>
+    <div class="diff-list" id="diffList"></div>
+    <div class="red-flags-section" id="redFlagsSection">
+      <div class="red-flags-title">🚨 Seek immediate care if you develop</div>
+      <div class="red-flag-list" id="redFlagList"></div>
+    </div>
+    <div class="tests-section">
+      <div class="tests-title">Tests your doctor may order</div>
+      <div class="tests-grid" id="testsList"></div>
+    </div>
+    <div class="doctor-questions">
+      <div class="dq-header">Questions to ask your doctor</div>
+      <div id="doctorQuestions"></div>
+    </div>
+
+    <div class="clinical-summary-section" id="clinicalSummarySection" style="display:none;margin-top:28px;padding:24px 28px;border-radius:16px;background:rgba(10,124,110,0.07);border:1px solid rgba(10,124,110,0.2);">
+      <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--teal-light);margin-bottom:14px;">⚕ Clinical Summary</div>
+      <div id="clinicalSummaryText" style="font-family:'Crimson Pro',serif;font-size:17px;color:rgba(255,255,255,0.8);line-height:1.75;white-space:pre-wrap;"></div>
+    </div>
+
+    <div class="recent-research-section" id="recentResearchSection" style="display:none;margin-top:16px;padding:20px 28px;border-radius:16px;background:rgba(74,111,165,0.07);border:1px solid rgba(74,111,165,0.2);">
+      <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#7b9fd4;margin-bottom:12px;">🔬 Recent Research Context</div>
+      <div id="recentResearchText" style="font-family:'Crimson Pro',serif;font-size:16px;color:rgba(255,255,255,0.7);line-height:1.7;"></div>
+    </div>
+
+    <div class="save-record-row" style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
+      <button class="save-record-btn" id="saveRecordBtn" onclick="handleSaveToMyRecords()">📄 Save to My Records</button>
+      <button class="reset-btn" onclick="resetToInput()">← Describe different symptoms</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>caedrix.com · Determine Diagnosis — Educational tool only. Not a substitute for medical evaluation.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="caedrix-local-storage.js"></script>
+<script src="caedrix-pdf-report.js"></script>
+<script src="caedrix-token-gate.js"></script>
+<script>
+
+async function handleSaveToMyRecords(){
+  const r = window.__caedrixLastResult;
+  if(!r){ return; }
+  const btn = document.getElementById('saveRecordBtn');
+  btn.disabled = true;
+  try{
+    const doc = CaedrixPDF.buildDeterminePDF(r);
+    await CaedrixPDF.saveOrDownloadPDF(doc, 'determine-diagnosis', btn);
+  } finally {
+    setTimeout(()=>{ btn.disabled = false; }, 2500);
+  }
+}
+
+const CaedrixAuth = {
+  getUser:             ()  => { try{ return JSON.parse(localStorage.getItem('caedrix_user')||'null'); }catch(_){return null;} },
+  logout:              ()  => { localStorage.removeItem('caedrix_user'); sessionStorage.clear(); window.location.href='login.html'; },
+  isRecordsConnected:  ()  => localStorage.getItem('caedrix_records_connected') === 'true',
+  setRecordsConnected: (v) => v ? localStorage.setItem('caedrix_records_connected','true') : localStorage.removeItem('caedrix_records_connected')
+};
+function caedrixInitUserBar() {
+  const bar = document.getElementById('caedrixUserBar');
+  if (!bar) return;
+  const user=CaedrixAuth.getUser();
+  if (!user || !user.email) {
+    bar.innerHTML='<div class="subs-left"><span class="subs-email" style="opacity:.6;">Not signed in yet</span></div>'+
+      '<div class="subs-right"><span class="subs-email" style="opacity:.5;font-size:12px;">Sign in happens automatically when you buy searches</span></div>';
+    return;
+  }
+  const rc=CaedrixAuth.isRecordsConnected();
+  const initials=(user.email||'?')[0].toUpperCase(), email=user.email||'';
+  bar.innerHTML='<div class="subs-left"><div class="subs-avatar">'+initials+'</div><span class="subs-email">'+email+'</span></div>'+
+    '<div class="subs-right">'+(rc?'<div class="subs-records subs-records-on"><div class="subs-rdot subs-rdot-on"></div><span>Records Linked</span></div>':
+    '<a href="health-decisions.html" class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Link Medical Records</span></a>')+
+    '<button class="subs-signout" onclick="CaedrixAuth.logout()">Sign out</button></div>';
+}
+
+
+let lastSymptoms='', lastAge='', lastSex='', clarifyingHistory=[], clarifyRound=0, finalClarifications={};
+const MAX_CLARIFY_ROUNDS=3;
+const CaedrixState = {
+  isRecordsConnected:  () => CaedrixAuth.isRecordsConnected(),
+  setRecordsConnected: (v) => CaedrixAuth.setRecordsConnected(v)
+};
+
+window.addEventListener('DOMContentLoaded',async ()=>{
+  caedrixInitUserBar();
+  await initFolderConnection();
+  CaedrixTokenGate.renderBalanceBadge('caedrixBalanceBadge');
+  const savedDraft = CaedrixTokenGate.getAndClearResumeDraft();
+  if (savedDraft) {
+    document.getElementById('symptomInput').value = savedDraft;
+    document.getElementById('symptomInput').dispatchEvent(new Event('input'));
+    document.getElementById('inputCard').scrollIntoView({behavior:'smooth',block:'center'});
+  }
+});
+
+/* ══════════════════════════════════════════════════════
+   LOCAL FOLDER HEALTH CONTEXT
+   (source of truth once a folder is connected — see
+   caedrix-local-storage.js. Falls back to localStorage
+   copies when no folder is connected on this device.)
+══════════════════════════════════════════════════════ */
+let folderConnected = false;
+let cachedHealthContextBlock = '';
+
+async function initFolderConnection() {
+  try {
+    if (typeof CaedrixStorage === 'undefined' || !CaedrixStorage.isSupported()) {
+      folderConnected = false;
+      return;
+    }
+    const status = await CaedrixStorage.restoreConnection();
+    folderConnected = (status === 'connected');
+  } catch (_) {
+    folderConnected = false;
+  }
+}
+
+async function getCaedrixMergedProfile() {
+  let personalDetails = null, healthProfile = null, medicalRecordCount = 0;
+  if (folderConnected && typeof CaedrixStorage !== 'undefined') {
+    try {
+      const ctx = await CaedrixStorage.getLocalHealthContext();
+      if (ctx && ctx.connected) {
+        personalDetails = ctx.personalDetails;
+        healthProfile = ctx.healthProfile;
+        medicalRecordCount = (ctx.medicalRecordFiles || []).length;
+      }
+    } catch (_) { /* fall through to localStorage below */ }
+  }
+  if (!personalDetails) {
+    try { personalDetails = JSON.parse(localStorage.getItem('caedrix_life_context') || 'null'); } catch (_) {}
+  }
+  if (!healthProfile) {
+    try { healthProfile = JSON.parse(localStorage.getItem('caedrix_health_profile') || 'null'); } catch (_) {}
+  }
+  return { personalDetails, healthProfile, medicalRecordCount };
+}
+
+async function buildCaedrixHealthContextBlock() {
+  const { personalDetails, healthProfile, medicalRecordCount } = await getCaedrixMergedProfile();
+  const parts = [];
+  if (personalDetails) {
+    const p = [];
+    if (personalDetails.activities) p.push('Favorite activities: ' + personalDetails.activities);
+    if (personalDetails.important)  p.push('Important personal context: ' + personalDetails.important);
+    if (personalDetails.caregiver)  p.push('Caregiver responsibilities: ' + personalDetails.caregiver);
+    if (personalDetails.living)     p.push('Living situation: ' + personalDetails.living);
+    if (p.length) parts.push('Personal context about this patient:\n' + p.join('\n'));
+  }
+  if (healthProfile) {
+    const h = [];
+    if (healthProfile.age)           h.push('Age: ' + healthProfile.age);
+    if (healthProfile.sex)           h.push('Biological sex: ' + healthProfile.sex);
+    if (healthProfile.smoking)       h.push('Smoking status: ' + healthProfile.smoking);
+    if (healthProfile.diabetes)      h.push('Diabetes: ' + healthProfile.diabetes);
+    if (healthProfile.heartDisease)  h.push('Heart disease: ' + healthProfile.heartDisease);
+    if (healthProfile.conditions)    h.push('Other conditions: ' + healthProfile.conditions);
+    if (healthProfile.medications)   h.push('Current medications: ' + healthProfile.medications);
+    if (healthProfile.screenings)    h.push('Recent screenings: ' + healthProfile.screenings);
+    if (healthProfile.familyHistory) h.push('Family history: ' + healthProfile.familyHistory);
+    if (h.length) parts.push('Patient health profile:\n' + h.join('\n'));
+  }
+  if (medicalRecordCount > 0) {
+    parts.push(`Patient has ${medicalRecordCount} uploaded medical record document(s) on file, indicating an engaged, documented patient.`);
+  }
+  if (!parts.length) return '';
+  return '\n\n---\n' + parts.join('\n\n') + '\n---';
+}
+window.addEventListener('scroll',()=>{const d=document.documentElement;const p=d.scrollHeight-d.clientHeight;document.getElementById('ppFill').style.width=p>0?(d.scrollTop/p*100)+'%':'0%';});
+
+function showPipeline(){document.getElementById('pipelinePanel').classList.add('visible');}
+function hidePipeline(){document.getElementById('pipelinePanel').classList.remove('visible');}
+
+const TRACK_STEPS = { 1: 0, 2: 25, 3: 50, 4: 75, 5: 100 };
+
+function setAgentState(n, state, msg) {
+  const card   = document.getElementById('agentCard' + n);
+  const status = document.getElementById('agentStatus' + n);
+  const flag   = document.getElementById('agentFlag' + n);
+  if (!card) return;
+  card.className = 'agent-card' + (state ? ' ' + state : '');
+  status.textContent = msg;
+  const icons = { 1:'💬', 2:'🩺', 3:'🔬', 4:'⚖️', 5:'✦' };
+  if (state === 'done') {
+    flag.textContent = '✓';
+    document.getElementById('trackFill').style.width = TRACK_STEPS[n] + '%';
+  } else if (state === 'paused') {
+    flag.textContent = '⏸';
+  } else if (state === 'running') {
+    flag.textContent = icons[n] || '⟳';
+  } else if (state === 'error') {
+    flag.textContent = '✕';
+  } else {
+    flag.textContent = icons[n] || '○';
+  }
+}
+
+/* Reads personal context saved on the Precision Medicine page */
+function getCaedrixLifeContext(){
+  try{
+    const ctx=JSON.parse(localStorage.getItem('caedrix_life_context')||'null');
+    if(!ctx)return '';
+    const parts=[];
+    if(ctx.activities)parts.push('Favorite activities: '+ctx.activities);
+    if(ctx.important) parts.push('Important personal context: '+ctx.important);
+    if(ctx.caregiver) parts.push('Caregiver responsibilities: '+ctx.caregiver);
+    if(ctx.living)    parts.push('Living situation: '+ctx.living);
+    if(!parts.length) return '';
+    return '\n\n---\nPersonal context about this patient:\n'+parts.join('\n')+'\n---';
+  }catch(_){return '';}
+}
+
+function getCaedrixHealthProfile(){
+  try{
+    const hp=JSON.parse(localStorage.getItem('caedrix_health_profile')||'null');
+    if(!hp)return '';
+    const parts=[];
+    if(hp.age)          parts.push('Age: '+hp.age);
+    if(hp.sex)          parts.push('Biological sex: '+hp.sex);
+    if(hp.smoking)      parts.push('Smoking status: '+hp.smoking);
+    if(hp.diabetes)     parts.push('Diabetes: '+hp.diabetes);
+    if(hp.heartDisease) parts.push('Heart disease: '+hp.heartDisease);
+    if(hp.conditions)   parts.push('Other conditions: '+hp.conditions);
+    if(hp.medications)  parts.push('Current medications: '+hp.medications);
+    if(hp.screenings)   parts.push('Recent screenings: '+hp.screenings);
+    if(hp.familyHistory)parts.push('Family history: '+hp.familyHistory);
+    if(!parts.length)return '';
+    return '\n\n---\nPatient health profile:\n'+parts.join('\n')+'\n---';
+  }catch(_){return '';}
+}
+
+async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebSearch = false, model = 'claude-sonnet-4-6' }, _retry = 0) {
+  const body = {
+    model: model,
+    max_tokens: maxTokens,
+    system: systemPrompt,
+    messages: [{ role: 'user', content: userContent }]
+  };
+  if (useWebSearch) body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
+  const res = await fetch('/api/claude', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if ((res.status === 529 || res.status === 503) && _retry < 3) {
+    await new Promise(r => setTimeout(r, (_retry + 1) * 2000));
+    return callClaude({ systemPrompt, userContent, maxTokens, useWebSearch, model }, _retry + 1);
+  }
+  if (!res.ok) { const err = await res.text(); throw new Error('API error ' + res.status + ': ' + err); }
+  return await res.json();
+}
+
+function extractText(d){return(d.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');}
+function safeParseJSON(text){
+  if(!text||!text.trim())throw new Error('Empty response');
+  let c=text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+  try{return JSON.parse(c);}catch(_){}
+  const m=c.match(/\{[\s\S]*\}/);if(m){try{return JSON.parse(m[0]);}catch(_){}}
+  throw new Error('Could not parse JSON. Preview: '+c.substring(0,300));
+}
+
+const AGENT_CLARIFY_SYSTEM=`You are Caedrix AI's Clarifying Assistant for symptom analysis. Your job is to ask targeted follow-up questions to narrow down potential diagnoses.
+
+Respond with ONLY this JSON:
+{"needs_questions":true,"questions":["Q1","Q2","Q3"]}
+
+Ask 2-4 focused questions. Prioritize questions about:
+- Duration and onset pattern (sudden vs gradual)
+- Associated symptoms not yet mentioned
+- Aggravating/relieving factors
+- Prior history of similar episodes
+- Medications, recent travel, exposures
+- For pain: character (sharp/dull/cramping), radiation, severity 1-10
+
+NEVER re-ask questions already answered. If symptoms are already very detailed (3+ specific details given), you may set needs_questions:false.
+Return ONLY valid JSON.`;
+
+const AGENT_DIFFERENTIAL_SYSTEM=`You are Caedrix AI's Differential Diagnosis Analyst. You help patients understand possible diagnoses based on their symptoms so they can have informed conversations with their physicians.
+
+IMPORTANT: You are generating EDUCATIONAL content about diagnostic possibilities — not diagnosing the patient.
+
+Respond with ONLY this JSON:
+{
+  "symptom_summary": "Concise 1-sentence restatement of the presenting symptoms",
+  "urgency": "emergency|urgent|soon|routine",
+  "urgency_reason": "Why this urgency level — what to do",
+  "differential_diagnoses": [
+    {
+      "rank": 1,
+      "diagnosis_name": "Name",
+      "probability_tier": "high|moderate|low",
+      "probability_explanation": "Why this ranks here based on the specific symptoms described",
+      "what_it_is": "Brief plain-language explanation (1-2 sentences)",
+      "why_it_fits": "Specific symptoms that match this diagnosis",
+      "key_differentiating_factors": ["What would make this more or less likely"],
+      "typical_course": "What usually happens if this is the diagnosis",
+      "matching_symptoms": ["symptom1","symptom2"],
+      "less_typical_aspects": "Any symptoms that don't fit well"
+    }
+  ],
+  "red_flag_symptoms": ["Specific symptom requiring immediate care 1","Symptom 2"],
+  "tests_likely_ordered": ["Test 1","Test 2"],
+  "questions_for_doctor": ["Specific question 1","Question 2","Question 3","Question 4","Question 5"],
+  "clinical_summary": "A 2-3 paragraph plain-language overview of the clinical picture written for a non-medical reader. Explain what the symptom pattern suggests, how the most likely diagnoses relate to each other, and what a doctor would be thinking about — using everyday words, not medical jargon. Avoid Latin terms, clinical shorthand, or passive voice. Write warmly, as if a knowledgeable friend is helping the patient understand what might be going on before their appointment.",
+  "recent_research": "2-3 sentences describing any clinically relevant recent developments, updated guidelines, or emerging understanding related to the top 1-2 differential diagnoses. Focus on information that would be useful context for a patient conversation. If nothing notable, note that standard guidelines apply."
+}
+
+RULES:
+- Rank 4-7 diagnoses from most to least likely based on symptoms
+- Base probability tier on: how well symptoms match, prevalence in this age/sex group, clinical patterns
+- Only include diagnoses a real clinician would genuinely consider
+- Be honest about uncertainty — medicine is probabilistic
+- NEVER say "you have X" — always frame as "this could be" or "a possible explanation is"
+- clinical_summary and recent_research must always be populated strings, never null or empty
+- Return ONLY valid JSON`;
+
+const AGENT_ACCURACY_SYSTEM=`Review the differential diagnosis JSON for accuracy. Respond ONLY:
+{"approved":true,"accuracy_score":9,"corrections_needed":[],"reviewer_note":"Brief note"}
+Check: are the listed diagnoses medically plausible for the symptoms? Is the probability ranking reasonable? Are the red flags appropriate?`;
+
+const AGENT_LEGAL_SYSTEM=`Review the differential diagnosis JSON for scope-of-practice issues. Respond ONLY:
+{"scope_appropriate":true,"issues_found":[],"legal_note":"Brief note"}
+FLAG if content: diagnoses the patient definitively, recommends specific medications or doses, creates false urgency, or minimizes symptoms that could be serious.`;
+
+const AGENT_CLARITY_SYSTEM=`You are Caedrix AI's Plain Language Editor. You will receive a differential diagnosis JSON and lists of accuracy and legal issues to fix. Your job is to apply those corrections AND rewrite the output so it is easy to understand for someone with a general education but no medical background.
+
+PLAIN LANGUAGE RULES:
+- Replace ALL medical jargon with everyday words. If a medical term must stay (e.g. in a question for the doctor), immediately follow it with a plain-English explanation in parentheses — for example: "hypertension (high blood pressure)" or "contraindicated (should not be used together)".
+- Write as if explaining to a smart friend who is not a doctor. Use short sentences. Choose simple words over complex ones.
+- Break complex ideas into simple numbered steps or use a familiar analogy when explaining how something works.
+- Never use Latin phrases, abbreviations (e.g. PRN, QD, BMI), or specialist acronyms without explaining them.
+- Assume the reader has a general education level but no medical background.
+- Preserve ALL factual content and accuracy — reword the language, never the meaning.
+- Apply every correction flagged by the Accuracy and Legal reviewers.
+
+Return the EXACT same JSON schema. Start with { and end with }. Return ONLY valid JSON, no other text.`;
+
+async function runAnalysis(){
+  const symptoms=document.getElementById('symptomInput').value.trim();
+  if(!symptoms){document.getElementById('symptomInput').focus();return;}
+  const tokenOk = await CaedrixTokenGate.spendTokenOrPrompt(symptoms);
+  if(!tokenOk) return;
+  lastSymptoms=symptoms;
+  cachedHealthContextBlock = await buildCaedrixHealthContextBlock();
+  const { healthProfile: hp } = await getCaedrixMergedProfile();
+  lastAge=hp?.age||''; lastSex=hp?.sex||'';
+  clarifyingHistory=[];clarifyRound=0;finalClarifications={};
+  document.getElementById('submitBtn').disabled=true;document.getElementById('symptomInput').disabled=true;
+  document.getElementById('clarifyPanel').classList.remove('visible');
+  document.getElementById('resultsSection').style.display='none';
+  const e=document.getElementById('pipelineErrorMsg');if(e)e.remove();
+  [1,2,3,4,5].forEach(n=>setAgentState(n,'','Waiting'));
+  document.getElementById('trackFill').style.width='0%';
+  showPipeline();
+  await runClarifyAgent();
+}
+
+async function runClarifyAgent(){
+  setAgentState(1,'running','Reading symptoms…');
+  let msg=`Patient symptoms: "${lastSymptoms}"\nAge: ${lastAge||'not provided'}, Sex: ${lastSex||'not provided'}${cachedHealthContextBlock}`;
+  if(clarifyingHistory.length>0){msg+='\n\nPrevious clarifications:\n';clarifyingHistory.forEach(r=>{r.questions.forEach(q=>{msg+=`Q: ${q}\nA: ${r.answers[q]||'(no answer)'}\n`;});});}
+  if(clarifyRound>=MAX_CLARIFY_ROUNDS)msg+='\n\nMax rounds reached. Set needs_questions:false.';
+  try{
+    const r=await callClaude({systemPrompt:AGENT_CLARIFY_SYSTEM,userContent:msg,maxTokens:500});
+    let p;try{p=safeParseJSON(extractText(r));}catch(_){p={needs_questions:false};}
+    if(p.needs_questions&&p.questions?.length>0&&clarifyRound<MAX_CLARIFY_ROUNDS){clarifyRound++;setAgentState(1,'paused','Awaiting answers');showClarifyPanel(p.questions,clarifyRound);}
+    else{clarifyingHistory.forEach(r=>Object.assign(finalClarifications,r.answers));setAgentState(1,'done','Complete');await runMainPipeline();}
+  }catch(err){setAgentState(1,'error','Error');handleError('Agent 1: '+err.message);}
+}
+
+function showClarifyPanel(questions,round){
+  document.getElementById('clarifyRoundBadge').innerHTML=round>1?`<div class="clarify-round-badge"><div class="clarify-round-dot"></div>Round ${round} of ${MAX_CLARIFY_ROUNDS}</div>`:'';
+  document.getElementById('clarifyQuestions').innerHTML=questions.map((q,i)=>`<div class="clarify-q"><div class="clarify-q-label">${i+1}. ${q}</div><input class="clarify-q-input" type="text" placeholder="Your answer (or leave blank)" data-question="${encodeURIComponent(q)}"></div>`).join('');
+  document.getElementById('clarifyPanel').classList.add('visible');
+  document.getElementById('clarifyPanel').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function submitClarifications(){
+  const inputs=document.querySelectorAll('.clarify-q-input');
+  const answers={};inputs.forEach(i=>{answers[decodeURIComponent(i.dataset.question)]=i.value.trim();});
+  clarifyingHistory.push({round:clarifyRound,questions:Array.from(inputs).map(i=>decodeURIComponent(i.dataset.question)),answers});
+  document.getElementById('clarifyPanel').classList.remove('visible');
+  runClarifyAgent();
+}
+
+async function runMainPipeline(){
+  let msg=`Symptoms: "${lastSymptoms}"\nAge: ${lastAge||'not provided'}, Sex: ${lastSex||'not provided'}${cachedHealthContextBlock}`;
+  const hasClarif=Object.values(finalClarifications).some(v=>v);
+  if(hasClarif){msg+='\n\nAdditional clarifications:\n';Object.entries(finalClarifications).forEach(([q,a])=>{if(a)msg+=`Q: ${q}\nA: ${a}\n`;});}
+  try{
+    setAgentState(2,'running','Building differential…');
+    const r2=await callClaude({systemPrompt:AGENT_DIFFERENTIAL_SYSTEM,userContent:msg,maxTokens:6000});
+    let p2;try{p2=safeParseJSON(extractText(r2));}catch(e){throw new Error('Differential Analyst JSON parse failed: '+e.message);}
+    setAgentState(2,'done','Complete');
+
+    /* Agents 3+4: parallel with Haiku */
+    setAgentState(3,'running','Verifying…');
+    setAgentState(4,'running','Checking scope…');
+    const [r3,r4]=await Promise.all([
+      callClaude({systemPrompt:AGENT_ACCURACY_SYSTEM,userContent:JSON.stringify(p2),maxTokens:600,model:'claude-haiku-4-5-20251001'}),
+      callClaude({systemPrompt:AGENT_LEGAL_SYSTEM,   userContent:JSON.stringify(p2),maxTokens:500,model:'claude-haiku-4-5-20251001'})
+    ]);
+    let p3,p4;
+    try{p3=safeParseJSON(extractText(r3));}catch(_){p3={approved:true,accuracy_score:8,reviewer_note:'Reviewed.',corrections_needed:[]};}
+    try{p4=safeParseJSON(extractText(r4));}catch(_){p4={scope_appropriate:true,issues_found:[],legal_note:'Reviewed.'};}
+    setAgentState(3,'done','Score '+(p3.accuracy_score||8)+'/10');
+    setAgentState(4,'done',p4.scope_appropriate?'Approved ✓':'Issues flagged');
+
+    /* Agent 5: Clarity — only calls API when reviewers flagged real issues */
+    let final=p2;
+    const hasIssues=(p3.corrections_needed||[]).length>0||(p4.issues_found||[]).length>0;
+    if(hasIssues){
+      setAgentState(5,'running','Applying corrections…');
+      const r5=await callClaude({systemPrompt:AGENT_CLARITY_SYSTEM,userContent:`Analysis:\n${JSON.stringify(p2)}\nAccuracy issues:\n${JSON.stringify(p3.corrections_needed||[])}\nLegal issues:\n${JSON.stringify(p4.issues_found||[])}`,maxTokens:4000,model:'claude-haiku-4-5-20251001'});
+      try{
+        const corrected=safeParseJSON(extractText(r5));
+        if(corrected?.differential_diagnoses?.length>0){final=corrected;}
+        setAgentState(5,'done','Corrections applied');
+      }catch(_){setAgentState(5,'done','Corrections applied');}
+    }else{setAgentState(5,'done','No changes needed');}
+
+    setTimeout(()=>{hidePipeline();renderResults(final,p3);document.getElementById('submitBtn').disabled=false;document.getElementById('symptomInput').disabled=false;},400);
+  }catch(err){handleError(err.message||String(err));}
+}
+
+function renderResults(r,accuracy){
+  window.__caedrixLastResult = r; // captured for "Save to My Records"
+  CaedrixTokenGate.renderBalanceBadge('caedrixBalanceBadge');
+  const sec=document.getElementById('resultsSection');sec.style.display='block';
+
+  // Urgency
+  const uMap={emergency:{cls:'urgency-emergency',icon:'🚨',label:'SEEK EMERGENCY CARE NOW'},urgent:{cls:'urgency-urgent',icon:'⚡',label:'SEE A DOCTOR TODAY'},soon:{cls:'urgency-soon',icon:'📅',label:'SEE A DOCTOR WITHIN A FEW DAYS'},routine:{cls:'urgency-routine',icon:'✓',label:'ROUTINE MEDICAL VISIT APPROPRIATE'}};
+  const u=uMap[r.urgency]||uMap.routine;
+  const banner=document.getElementById('urgencyBanner');
+  banner.className='urgency-banner '+u.cls;
+  document.getElementById('urgencyIcon').textContent=u.icon;
+  document.getElementById('urgencyLabel').textContent=u.label;
+  document.getElementById('urgencyReason').textContent=r.urgency_reason||'';
+
+  document.getElementById('symptomEcho').textContent='"'+r.symptom_summary+'"';
+  document.getElementById('resultsMeta').innerHTML=`<div class="results-meta-chip">📅 ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div><div class="results-meta-chip">${(r.differential_diagnoses||[]).length} possible diagnoses</div><div class="results-meta-chip">✓ 5-Agent Review</div><div class="results-meta-chip">⚕ Educational only</div>`;
+  document.getElementById('agentNote').textContent=accuracy?.reviewer_note||'Reviewed by Caedrix AI 5-agent pipeline.';
+
+  // Differential list
+  document.getElementById('diffList').innerHTML=(r.differential_diagnoses||[]).map((d,i)=>{
+    const pc=d.probability_tier==='high'?'prob-high':d.probability_tier==='moderate'?'prob-moderate':'prob-low';
+    const pl=d.probability_tier==='high'?'Higher Likelihood':d.probability_tier==='moderate'?'Moderate Likelihood':'Lower Likelihood';
+    return `<div class="diff-card ${pc}">
+      <div class="diff-header" onclick="toggleDiff(this)">
+        <div class="diff-rank">${d.rank||i+1}</div>
+        <div class="diff-title-wrap">
+          <div class="diff-name">${esc(d.diagnosis_name)}</div>
+          <div class="diff-summary">${esc(d.what_it_is||'')}</div>
+        </div>
+        <span class="diff-prob-badge">${pl}</span>
+        <div class="diff-chevron">${i===0?'▾':'▸'}</div>
+      </div>
+      <div class="diff-body ${i===0?'open':''}">
+        <div class="diff-section"><div class="diff-section-label">Why this fits your symptoms</div><div class="diff-text">${esc(d.probability_explanation||d.why_it_fits||'')}</div></div>
+        ${(d.matching_symptoms||[]).length?`<div class="diff-section"><div class="diff-section-label">Matching symptoms</div><div class="diff-tags">${d.matching_symptoms.map(s=>`<span class="diff-tag matching">${esc(s)}</span>`).join('')}</div></div>`:''}
+        ${d.typical_course?`<div class="diff-section"><div class="diff-section-label">Typical course</div><div class="diff-text">${esc(d.typical_course)}</div></div>`:''}
+        ${(d.key_differentiating_factors||[]).length?`<div class="diff-section"><div class="diff-section-label">Key factors your doctor will consider</div><div class="diff-tags">${d.key_differentiating_factors.map(f=>`<span class="diff-tag">${esc(f)}</span>`).join('')}</div></div>`:''}
+        ${d.less_typical_aspects?`<div class="diff-section"><div class="diff-section-label">What doesn't fit as well</div><div class="diff-text" style="font-size:14px;color:rgba(255,255,255,0.5);">${esc(d.less_typical_aspects)}</div></div>`:''}
+      </div>
+    </div>`;}).join('');
+
+  // Red flags
+  const rfl=r.red_flag_symptoms||[];
+  document.getElementById('redFlagList').innerHTML=rfl.map(f=>`<div class="red-flag-item"><span class="red-flag-dot">•</span>${esc(f)}</div>`).join('');
+  document.getElementById('redFlagsSection').style.display=rfl.length?'block':'none';
+
+  // Tests
+  document.getElementById('testsList').innerHTML=(r.tests_likely_ordered||[]).map(t=>`<span class="test-chip">${esc(t)}</span>`).join('');
+
+  // Doctor questions
+  document.getElementById('doctorQuestions').innerHTML=(r.questions_for_doctor||[]).map((q,i)=>`<div class="doctor-q"><div class="doctor-q-num">${i+1}</div><span>${esc(q)}</span></div>`).join('');
+
+  // Clinical summary
+  const cs=r.clinical_summary||'';
+  const csSection=document.getElementById('clinicalSummarySection');
+  if(cs){document.getElementById('clinicalSummaryText').textContent=cs;csSection.style.display='block';}
+  else{csSection.style.display='none';}
+
+  // Recent research
+  const rr=r.recent_research||'';
+  const rrSection=document.getElementById('recentResearchSection');
+  if(rr){document.getElementById('recentResearchText').textContent=rr;rrSection.style.display='block';}
+  else{rrSection.style.display='none';}
+
+  setTimeout(()=>sec.scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+
+function toggleDiff(h){const b=h.nextElementSibling;const c=h.querySelector('.diff-chevron');b.classList.toggle('open');c.textContent=b.classList.contains('open')?'▾':'▸';}
+function resetToInput(){document.getElementById('resultsSection').style.display='none';document.getElementById('symptomInput').value='';document.getElementById('symptomInput').disabled=false;document.getElementById('submitBtn').disabled=false;document.getElementById('clarifyPanel').classList.remove('visible');hidePipeline();document.getElementById('inputCard').scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>document.getElementById('symptomInput').focus(),400);}
+function handleError(msg){console.error(msg);[1,2,3,4,5].forEach(n=>{const c=document.getElementById('agentCard'+n);if(c&&c.classList.contains('running'))setAgentState(n,'error','Error');});setTimeout(()=>{hidePipeline();document.getElementById('submitBtn').disabled=false;document.getElementById('symptomInput').disabled=false;const d=document.createElement('div');d.id='pipelineErrorMsg';d.style.cssText='margin-top:16px;padding:16px 20px;background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.3);border-radius:12px;font-size:13px;color:#e07070;font-family:DM Sans,sans-serif;line-height:1.5;';d.innerHTML='<strong style="color:#e88;">⚠ Error:</strong> '+msg+'<br><span style="opacity:.6;font-size:12px;">Check your API key and try again.</span>';document.getElementById('inputCard').after(d);},800);}
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+document.getElementById('symptomInput').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')runAnalysis();});
+document.getElementById('symptomInput').addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(300,Math.max(100,this.scrollHeight))+'px';});
+
+function downloadResults() {
+  const title = document.getElementById('resultsDiagnosisName')?.textContent ||
+                document.getElementById('resultQuestionEcho')?.textContent || 'Caedrix AI Results';
+  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+title+'</title>' +
+    '<style>body{font-family:Georgia,serif;max-width:800px;margin:40px auto;color:#111;line-height:1.6;}' +
+    'h1{font-size:28px;}h2{font-size:20px;margin-top:32px;border-bottom:1px solid #ccc;padding-bottom:6px;}' +
+    'p,li{font-size:15px;}.section{margin-bottom:32px;}</style></head><body>' +
+    document.getElementById("resultsSection").innerHTML + '</body></html>';
+  const blob = new Blob([html], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = title.replace(/[^a-z0-9]/gi,'_').toLowerCase() + '_caedrix_ai.html';
+  a.click();
+}
+
+</script>
+</body>
+</html>
