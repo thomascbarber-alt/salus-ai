@@ -1330,13 +1330,31 @@ async function initFolderConnection() {
 async function getCaedrixMergedProfile() {
   let personalDetails = null, healthProfile = null, medicalRecordCount = 0;
 
-  if (folderConnected && typeof CaedrixStorage !== 'undefined') {
+  if (typeof CaedrixStorage !== 'undefined' && CaedrixStorage.isSupported()) {
     try {
-      const ctx = await CaedrixStorage.getLocalHealthContext();
-      if (ctx && ctx.connected) {
-        personalDetails = ctx.personalDetails;
-        healthProfile = ctx.healthProfile;
-        medicalRecordCount = (ctx.medicalRecordFiles || []).length;
+      // folderConnected (set once at page load) can go stale if permission
+      // lapsed since then. Re-check live, and — since this only ever runs
+      // from the "Ask" button's click handler, i.e. a real user gesture —
+      // silently re-request permission if needed, instead of quietly
+      // falling back to a possibly outdated localStorage copy.
+      let status = folderConnected ? 'connected' : await CaedrixStorage.restoreConnection();
+      if (status === 'needs-permission') {
+        try {
+          await CaedrixStorage.reconnectFolder();
+          status = 'connected';
+        } catch (_) {
+          status = 'none'; // user declined re-confirmation
+        }
+      }
+      folderConnected = (status === 'connected');
+
+      if (folderConnected) {
+        const ctx = await CaedrixStorage.getLocalHealthContext();
+        if (ctx && ctx.connected) {
+          personalDetails = ctx.personalDetails;
+          healthProfile = ctx.healthProfile;
+          medicalRecordCount = (ctx.medicalRecordFiles || []).length;
+        }
       }
     } catch (_) { /* fall through to localStorage below */ }
   }
