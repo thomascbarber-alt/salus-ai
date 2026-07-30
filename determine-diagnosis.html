@@ -445,6 +445,7 @@ window.addEventListener('DOMContentLoaded',async ()=>{
   caedrixInitUserBar();
   await initFolderConnection();
   CaedrixTokenGate.renderBalanceBadge('caedrixBalanceBadge');
+  CaedrixTokenGate.syncButtonLabel('submitBtn', 'Analyze Symptoms →', 'Analyze Symptoms — $2.99 →');
   const savedDraft = CaedrixTokenGate.getAndClearResumeDraft();
   if (savedDraft) {
     document.getElementById('symptomInput').value = savedDraft;
@@ -804,6 +805,7 @@ async function runMainPipeline(){
 function renderResults(r,accuracy){
   window.__caedrixLastResult = r; // captured for "Save to My Records"
   CaedrixTokenGate.renderBalanceBadge('caedrixBalanceBadge');
+  CaedrixTokenGate.syncButtonLabel('submitBtn', 'Analyze Symptoms →', 'Analyze Symptoms — $2.99 →');
   const sec=document.getElementById('resultsSection');sec.style.display='block';
 
   // Urgency

@@ -1,0 +1,207 @@
+<!--
+  PERSONALIZATION PLACEHOLDERS
+  ================================
+  {{email}}         — recipient's email (shown as confirmation)
+  {{first_name}}     — recipient's first name, used in the opening line
+  {{redeem_code}}    — their personal gift code (see redeem-code.js /
+                        caedrix-token-gate.js paywall "Redeem a gift code"
+                        field — no new backend needed)
+
+  Replace with your platform's merge tag syntax once chosen (Mailchimp:
+  *|FNAME|* *|EMAIL|*, Klaviyo: {{ person.first_name }} etc.), or
+  find-and-replace by hand if sending manually.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caedrix AI — Early Access for You</title>
+</head>
+<body style="margin:0; padding:0; background-color:#ede8df; font-family:Arial, Helvetica, sans-serif;">
+
+<div style="display:none; max-height:0; overflow:hidden; font-size:1px; line-height:1px; color:#ede8df;">
+  We built something we think your audience needs to see — and we'd love your honest take, on us.
+</div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#ede8df;">
+  <tr>
+    <td align="center" style="padding:32px 16px;">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%; background-color:#ffffff; border-radius:12px; overflow:hidden;">
+
+        <!-- HEADER -->
+        <tr>
+          <td align="center" style="background-color:#0c1e3a; padding:32px 24px;">
+            <div style="font-family:Georgia, 'Times New Roman', serif; font-size:26px; font-weight:bold; color:#ffffff; letter-spacing:0.5px;">
+              Caedrix <span style="color:#d4aa3a; font-style:italic;">AI</span>
+            </div>
+            <div style="font-family:Arial, sans-serif; font-size:11px; letter-spacing:2px; color:#d4aa3a; text-transform:uppercase; margin-top:6px;">
+              Creator Early Access
+            </div>
+          </td>
+        </tr>
+
+        <!-- HERO -->
+        <tr>
+          <td style="padding:36px 32px 8px 32px;">
+            <div style="font-family:Georgia, serif; font-size:23px; line-height:1.35; color:#1a2e4a; text-align:center;">
+              Hi {{first_name}} — we built something for your audience.
+            </div>
+            <p style="font-family:Arial, sans-serif; font-size:14px; line-height:1.65; color:#4a5568; text-align:center; margin:16px 0 0 0;">
+              We're inviting a small group of creators to try Caedrix AI before we open it up more broadly —
+              and we'd love for you to be one of them. This note (and your free access) was sent to
+              <strong style="color:#1a2e4a;">{{email}}</strong>.
+            </p>
+          </td>
+        </tr>
+
+        <!-- WHAT IT IS -->
+        <tr>
+          <td style="padding:20px 32px 4px 32px;">
+            <p style="font-family:Arial, sans-serif; font-size:14px; line-height:1.65; color:#4a5568; margin:0;">
+              Caedrix AI turns your personal health context into three clear, practical tools — no more piecing
+              together generic search results at 1am.
+            </p>
+          </td>
+        </tr>
+
+        <!-- FEATURE 1 -->
+        <tr>
+          <td style="padding:14px 32px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8f4ed; border-radius:10px; border:1px solid #ddd8cc;">
+              <tr>
+                <td style="padding:20px 22px;">
+                  <table role="presentation" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td width="40" valign="top" style="font-size:24px; padding-right:10px;">⚖️</td>
+                      <td valign="top">
+                        <div style="font-family:Arial, sans-serif; font-size:15px; font-weight:bold; color:#0c1e3a;">Health Decisions</div>
+                        <p style="font-family:Arial, sans-serif; font-size:13px; line-height:1.5; color:#4a5568; margin:5px 0 0 0;">
+                          Weighs a medication, procedure, or lifestyle choice against your own health history —
+                          so you show up to appointments with real questions, not guesswork.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- FEATURE 2 -->
+        <tr>
+          <td style="padding:0 32px 14px 32px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8f4ed; border-radius:10px; border:1px solid #ddd8cc;">
+              <tr>
+                <td style="padding:20px 22px;">
+                  <table role="presentation" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td width="40" valign="top" style="font-size:24px; padding-right:10px;">🩺</td>
+                      <td valign="top">
+                        <div style="font-family:Arial, sans-serif; font-size:15px; font-weight:bold; color:#0c1e3a;">Determine Diagnosis</div>
+                        <p style="font-family:Arial, sans-serif; font-size:13px; line-height:1.5; color:#4a5568; margin:5px 0 0 0;">
+                          Describe symptoms, get a ranked breakdown of likely explanations matched to your age,
+                          conditions, and risk factors — plus honest red-flag guidance on when to seek care.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- FEATURE 3 -->
+        <tr>
+          <td style="padding:0 32px 14px 32px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8f4ed; border-radius:10px; border:1px solid #ddd8cc;">
+              <tr>
+                <td style="padding:20px 22px;">
+                  <table role="presentation" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td width="40" valign="top" style="font-size:24px; padding-right:10px;">🔍</td>
+                      <td valign="top">
+                        <div style="font-family:Arial, sans-serif; font-size:15px; font-weight:bold; color:#0c1e3a;">Understand Diagnosis</div>
+                        <p style="font-family:Arial, sans-serif; font-size:13px; line-height:1.5; color:#4a5568; margin:5px 0 0 0;">
+                          A plain-language deep dive on an existing diagnosis — treatment options, recent
+                          research, and relevant specialists, framed around your own medical history.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- CODE BOX -->
+        <tr>
+          <td style="padding:18px 32px 8px 32px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0c1e3a; border-radius:10px;">
+              <tr>
+                <td align="center" style="padding:24px 24px;">
+                  <div style="font-size:22px;">🎁</div>
+                  <p style="font-family:Arial, sans-serif; font-size:13px; line-height:1.6; color:#e6ecf5; margin:8px 0 14px 0;">
+                    Your access is free — no card needed. Use this code on any search:
+                  </p>
+                  <div style="font-family:'Courier New', monospace; font-size:22px; font-weight:bold; letter-spacing:2px; color:#d4aa3a;">
+                    {{redeem_code}}
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- THE ASK -->
+        <tr>
+          <td style="padding:20px 32px 4px 32px;">
+            <p style="font-family:Arial, sans-serif; font-size:13.5px; line-height:1.65; color:#4a5568; text-align:center; margin:0;">
+              No obligation, no script to follow — just genuinely try it. If it's useful to you, we'd love your
+              honest feedback, and if you ever want to share it with your audience, we'll set you up with a
+              code just for them.
+            </p>
+          </td>
+        </tr>
+
+        <!-- CTA -->
+        <tr>
+          <td align="center" style="padding:28px 32px 8px 32px;">
+            <a href="https://caedrix.com/precision-medicine3.html"
+               style="display:inline-block; background-color:#d4aa3a; color:#0c1e3a; font-family:Arial, sans-serif; font-size:15px; font-weight:bold; text-decoration:none; padding:14px 36px; border-radius:8px;">
+              Try Caedrix AI Free →
+            </a>
+            <p style="font-family:Arial, sans-serif; font-size:11.5px; color:#9aa5b1; margin:12px 0 0 0;">
+              HIPAA-compliant &amp; encrypted. Your data stays yours.
+            </p>
+          </td>
+        </tr>
+
+        <!-- FOOTER -->
+        <tr>
+          <td style="padding:28px 32px; border-top:1px solid #ede8df; text-align:center;">
+            <p style="font-family:Arial, sans-serif; font-size:11px; line-height:1.6; color:#9aa5b1; margin:0;">
+              Caedrix AI provides health information to help you understand your medical data and prepare for
+              conversations with your care team. It does not constitute medical advice, diagnosis, or treatment.
+              Always consult a qualified healthcare provider for medical decisions.
+            </p>
+            <p style="font-family:Arial, sans-serif; font-size:11px; color:#9aa5b1; margin:12px 0 0 0;">
+              Sent to {{email}} as part of the Caedrix AI creator early access program.
+            </p>
+            <p style="font-family:Arial, sans-serif; font-size:11px; color:#9aa5b1; margin:8px 0 0 0;">
+              Caedrix AI · <a href="https://caedrix.com" style="color:#0a7c6e; text-decoration:none;">caedrix.com</a>
+              &nbsp;·&nbsp; <a href="#" style="color:#9aa5b1; text-decoration:underline;">Unsubscribe</a>
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

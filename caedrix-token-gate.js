@@ -64,12 +64,46 @@ const CaedrixTokenGate = (function () {
   }
 
   /**
+   * Keeps a search button's label in sync with the user's live balance.
+   * When they have credits (tokens > 0), shows the plain action label —
+   * no price, since this search is already paid for. When they're at 0
+   * (or not logged in yet), shows the priced label instead so the cost
+   * is clear before they click.
+   *
+   * Call this anywhere you'd call renderBalanceBadge — page load, and
+   * again right after a search completes (balance may have just dropped
+   * to 0, or just gone up if they bought more mid-flow).
+   *
+   * USAGE: CaedrixTokenGate.syncButtonLabel('submitBtn', 'Analyze My Decision', 'Analyze My Decision — $2.99');
+   */
+  async function syncButtonLabel(buttonElementId, freeLabel, pricedLabel) {
+    const btn = document.getElementById(buttonElementId);
+    if (!btn) return;
+    const tokens = await fetchBalance();
+    btn.textContent = tokens > 0 ? freeLabel : pricedLabel;
+  }
+
+  /**
    * Attempts to spend one token server-side. If the user has none, shows
    * the paywall modal (buy / redeem code) instead and returns false so the
    * calling page does NOT proceed with the search.
    * Returns true only if a token was actually, successfully spent.
    */
-  async function spendTokenOrPrompt() {
+  async function spendTokenOrPrompt(draftText) {
+    if (typeof draftText === 'string' && draftText.trim()) {
+      const key = 'caedrix_draft:' + window.location.pathname;
+      try { sessionStorage.setItem(key, draftText); } catch (_) {}
+      // Belt-and-suspenders backup: some browsers (notably Safari's tracking
+      // prevention) can behave inconsistently with sessionStorage across a
+      // third-party redirect round-trip like Stripe Checkout. Mirror the
+      // draft into localStorage with an expiry so a restore is still
+      // possible even if sessionStorage came back empty — but old drafts
+      // don't linger forever if the user never actually goes through
+      // checkout.
+      try {
+        localStorage.setItem(key, JSON.stringify({ text: draftText, expires: Date.now() + 30 * 60 * 1000 }));
+      } catch (_) {}
+    }
     const email = getUserEmail();
     if (!email) {
       // No account yet — that's fine, they haven't bought anything.
@@ -212,6 +246,31 @@ const CaedrixTokenGate = (function () {
     if (modal) modal.style.display = 'none';
   }
 
+  function getAndClearResumeDraft() {
+    const key = 'caedrix_draft:' + window.location.pathname;
+    try {
+      const val = sessionStorage.getItem(key);
+      if (val) {
+        sessionStorage.removeItem(key);
+        try { localStorage.removeItem(key); } catch (_) {}
+        return val;
+      }
+    } catch (_) { /* fall through to localStorage backup */ }
+
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        localStorage.removeItem(key);
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.expires > Date.now()) {
+          return parsed.text || '';
+        }
+      }
+    } catch (_) {}
+
+    return '';
+  }
+
   async function buy(pack) {
     const email = getOrCollectEmail();
     if (!email) return;
@@ -219,7 +278,7 @@ const CaedrixTokenGate = (function () {
       const res = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, pack })
+        body: JSON.stringify({ email, pack, returnUrl: window.location.pathname })
       });
       const data = await res.json();
       if (data.url) {
@@ -273,12 +332,14 @@ const CaedrixTokenGate = (function () {
   return {
     fetchBalance,
     renderBalanceBadge,
+    syncButtonLabel,
     spendTokenOrPrompt,
     showPaywall,
     hidePaywall,
     buy,
     redeem,
-    getOrCollectEmail
+    getOrCollectEmail,
+    getAndClearResumeDraft
   };
 
 })();

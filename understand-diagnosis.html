@@ -548,6 +548,7 @@ window.addEventListener('DOMContentLoaded',async ()=>{
   caedrixInitUserBar();
   await initFolderConnection();
   CaedrixTokenGate.renderBalanceBadge('caedrixBalanceBadge');
+  CaedrixTokenGate.syncButtonLabel('submitBtn', 'Research →', 'Research — $2.99 →');
   const savedDraft = CaedrixTokenGate.getAndClearResumeDraft();
   if (savedDraft) {
     document.getElementById('diagnosisInput').value = savedDraft;
@@ -1219,6 +1220,7 @@ async function runResearchInParallel(){
 function renderResults(c,legal){
   window.__caedrixLastResult = c; // captured for "Save to My Records"
   CaedrixTokenGate.renderBalanceBadge('caedrixBalanceBadge');
+  CaedrixTokenGate.syncButtonLabel('submitBtn', 'Research →', 'Research — $2.99 →');
   // c = merged + polished JSON containing all fields from both clinical + trials agents
   const sec=document.getElementById('resultsSection');
   sec.style.display='block';

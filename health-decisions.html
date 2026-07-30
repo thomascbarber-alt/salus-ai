@@ -1291,6 +1291,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   await initFolderConnection();
   await renderProfileContextBox();
   CaedrixTokenGate.renderBalanceBadge('caedrixBalanceBadge');
+  CaedrixTokenGate.syncButtonLabel('submitBtn', 'Analyze My Decision', 'Analyze My Decision — $2.99');
   if (CaedrixState.isRecordsConnected()) {
     recordsConnected = true;
   }
@@ -2007,6 +2008,7 @@ function renderResults(result, accuracy, legal, originalQuestion) {
   window.__caedrixLastResult = result;          // captured for "Save to My Records"
   window.__caedrixLastQuestion = originalQuestion;
   CaedrixTokenGate.renderBalanceBadge('caedrixBalanceBadge');
+  CaedrixTokenGate.syncButtonLabel('submitBtn', 'Analyze My Decision', 'Analyze My Decision — $2.99');
   const sec = document.getElementById('resultsSection');
   sec.classList.remove('hidden');
 
