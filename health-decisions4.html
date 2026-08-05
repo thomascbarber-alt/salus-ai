@@ -14,6 +14,10 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>Salus AI — Health Decisions</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -72,7 +76,7 @@ nav {
 .nav-mini {
   padding: 8px 14px; border-radius: 20px;
   font-size: 12px; font-weight: 600;
-  text-decoration: none; transition: all 0.2s ease;
+  text-decoration: none; transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   font-family: 'DM Sans', sans-serif;
 }
 .nav-mini:hover { transform: translateY(-1px); opacity: 0.9; }
@@ -175,7 +179,7 @@ h1 em { font-style: italic; color: var(--gold); }
   line-height: 1.65;
   resize: vertical;
   outline: none;
-  transition: all 0.3s;
+  transition: background-color 0.3s, color 0.3s, transform 0.3s, box-shadow 0.3s, border-color 0.3s;
   display: block;
   margin-bottom: 18px;
 }
@@ -203,7 +207,7 @@ h1 em { font-style: italic; color: var(--gold); }
   border: 1px solid rgba(184,147,42,0.2);
   color: rgba(255,255,255,0.4); cursor: pointer;
   background: rgba(184,147,42,0.05);
-  transition: all 0.2s; white-space: nowrap;
+  transition: background-color 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s, border-color 0.2s; white-space: nowrap;
 }
 .hint-chip:hover {
   border-color: rgba(184,147,42,0.5);
@@ -217,13 +221,15 @@ h1 em { font-style: italic; color: var(--gold); }
   color: white; font-family: 'DM Sans', sans-serif;
   font-size: 15px; font-weight: 700;
   border: none; cursor: pointer;
-  transition: all 0.25s; white-space: nowrap; flex-shrink: 0;
+  transition: background-color 0.25s, color 0.25s, transform 0.25s, box-shadow 0.25s, border-color 0.25s; white-space: nowrap; flex-shrink: 0;
 }
 .submit-btn:hover:not(:disabled) {
   background: linear-gradient(135deg, #1abfad, var(--teal-light));
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(10,124,110,0.35);
 }
+.submit-btn:active:not(:disabled) { transform: scale(0.96); }
+
 .submit-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 .submit-arrow { font-size: 18px; }
 
@@ -258,7 +264,7 @@ h1 em { font-style: italic; color: var(--gold); }
 .records-btn {
   padding: 9px 18px; border-radius: 8px; font-family: 'DM Sans', sans-serif;
   font-size: 13px; font-weight: 700; cursor: pointer; border: none;
-  transition: all 0.2s; text-decoration: none;
+  transition: background-color 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s, border-color 0.2s; text-decoration: none;
 }
 .records-btn-yes { background: var(--gold); color: var(--navy); }
 .records-btn-yes:hover { background: var(--gold-light); transform: translateY(-1px); }
@@ -328,7 +334,7 @@ h1 em { font-style: italic; color: var(--gold); }
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 8px; outline: none;
   font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--white);
-  transition: all 0.2s;
+  transition: background-color 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
 .clarify-q-input:focus {
   border-color: rgba(184,147,42,0.4);
@@ -340,7 +346,7 @@ h1 em { font-style: italic; color: var(--gold); }
   padding: 12px 24px; border-radius: 8px;
   background: var(--gold); color: var(--navy);
   font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
-  border: none; cursor: pointer; transition: all 0.2s;
+  border: none; cursor: pointer; transition: background-color 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
 .clarify-submit:hover { background: var(--gold-light); transform: translateY(-1px); }
 
@@ -382,7 +388,7 @@ h1 em { font-style: italic; color: var(--gold); }
   border-radius: 12px; padding: 14px 12px 12px;
   border: 1px solid rgba(255,255,255,0.07);
   background: rgba(255,255,255,0.02);
-  transition: all 0.4s ease;
+  transition: background-color 0.4s ease, color 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
   position: relative; overflow: hidden;
   display: flex; flex-direction: column; align-items: center;
   text-align: center;
@@ -412,7 +418,7 @@ h1 em { font-style: italic; color: var(--gold); }
   margin: 0 auto 10px;
   background: rgba(255,255,255,0.05);
   border: 1.5px solid rgba(255,255,255,0.1);
-  font-size: 13px; transition: all 0.4s;
+  font-size: 13px; transition: background-color 0.4s, color 0.4s, transform 0.4s, box-shadow 0.4s, border-color 0.4s;
   flex-shrink: 0;
 }
 .agent-card.running .agent-flag {
@@ -578,7 +584,7 @@ h1 em { font-style: italic; color: var(--gold); }
   background: var(--white); border-radius: 16px;
   border: 1px solid var(--border);
   box-shadow: 0 2px 24px rgba(12,30,58,0.07);
-  overflow: hidden; transition: all 0.3s;
+  overflow: hidden; transition: background-color 0.3s, color 0.3s, transform 0.3s, box-shadow 0.3s, border-color 0.3s;
 }
 .option-card:hover {
   box-shadow: 0 8px 40px rgba(12,30,58,0.12);
@@ -738,7 +744,7 @@ h1 em { font-style: italic; color: var(--gold); }
   padding: 10px 22px; border-radius: 8px;
   background: var(--gold); color: var(--navy);
   font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
-  border: none; cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+  border: none; cursor: pointer; transition: background-color 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s, border-color 0.2s; flex-shrink: 0;
 }
 .new-q-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
 
@@ -822,7 +828,7 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 .subs-avatar{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,0.6);flex-shrink:0;}
 .subs-email{color:rgba(255,255,255,0.38);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .subs-right{display:flex;align-items:center;gap:10px;}
-.subs-records{display:flex;align-items:center;gap:5px;padding:4px 11px;border-radius:100px;text-decoration:none;transition:all .2s;white-space:nowrap;}
+.subs-records{display:flex;align-items:center;gap:5px;padding:4px 11px;border-radius:100px;text-decoration:none;transition: background-color .2s, color .2s, transform .2s, box-shadow .2s, border-color .2s;white-space:nowrap;}
 .subs-records-on{background:rgba(58,158,106,0.12);border:1px solid rgba(58,158,106,0.3);color:#52c488;}
 .subs-records-off{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.3);}
 .subs-records-off:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.55);}
@@ -830,14 +836,14 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 .subs-rdot-on{background:#52c488;animation:subsDotPulse 2.2s infinite;}
 .subs-rdot-off{background:rgba(255,255,255,0.18);}
 @keyframes subsDotPulse{0%{box-shadow:0 0 0 0 rgba(82,196,136,.5);}70%{box-shadow:0 0 0 5px rgba(82,196,136,0);}100%{box-shadow:0 0 0 0 rgba(82,196,136,0);}}
-.subs-signout{padding:4px 9px;border-radius:6px;background:none;border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.22);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;transition:all .2s;}
+.subs-signout{padding:4px 9px;border-radius:6px;background:none;border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.22);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;transition: background-color .2s, color .2s, transform .2s, box-shadow .2s, border-color .2s;}
 .subs-signout:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.5);}
 @media(max-width:768px){#salusUserBar{padding:0 16px;}.subs-email{display:none;}.subs-records span{display:none;}}
 
 
 /* ── Print/Download bar ── */
 .print-bar{display:flex;gap:12px;justify-content:flex-end;margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.07);}
-.print-btn{display:flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;border:none;}
+.print-btn{display:flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition: background-color .2s, color .2s, transform .2s, box-shadow .2s, border-color .2s;border:none;}
 .print-btn-download{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.7);}
 .print-btn-download:hover{background:rgba(255,255,255,0.12);color:white;}
 .print-btn-print{background:rgba(19,160,144,0.15);color:#13c0ac;border:1px solid rgba(19,160,144,0.3);}

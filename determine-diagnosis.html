@@ -9,6 +9,10 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>Caedrix AI — Determine Diagnosis</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
@@ -31,7 +35,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .nav-logo{display:flex;align-items:center;}
 .logo-img{height:90px;width:auto;object-fit:contain;}
 .nav-actions{display:flex;gap:10px;margin-left:auto;margin-right:20px;}
-.nav-mini{padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;transition:all .2s;white-space:nowrap;}
+.nav-mini{padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;transition: background-color .2s, color .2s, transform .2s, box-shadow .2s, border-color .2s;white-space:nowrap;}
 .nav-mini:hover{transform:translateY(-1px);opacity:.9;}
 .btn1{background:linear-gradient(135deg,#d4aa3a,#b8932a);color:#0c1e3a;}
 .btn2{background:linear-gradient(135deg,#13a090,#0a7c6e);color:white;}
@@ -73,13 +77,15 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .ctx-select:focus{border-color:rgba(155,89,182,0.5);}
 .ctx-select option{background:#162d52;color:white;}
 .symptom-area{padding:16px 28px 8px;}
-.symptom-input{width:100%;padding:16px 20px;background:rgba(255,255,255,0.04);border:1px solid rgba(155,89,182,0.15);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--white);outline:none;resize:none;min-height:100px;line-height:1.6;transition:all .3s;}
+.symptom-input{width:100%;padding:16px 20px;background:rgba(255,255,255,0.04);border:1px solid rgba(155,89,182,0.15);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--white);outline:none;resize:none;min-height:100px;line-height:1.6;transition: background-color .3s, color .3s, transform .3s, box-shadow .3s, border-color .3s;}
 .symptom-input:focus{border-color:rgba(155,89,182,0.5);background:rgba(155,89,182,0.06);}
 .symptom-input::placeholder{color:rgba(255,255,255,0.18);}
 .input-footer{display:flex;align-items:center;justify-content:space-between;padding:12px 28px 22px;gap:12px;flex-wrap:wrap;}
 .char-hint{font-size:11px;color:rgba(255,255,255,0.25);}
-.submit-btn{padding:14px 28px;border-radius:12px;background:linear-gradient(135deg,var(--plum),#6b7a8d);color:white;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;border:1px solid rgba(155,89,182,0.4);cursor:pointer;transition:all .25s;white-space:nowrap;}
+.submit-btn{padding:14px 28px;border-radius:12px;background:linear-gradient(135deg,var(--plum),#6b7a8d);color:white;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;border:1px solid rgba(155,89,182,0.4);cursor:pointer;transition: background-color .25s, color .25s, transform .25s, box-shadow .25s, border-color .25s;white-space:nowrap;}
 .submit-btn:hover:not(:disabled){background:linear-gradient(135deg,#aa66c8,var(--plum));transform:translateY(-1px);box-shadow:0 6px 20px rgba(155,89,182,0.3);}
+.submit-btn:active:not(:disabled){transform:scale(0.96);}
+
 .submit-btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
 
 /* CLARIFY */
@@ -97,7 +103,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .clarify-q-input{width:100%;padding:11px 14px;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(155,89,182,0.2);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none;transition:border-color .2s;}
 .clarify-q-input:focus{border-color:rgba(155,89,182,0.5);}
 .clarify-q-input::placeholder{color:rgba(255,255,255,0.2);}
-.clarify-submit{display:block;width:calc(100% - 48px);margin:14px 24px 22px;padding:13px;border-radius:10px;background:rgba(155,89,182,0.6);color:white;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:all .2s;}
+.clarify-submit{display:block;width:calc(100% - 48px);margin:14px 24px 22px;padding:13px;border-radius:10px;background:rgba(155,89,182,0.6);color:white;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;border:none;cursor:pointer;transition: background-color .2s, color .2s, transform .2s, box-shadow .2s, border-color .2s;}
 .clarify-submit:hover{background:var(--plum);transform:translateY(-1px);}
 
 /* PIPELINE */
@@ -108,7 +114,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .pipeline-track-line{position:absolute;top:22px;left:10%;right:10%;height:2px;background:rgba(255,255,255,0.07);z-index:0;border-radius:2px;overflow:hidden;}
 .pipeline-track-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--plum),var(--plum-light));transition:width .6s cubic-bezier(.4,0,.2,1);}
 .agents-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%;position:relative;z-index:1;}
-.agent-card{border-radius:12px;padding:14px 12px 12px;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.02);transition:all .4s;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;text-align:center;}
+.agent-card{border-radius:12px;padding:14px 12px 12px;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.02);transition: background-color .4s, color .4s, transform .4s, box-shadow .4s, border-color .4s;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;text-align:center;}
 .agent-card.running{border-color:rgba(155,89,182,0.5);background:rgba(155,89,182,0.08);box-shadow:0 0 18px rgba(155,89,182,0.08);}
 .agent-card.done{border-color:rgba(155,89,182,0.4);background:rgba(155,89,182,0.06);}
 .agent-card.paused{border-color:rgba(155,89,182,0.4);background:rgba(155,89,182,0.07);}
@@ -116,7 +122,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .agent-card-shimmer{position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent);transform:translateX(-100%);animation:shimmer 1.5s infinite;pointer-events:none;display:none;}
 .agent-card.running .agent-card-shimmer{display:block;}
 @keyframes shimmer{to{transform:translateX(100%);}}
-.agent-flag{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:13px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);transition:all .4s;flex-shrink:0;}
+.agent-flag{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:13px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);transition: background-color .4s, color .4s, transform .4s, box-shadow .4s, border-color .4s;flex-shrink:0;}
 .agent-card.running .agent-flag{background:rgba(155,89,182,0.2);border-color:rgba(155,89,182,0.6);animation:flagPulse 1.2s ease-in-out infinite;}
 .agent-card.done .agent-flag{background:rgba(155,89,182,0.2);border-color:var(--plum-light);color:var(--plum-light);}
 .agent-card.error .agent-flag{background:rgba(192,57,43,0.15);border-color:var(--danger);}
@@ -163,7 +169,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 /* DIFFERENTIAL LIST */
 .section-label-main{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:20px;text-align:center;}
 .diff-list{display:flex;flex-direction:column;gap:12px;margin-bottom:36px;}
-.diff-card{border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.02);transition:all .3s;}
+.diff-card{border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.02);transition: background-color .3s, color .3s, transform .3s, box-shadow .3s, border-color .3s;}
 .diff-card.prob-high{border-color:rgba(155,89,182,0.35);background:rgba(155,89,182,0.05);}
 .diff-card.prob-moderate{border-color:rgba(184,147,42,0.2);background:rgba(184,147,42,0.03);}
 .diff-card.prob-low{border-color:rgba(74,111,165,0.15);}
@@ -211,10 +217,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .doctor-q-num{width:22px;height:22px;border-radius:50%;background:rgba(155,89,182,0.2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--plum-light);flex-shrink:0;margin-top:2px;}
 
 /* RESET */
-.reset-btn{display:flex;align-items:center;gap:8px;margin:0 auto;padding:12px 28px;background:rgba(155,89,182,0.1);border:1px solid rgba(155,89,182,0.25);border-radius:100px;color:rgba(255,255,255,0.5);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;}
+.reset-btn{display:flex;align-items:center;gap:8px;margin:0 auto;padding:12px 28px;background:rgba(155,89,182,0.1);border:1px solid rgba(155,89,182,0.25);border-radius:100px;color:rgba(255,255,255,0.5);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition: background-color .2s, color .2s, transform .2s, box-shadow .2s, border-color .2s;}
 .reset-btn:hover{background:rgba(155,89,182,0.2);color:rgba(255,255,255,0.8);}
 .save-record-row{justify-content:center;}
-.save-record-btn{display:flex;align-items:center;gap:8px;margin:0 auto;padding:12px 28px;background:linear-gradient(135deg,#13a090,#0a7c6e);border:none;border-radius:100px;color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.save-record-btn{display:flex;align-items:center;gap:8px;margin:0 auto;padding:12px 28px;background:linear-gradient(135deg,#13a090,#0a7c6e);border:none;border-radius:100px;color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition: background-color .2s, color .2s, transform .2s, box-shadow .2s, border-color .2s;}
 .save-record-btn:hover{opacity:0.9;}
 .save-record-btn:disabled{opacity:0.5;cursor:not-allowed;}
 
@@ -234,7 +240,7 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
 .subs-avatar{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,0.6);flex-shrink:0;}
 .subs-email{color:rgba(255,255,255,0.38);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .subs-right{display:flex;align-items:center;gap:10px;}
-.subs-records{display:flex;align-items:center;gap:5px;padding:4px 11px;border-radius:100px;text-decoration:none;transition:all .2s;white-space:nowrap;}
+.subs-records{display:flex;align-items:center;gap:5px;padding:4px 11px;border-radius:100px;text-decoration:none;transition: background-color .2s, color .2s, transform .2s, box-shadow .2s, border-color .2s;white-space:nowrap;}
 .subs-records-on{background:rgba(58,158,106,0.12);border:1px solid rgba(58,158,106,0.3);color:#52c488;}
 .subs-records-off{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.3);}
 .subs-records-off:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.55);}
@@ -242,14 +248,14 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
 .subs-rdot-on{background:#52c488;animation:subsDotPulse 2.2s infinite;}
 .subs-rdot-off{background:rgba(255,255,255,0.18);}
 @keyframes subsDotPulse{0%{box-shadow:0 0 0 0 rgba(82,196,136,.5);}70%{box-shadow:0 0 0 5px rgba(82,196,136,0);}100%{box-shadow:0 0 0 0 rgba(82,196,136,0);}}
-.subs-signout{padding:4px 9px;border-radius:6px;background:none;border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.22);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;transition:all .2s;}
+.subs-signout{padding:4px 9px;border-radius:6px;background:none;border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.22);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;transition: background-color .2s, color .2s, transform .2s, box-shadow .2s, border-color .2s;}
 .subs-signout:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.5);}
 @media(max-width:768px){#caedrixUserBar{padding:0 16px;}.subs-email{display:none;}.subs-records span{display:none;}}
 
 
 /* ── Print/Download bar ── */
 .print-bar{display:flex;gap:12px;justify-content:flex-end;margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.07);}
-.print-btn{display:flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;border:none;}
+.print-btn{display:flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition: background-color .2s, color .2s, transform .2s, box-shadow .2s, border-color .2s;border:none;}
 .print-btn-download{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.7);}
 .print-btn-download:hover{background:rgba(255,255,255,0.12);color:white;}
 .print-btn-print{background:rgba(19,160,144,0.15);color:#13c0ac;border:1px solid rgba(19,160,144,0.3);}
@@ -276,7 +282,7 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
   </div>
     <div class="nav-actions">
     <a href="precision-medicine3.html"  class="nav-mini btn1">Precision Medicine</a>
-    <a href="health-decisions.html"    class="nav-mini btn2">Health Decisions</a>
+    <a href="health-decisions4.html"    class="nav-mini btn2">Health Decisions</a>
     <a href="determine-diagnosis.html"  class="nav-mini btn4" style="border:1px solid rgba(155,89,182,0.6);">Determine Diagnosis</a>
     <a href="understand-diagnosis.html" class="nav-mini btn3">Understand Diagnosis</a>
   </div>
@@ -429,7 +435,7 @@ function caedrixInitUserBar() {
   const initials=(user.email||'?')[0].toUpperCase(), email=user.email||'';
   bar.innerHTML='<div class="subs-left"><div class="subs-avatar">'+initials+'</div><span class="subs-email">'+email+'</span></div>'+
     '<div class="subs-right">'+(rc?'<div class="subs-records subs-records-on"><div class="subs-rdot subs-rdot-on"></div><span>Records Linked</span></div>':
-    '<a href="health-decisions.html" class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Link Medical Records</span></a>')+
+    '<a href="health-decisions4.html" class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Link Medical Records</span></a>')+
     '<button class="subs-signout" onclick="CaedrixAuth.logout()">Sign out</button></div>';
 }
 
