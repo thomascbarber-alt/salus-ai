@@ -992,6 +992,195 @@ h1 em {
  line-height: 1.6;
 }
 
+/* ── EXAMPLES SECTION ── */
+.examples-section {
+ padding: 100px 48px 90px;
+ background: var(--cream);
+ position: relative;
+}
+
+.examples-grid {
+ display: grid;
+ grid-template-columns: repeat(3, 1fr);
+ gap: 28px;
+ max-width: 1100px;
+ margin: 0 auto 64px;
+}
+
+.example-card {
+ display: flex;
+ flex-direction: column;
+ background: var(--white);
+ border: 1px solid var(--border);
+ border-radius: 16px;
+ padding: 30px 28px;
+ text-decoration: none;
+ color: inherit;
+ position: relative;
+ overflow: hidden;
+ transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+}
+
+.example-card::before {
+ content: '';
+ position: absolute;
+ top: 0; left: 0; right: 0;
+ height: 3px;
+ background: linear-gradient(90deg, var(--teal), var(--gold));
+ transform: scaleX(0);
+ transition: transform 0.3s;
+}
+
+.example-card:hover::before { transform: scaleX(1); }
+.example-card:hover {
+ transform: translateY(-4px);
+ box-shadow: 0 16px 40px rgba(12,30,58,0.12);
+ border-color: transparent;
+}
+
+.example-card.expanded {
+ grid-column: 1 / -1;
+}
+
+.example-card.expanded:hover { transform: none; }
+
+.example-tag {
+ display: inline-block;
+ font-size: 11px;
+ font-weight: 700;
+ letter-spacing: 1.5px;
+ text-transform: uppercase;
+ color: var(--teal);
+ margin-bottom: 14px;
+}
+
+.example-question {
+ font-family: 'Playfair Display', serif;
+ font-size: 19px;
+ color: var(--navy);
+ line-height: 1.4;
+ margin-bottom: 18px;
+ flex-grow: 1;
+ cursor: pointer;
+}
+
+.example-cta {
+ display: inline-flex;
+ align-items: center;
+ gap: 6px;
+ font-size: 14px;
+ font-weight: 600;
+ color: var(--gold);
+ cursor: pointer;
+ background: none;
+ border: none;
+ padding: 0;
+ font-family: 'DM Sans', sans-serif;
+}
+
+.example-arrow { transition: transform 0.2s; display: inline-block; }
+.example-card:hover .example-arrow { transform: translateX(4px); }
+.example-card.expanded .example-cta .example-arrow { transform: rotate(90deg); }
+.example-card.expanded:hover .example-arrow { transform: rotate(90deg); }
+
+.example-result-panel {
+ display: none;
+ margin-top: 22px;
+ padding-top: 22px;
+ border-top: 1px solid var(--border);
+}
+
+.example-card.expanded .example-result-panel { display: block; }
+
+.example-result-label {
+ font-size: 11px;
+ font-weight: 700;
+ letter-spacing: 1.5px;
+ text-transform: uppercase;
+ color: var(--navy);
+ margin-bottom: 14px;
+ display: flex;
+ align-items: center;
+ gap: 8px;
+}
+
+.example-result-label .dot {
+ width: 7px; height: 7px;
+ border-radius: 50%;
+ background: var(--teal-light);
+}
+
+.example-answer-item {
+ display: flex;
+ gap: 12px;
+ margin-bottom: 14px;
+ font-family: 'Crimson Pro', serif;
+ font-size: 16px;
+ line-height: 1.55;
+ color: var(--text);
+}
+
+.example-answer-item .bullet {
+ color: var(--gold);
+ font-weight: 700;
+ flex-shrink: 0;
+}
+
+.example-try-btn {
+ display: inline-flex;
+ align-items: center;
+ gap: 8px;
+ margin-top: 12px;
+ background: var(--navy);
+ color: var(--white);
+ padding: 12px 22px;
+ border-radius: 8px;
+ font-weight: 600;
+ font-size: 14px;
+ text-decoration: none;
+ transition: background-color 0.2s, transform 0.2s;
+}
+
+.example-try-btn:hover { background: var(--navy-mid); transform: translateY(-1px); }
+
+/* Video block */
+.video-block {
+ max-width: 720px;
+ margin: 0 auto;
+ text-align: center;
+}
+
+.video-frame-wrap {
+ position: relative;
+ width: 100%;
+ padding-top: 56.25%;
+ border-radius: 16px;
+ overflow: hidden;
+ background: var(--navy);
+ box-shadow: 0 16px 48px rgba(12,30,58,0.18);
+ border: 1px solid var(--border);
+}
+
+.video-frame-wrap iframe {
+ position: absolute;
+ inset: 0;
+ width: 100%;
+ height: 100%;
+ border: none;
+}
+
+.video-caption {
+ font-family: 'Crimson Pro', serif;
+ font-size: 15px;
+ color: var(--gray);
+ margin-top: 14px;
+}
+
+@media (max-width: 768px) {
+ .examples-section { padding: 60px 24px; }
+ .examples-grid { grid-template-columns: 1fr; margin-bottom: 48px; }
+}
+
 /* ── STORY SECTION ── */
 .story-section {
  padding: 100px 48px;
@@ -1302,16 +1491,19 @@ footer .footer-disclaimer {
     <div class="eyebrow-line"></div>
    </div>
    <h1>Your Health, <em>Understood.<br></em>Your Doctor,<br><em>Better Informed.</em></h1>
-   <p class="hero-sub">Caedrix AI is your personal health coach — built by a physician, powered by AI. Start free with your activity score, and understand your health the way your doctor does.</p>
+   <p class="hero-sub">Facing a diagnosis, a treatment decision, or symptoms no one can explain? Caedrix AI — built by a physician, powered by AI — gives you a clear, personalized answer in minutes.</p>
    <div class="hero-badges">
     <div class="badge"><div class="badge-dot"></div> No account required</div>
     <div class="badge"><div class="badge-dot"></div> Takes 60 seconds</div>
     <div class="badge"><div class="badge-dot"></div> Built on peer-reviewed research</div>
    </div>
-   <a href="#analyzer" class="hero-cta">
-    Analyze My Activity
+   <a href="#examples" class="hero-cta">
+    See What Caedrix AI Can Tell You
     <span class="hero-cta-arrow">→</span>
    </a>
+   <div style="margin-top:16px;">
+    <a href="#analyzer" style="color:rgba(255,255,255,0.55);font-size:14px;text-decoration:underline;">or try the free Activity Score tool →</a>
+   </div>
 
 
 
@@ -1340,6 +1532,73 @@ footer .footer-disclaimer {
     </div>
    </div>
   </div>
+ </div>
+</section>
+
+<!-- EXAMPLES -->
+<section class="examples-section" id="examples">
+ <div class="section-label">Real Questions, Real Answers</div>
+ <div class="section-title">This is what Caedrix AI is actually for.</div>
+ <p class="section-sub">Three real situations. See what Caedrix AI tells you — then try it with your own.</p>
+
+ <div class="examples-grid" id="examplesGrid">
+
+  <div class="example-card" id="example-card-1">
+   <span class="example-tag">Health Decision</span>
+   <div class="example-question" onclick="toggleExample(1)">"My grandmother, 83, was just diagnosed with uterine cancer. Should she have chemotherapy?"</div>
+   <button class="example-cta" onclick="toggleExample(1)">See how Caedrix AI responds <span class="example-arrow">→</span></button>
+
+   <div class="example-result-panel">
+    <div class="example-result-label"><span class="dot"></span>Caedrix AI's Response (illustrative)</div>
+    <div class="example-answer-item"><span class="bullet">·</span>At 83, the chemotherapy decision depends less on age alone and more on her overall health, the cancer's stage and subtype, and her personal goals — comfort and quality of life vs. maximizing time.</div>
+    <div class="example-answer-item"><span class="bullet">·</span>For early-stage, low-grade uterine cancer, surgery alone may be curative and chemo may add limited benefit relative to its toxicity in an older adult.</div>
+    <div class="example-answer-item"><span class="bullet">·</span>For higher-stage or aggressive subtypes, chemotherapy can meaningfully improve outcomes — but tolerance, kidney/liver function, and existing conditions matter as much as the cancer itself.</div>
+    <div class="example-answer-item"><span class="bullet">·</span>Questions worth asking her oncologist: What stage and subtype is this? What does chemo add on top of surgery/radiation? What would a geriatric oncology assessment show about her fitness for treatment?</div>
+    <a href="health-decisions.html" class="example-try-btn">Try This With Your Own Decision →</a>
+   </div>
+  </div>
+
+  <div class="example-card" id="example-card-2">
+   <span class="example-tag">Understand a Diagnosis</span>
+   <div class="example-question" onclick="toggleExample(2)">"My friend was just diagnosed with polycystic kidney disease. What does that actually mean?"</div>
+   <button class="example-cta" onclick="toggleExample(2)">See how Caedrix AI responds <span class="example-arrow">→</span></button>
+
+   <div class="example-result-panel">
+    <div class="example-result-label"><span class="dot"></span>Caedrix AI's Response (illustrative)</div>
+    <div class="example-answer-item"><span class="bullet">·</span>Polycystic kidney disease (PKD) is a genetic condition where fluid-filled cysts gradually replace healthy kidney tissue, most often inherited from a parent (autosomal dominant PKD).</div>
+    <div class="example-answer-item"><span class="bullet">·</span>It typically progresses slowly over decades — many people function normally for years before kidney function declines.</div>
+    <div class="example-answer-item"><span class="bullet">·</span>The main things to monitor are blood pressure, kidney function (via bloodwork), and cyst growth — high blood pressure is both a symptom and an accelerant, so controlling it matters a lot.</div>
+    <div class="example-answer-item"><span class="bullet">·</span>Newer medications can slow cyst growth in some patients, and family members may want genetic counseling, since it's hereditary.</div>
+    <div class="example-answer-item"><span class="bullet">·</span>Caedrix AI also surfaces recent research and actively enrolling clinical trials relevant to her specific case — for PKD, this could mean trials testing newer cyst-growth inhibitors or kidney-protective therapies she may qualify for.</div>
+    <a href="understand-diagnosis.html" class="example-try-btn">Try This With Your Own Diagnosis →</a>
+   </div>
+  </div>
+
+  <div class="example-card" id="example-card-3">
+   <span class="example-tag">Determine a Diagnosis</span>
+   <div class="example-question" onclick="toggleExample(3)">"I'm 35 and healthy, but I have blurry vision and keep stumbling. No one can tell me why."</div>
+   <button class="example-cta" onclick="toggleExample(3)">See how Caedrix AI responds <span class="example-arrow">→</span></button>
+
+   <div class="example-result-panel">
+    <div class="example-result-label"><span class="dot"></span>Caedrix AI's Response (illustrative)</div>
+    <div class="example-answer-item"><span class="bullet">·</span>Blurry vision plus balance problems in a young, otherwise healthy adult points toward a handful of possibilities worth ruling in or out — most commonly a vestibular (inner ear) issue, a neurological cause such as multiple sclerosis, or a metabolic cause like a B12 deficiency or blood sugar issue.</div>
+    <div class="example-answer-item"><span class="bullet">·</span>The pattern and timing matter: Are symptoms constant or come in episodes? Did they start suddenly or build gradually? That distinction changes which cause is most likely.</div>
+    <div class="example-answer-item"><span class="bullet">·</span>A reasonable next step is a neurology referral for an MRI and neurological exam, plus baseline bloodwork (B12, blood sugar, thyroid) — both are relatively quick to rule in or out.</div>
+    <div class="example-answer-item"><span class="bullet">·</span>This combination of symptoms is not something to sit on — it's worth pursuing an evaluation soon rather than waiting to see if it resolves.</div>
+    <a href="determine-diagnosis.html" class="example-try-btn">Try This With Your Own Symptoms →</a>
+   </div>
+  </div>
+
+ </div>
+
+ <div class="video-block">
+  <div class="section-label" style="margin-bottom:10px;">Watch It In Action</div>
+  <div class="section-title" style="font-size:26px;margin-bottom:24px;">See how it works in under 2 minutes</div>
+  <div class="video-frame-wrap">
+   <!-- Replace VIDEO_ID_HERE with your YouTube/Vimeo embed ID once the video is ready -->
+   <iframe src="https://www.youtube.com/embed/VIDEO_ID_HERE" title="How Caedrix AI Works" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+  <p class="video-caption">A real walkthrough — from typing your question to getting a personalized, physician-informed answer.</p>
  </div>
 </section>
 
@@ -1779,6 +2038,17 @@ function runAnalysis() {
   panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
  }, 300);
 }
+// ── Example cards toggle ──
+function toggleExample(n) {
+ const card = document.getElementById('example-card-' + n);
+ const wasExpanded = card.classList.contains('expanded');
+ document.querySelectorAll('.example-card').forEach(c => c.classList.remove('expanded'));
+ if (!wasExpanded) {
+  card.classList.add('expanded');
+  setTimeout(() => { card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 100);
+ }
+}
+
 // ── Caedrix shared state (sessionStorage) ──
 (function() {
   const connected = localStorage.getItem('caedrix_records_connected') === 'true';
