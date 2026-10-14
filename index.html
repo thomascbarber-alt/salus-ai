@@ -1004,7 +1004,7 @@ h1 em {
  grid-template-columns: repeat(3, 1fr);
  gap: 28px;
  max-width: 1100px;
- margin: 0 auto 64px;
+ margin: 0 auto;
 }
 
 .example-card {
@@ -1143,42 +1143,9 @@ h1 em {
 
 .example-try-btn:hover { background: var(--navy-mid); transform: translateY(-1px); }
 
-/* Video block */
-.video-block {
- max-width: 720px;
- margin: 0 auto;
- text-align: center;
-}
-
-.video-frame-wrap {
- position: relative;
- width: 100%;
- padding-top: 56.25%;
- border-radius: 16px;
- overflow: hidden;
- background: var(--navy);
- box-shadow: 0 16px 48px rgba(12,30,58,0.18);
- border: 1px solid var(--border);
-}
-
-.video-frame-wrap iframe {
- position: absolute;
- inset: 0;
- width: 100%;
- height: 100%;
- border: none;
-}
-
-.video-caption {
- font-family: 'Crimson Pro', serif;
- font-size: 15px;
- color: var(--gray);
- margin-top: 14px;
-}
-
 @media (max-width: 768px) {
  .examples-section { padding: 60px 24px; }
- .examples-grid { grid-template-columns: 1fr; margin-bottom: 48px; }
+ .examples-grid { grid-template-columns: 1fr; }
 }
 
 /* ── STORY SECTION ── */
@@ -1591,15 +1558,6 @@ footer .footer-disclaimer {
 
  </div>
 
- <div class="video-block">
-  <div class="section-label" style="margin-bottom:10px;">Watch It In Action</div>
-  <div class="section-title" style="font-size:26px;margin-bottom:24px;">See how it works in under 2 minutes</div>
-  <div class="video-frame-wrap">
-   <!-- Replace VIDEO_ID_HERE with your YouTube/Vimeo embed ID once the video is ready -->
-   <iframe src="https://www.youtube.com/embed/VIDEO_ID_HERE" title="How Caedrix AI Works" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-  </div>
-  <p class="video-caption">A real walkthrough — from typing your question to getting a personalized, physician-informed answer.</p>
- </div>
 </section>
 
 <!-- ANALYZER -->
