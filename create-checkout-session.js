@@ -1,19 +1,15 @@
 /**
- * Caedrix AI — Create Stripe Checkout Session
- * ==============================================
+ * Caedrix AI — Create Checkout Session
+ * =======================================
  * POST /api/create-checkout-session
- * Body: { email: string, pack: "single" | "five" }
- * Returns: { url: string }  <- redirect the browser here (Stripe-hosted page)
- *
- * Uses Stripe Checkout (not custom card fields) because it's PCI-compliant
- * out of the box and supports Apple Pay / Google Pay automatically once
- * enabled in your Stripe Dashboard — no extra frontend code needed for
- * wallets; Stripe's hosted page detects and offers them itself.
+ * Body: { email: string, pack: 'single' | 'five' }
+ * Returns: { url: string } — redirect the browser to this Stripe-hosted
+ * Checkout page. Apple Pay / Google Pay surface automatically there.
  *
  * ── SETUP REQUIRED (see .env.example) ──
  *   STRIPE_SECRET_KEY        — Stripe Dashboard > Developers > API keys
- *   STRIPE_PRICE_SINGLE      — Price ID for the $5.99 single-token product
- *   STRIPE_PRICE_FIVE_PACK   — Price ID for the $24.99 five-token pack
+ *   STRIPE_PRICE_SINGLE      — Price ID for the single-search product
+ *   STRIPE_PRICE_FIVE_PACK   — Price ID for the five-search pack
  *   PUBLIC_SITE_URL          — e.g. https://caedrix.com (for redirects back)
  */
 
@@ -35,7 +31,7 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const { email, pack } = req.body || {};
+  const { email, pack, returnUrl } = req.body || {};
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     res.status(400).json({ error: 'INVALID_EMAIL' });
@@ -44,6 +40,14 @@ module.exports = async (req, res) => {
   if (pack !== 'single' && pack !== 'five') {
     res.status(400).json({ error: 'INVALID_PACK', message: 'pack must be "single" or "five"' });
     return;
+  }
+
+  // Only accept a same-origin relative path for returnUrl (e.g.
+  // "/health-decisions.html") to avoid this becoming an open redirect.
+  // Falls back to the homepage if missing or unsafe.
+  let returnPath = '/index.html';
+  if (typeof returnUrl === 'string' && returnUrl.startsWith('/') && !returnUrl.startsWith('//')) {
+    returnPath = returnUrl;
   }
 
   const stripe = Stripe(STRIPE_SECRET_KEY);
@@ -59,8 +63,8 @@ module.exports = async (req, res) => {
       // email + tokensToGrant travel through to the webhook, which is the
       // ONLY place tokens actually get credited (never trust the client).
       metadata: { email: email.trim().toLowerCase(), tokensToGrant: String(tokensToGrant), pack },
-      success_url: `${PUBLIC_SITE_URL}/precision-medicine3.html?purchase=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${PUBLIC_SITE_URL}/precision-medicine3.html?purchase=cancelled`,
+      success_url: `${PUBLIC_SITE_URL}${returnPath}?purchase=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${PUBLIC_SITE_URL}${returnPath}?purchase=cancelled`,
     });
 
     res.status(200).json({ url: session.url });

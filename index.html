@@ -1421,7 +1421,6 @@ footer .footer-disclaimer {
  </div>
 
 <div class="nav-actions">
-  <a href="precision-medicine3.html"  class="nav-mini btn1">Precision Medicine</a>
   <a href="health-decisions.html"    class="nav-mini btn2">Health Decisions</a>
   <a href="determine-diagnosis.html"  class="nav-mini btn4">Determine Diagnosis</a>
   <a href="understand-diagnosis.html" class="nav-mini btn3">Understand Diagnosis</a>
@@ -1434,12 +1433,6 @@ footer .footer-disclaimer {
 </nav>
 
 <!-- HERO -->
-<!-- Records connected bar (shown when records are linked) -->
-<div class="salus-records-connected-bar" id="salusRecordsConnected">
-  <div class="salus-connected-dot"></div>
-  <span>Medical records connected via <strong style="color:#13a090;">HealthEx</strong> — all Caedrix AI responses are personalized to your health history.</span>
-</div>
-
 <!-- HERO -->
 <section class="hero">
  <div class="hero-bg"></div>
@@ -1668,7 +1661,7 @@ footer .footer-disclaimer {
    <!-- Upgrade -->
    <div class="upgrade-cta">
     <h3>Want a deeper picture?</h3>
-    <p>Connect your medical record for a Caedrix AI Precision analysis — personalized to your actual health history, medications, labs, and risk factors. Not just your steps.</p>
+    <p>Get a Caedrix AI analysis personalized to you — tell us about your activities, living situation, medical history, and more when you ask your question. Not just your steps.</p>
     <div class="apple-btn-wrap">
      <a href="health-decisions.html" class="upgrade-btn" style="display:inline-block;text-decoration:none;">Analyze a Health Decision →</a>
     </div>
@@ -2007,11 +2000,4 @@ function toggleExample(n) {
  }
 }
 
-// ── Caedrix shared state (sessionStorage) ──
-(function() {
-  const connected = localStorage.getItem('caedrix_records_connected') === 'true';
-  if (connected) {
-    document.getElementById('salusRecordsConnected').classList.add('visible');
-  }
-})();
 </script>
