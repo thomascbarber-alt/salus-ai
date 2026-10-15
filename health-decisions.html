@@ -1172,6 +1172,7 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
     conversations with your care team. It does not constitute medical advice, diagnosis, or treatment.
     Always consult a qualified and licensed healthcare provider before making medical decisions.
   </p>
+  <p class="site-contact" style="margin:10px auto 0;text-align:center;font-size:13px;">Contact: <a href="mailto:Thomas@caedrix.com" style="color:#d4aa3a;text-decoration:none;">Thomas@caedrix.com</a></p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -1179,6 +1180,7 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 <script src="caedrix-pdf-report.js"></script>
 <script src="caedrix-token-gate.js"></script>
 <script src="caedrix-about-you.js"></script>
+<script src="caedrix-doctor-questions.js"></script>
 <script>
 /* ══════════════════════════════════════════════════════
    CAEDRIX AUTH — shared state (localStorage-backed)
@@ -1704,7 +1706,7 @@ async function runMainPipeline() {
     const r2 = await callClaude({
       systemPrompt: AGENT_ANALYZE_SYSTEM,
       userContent:  userMsg,
-      maxTokens:    3000
+      maxTokens:    5000
     });
     const raw2 = extractText(r2);
     let parsed2;
@@ -1749,7 +1751,7 @@ async function runMainPipeline() {
       const r5 = await callClaude({
         systemPrompt: AGENT_CLARITY_SYSTEM,
         userContent:  clarityInput,
-        maxTokens:    4000
+        maxTokens:    6000
       });
       try { finalResult = safeParseJSON(extractText(r5)); }
       catch(e) { finalResult = parsed2; }
@@ -1757,6 +1759,12 @@ async function runMainPipeline() {
     } else {
       setAgentState(5, 'done', 'No changes needed');
     }
+
+    /* ── Every result must include at least one question for the doctor ── */
+    await CaedrixDoctorQs.ensure(finalResult, 'discuss_with_doctor', {
+      sources: [parsed2], topic: lastQuestion,
+      context: cachedHealthContextBlock, kind: 'decision'
+    });
 
     /* ── Final render with polished results ── */
     setTimeout(() => {

@@ -434,11 +434,14 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
 
 <footer>
   <p>caedrix.com · Determine Diagnosis — Educational tool only. Not a substitute for medical evaluation.</p>
+  <p class="site-contact" style="margin:10px auto 0;text-align:center;font-size:13px;">Contact: <a href="mailto:Thomas@caedrix.com" style="color:#d4aa3a;text-decoration:none;">Thomas@caedrix.com</a></p>
+</footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="caedrix-local-storage.js"></script>
 <script src="caedrix-pdf-report.js"></script>
 <script src="caedrix-token-gate.js"></script>
 <script src="caedrix-about-you.js"></script>
+<script src="caedrix-doctor-questions.js"></script>
 <script>
 
 async function handleSaveToMyRecords(){
@@ -738,13 +741,16 @@ async function runMainPipeline(){
     const hasIssues=(p3.corrections_needed||[]).length>0||(p4.issues_found||[]).length>0;
     if(hasIssues){
       setAgentState(5,'running','Applying corrections…');
-      const r5=await callClaude({systemPrompt:AGENT_CLARITY_SYSTEM,userContent:`Analysis:\n${JSON.stringify(p2)}\nAccuracy issues:\n${JSON.stringify(p3.corrections_needed||[])}\nLegal issues:\n${JSON.stringify(p4.issues_found||[])}`,maxTokens:4000,model:'claude-haiku-4-5-20251001'});
+      const r5=await callClaude({systemPrompt:AGENT_CLARITY_SYSTEM,userContent:`Analysis:\n${JSON.stringify(p2)}\nAccuracy issues:\n${JSON.stringify(p3.corrections_needed||[])}\nLegal issues:\n${JSON.stringify(p4.issues_found||[])}`,maxTokens:7000,model:'claude-haiku-4-5-20251001'});
       try{
         const corrected=safeParseJSON(extractText(r5));
         if(corrected?.differential_diagnoses?.length>0){final=corrected;}
         setAgentState(5,'done','Corrections applied');
       }catch(_){setAgentState(5,'done','Corrections applied');}
     }else{setAgentState(5,'done','No changes needed');}
+
+    /* Every result must include at least one question for the doctor */
+    await CaedrixDoctorQs.ensure(final,'questions_for_doctor',{sources:[p2],topic:lastSymptoms,context:cachedHealthContextBlock,kind:'symptoms'});
 
     setTimeout(()=>{hidePipeline();renderResults(final,p3);document.getElementById('submitBtn').disabled=false;document.getElementById('symptomInput').disabled=false;},400);
   }catch(err){handleError(err.message||String(err));}
