@@ -316,6 +316,11 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
   .results-section,.results-section.visible{display:block!important;}
   .section-pane{display:block!important;margin-bottom:24px;}
 }
+
+/* Page graphic (top of page) */
+.page-graphic{max-width:540px;margin:0 auto 26px;}
+.page-graphic svg{display:block;width:100%;height:auto;}
+@media(max-width:600px){.page-graphic{margin-bottom:18px;}.page-graphic .pg-caption{display:none;}}
 </style>
 </head>
 <body>
@@ -328,8 +333,7 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
     </a>
   </div>
   <div class="nav-actions">
-    <a href="precision-medicine3.html"  class="nav-mini btn1">Precision Medicine</a>
-    <a href="health-decisions4.html"    class="nav-mini btn2">Health Decisions</a>
+    <a href="health-decisions.html"    class="nav-mini btn2">Health Decisions</a>
     <a href="determine-diagnosis.html"  class="nav-mini btn4">Determine Diagnosis</a>
     <a href="understand-diagnosis.html" class="nav-mini btn3" style="border:1px solid rgba(74,111,165,0.6);">Understand Diagnosis</a>
   </div>
@@ -340,6 +344,22 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
 
   <!-- HEADER -->
   <div class="page-header">
+    <div class="page-graphic">
+    <svg viewBox="0 0 540 200" role="img" aria-label="Enter a diagnosis to get what it is, treatment options, active clinical trials, and leading specialists and centers" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="rgba(255,255,255,0.28)" stroke-width="1.5" fill="none" stroke-linecap="round">
+     <path d="M200 84 C180 84 180 46 164 46"/><path d="M200 112 C180 112 180 150 164 150"/>
+     <path d="M340 84 C360 84 360 46 376 46"/><path d="M340 112 C360 112 360 150 376 150"/>
+    </g>
+    <rect x="200" y="62" width="140" height="74" rx="12" fill="rgba(74,111,165,0.16)" stroke="#7b9fd4" stroke-width="1.8"/>
+    <text x="270" y="90" text-anchor="middle" font-size="15" font-weight="600" font-family="'DM Sans',system-ui,sans-serif" fill="#fff">Your diagnosis</text>
+    <path d="M226 106 H314 M238 120 H302" stroke="rgba(255,255,255,0.35)" stroke-width="2.2" stroke-linecap="round"/>
+    <rect x="14" y="24" width="150" height="44" rx="10" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.24)" stroke-width="1.2"/><g transform="translate(30,35)" stroke="#7b9fd4" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M0 3 C5 0 10 0 11 3 V22 C10 19 5 19 0 22 Z"/><path d="M22 3 C17 0 12 0 11 3 V22 C12 19 17 19 22 22 Z"/></g><text x="62" y="51" text-anchor="start" font-size="14" font-weight="500" font-family="'DM Sans',system-ui,sans-serif" fill="rgba(255,255,255,0.78)">What it is</text>
+    <rect x="14" y="128" width="150" height="44" rx="10" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.24)" stroke-width="1.2"/><g transform="translate(30,139)" stroke="#7b9fd4" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"><g transform="rotate(-35 11 11)"><rect x="-1" y="5.5" width="24" height="11" rx="5.5"/><path d="M11 5.5 V16.5"/></g></g><text x="62" y="155" text-anchor="start" font-size="14" font-weight="500" font-family="'DM Sans',system-ui,sans-serif" fill="rgba(255,255,255,0.78)">Treatment</text>
+    <rect x="376" y="24" width="150" height="44" rx="10" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.24)" stroke-width="1.2"/><g transform="translate(392,35)" stroke="#7b9fd4" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M8 0 H14 M9 0 V8 L2 20 C1 22 2 23 4 23 H18 C20 23 21 22 20 20 L13 8 V0"/><path d="M5 15 H17"/></g><text x="424" y="51" text-anchor="start" font-size="14" font-weight="500" font-family="'DM Sans',system-ui,sans-serif" fill="rgba(255,255,255,0.78)">Clinical trials</text>
+    <rect x="376" y="128" width="150" height="44" rx="10" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.24)" stroke-width="1.2"/><g transform="translate(392,139)" stroke="#7b9fd4" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M1 23 V7 H21 V23 Z"/><path d="M11 1 V5 M9 3 H13"/><path d="M6 12 H8 M14 12 H16 M6 17 H8 M14 17 H16"/><path d="M9 23 V18 H13 V23"/></g><text x="424" y="155" text-anchor="start" font-size="14" font-weight="500" font-family="'DM Sans',system-ui,sans-serif" fill="rgba(255,255,255,0.78)">Specialists</text>
+    <text class="pg-caption" x="270" y="192" text-anchor="middle" font-size="13" font-weight="400" font-family="'DM Sans',system-ui,sans-serif" fill="rgba(255,255,255,0.45)">Researched and summarized in one place</text>
+    </svg>
+    </div>
     <div class="page-eyebrow">
       <div class="eyebrow-line"></div>
       Caedrix AI · Understand Diagnosis
@@ -585,74 +605,10 @@ async function initFolderConnection() {
   }
 }
 
-async function getCaedrixMergedProfile() {
-  let personalDetails = null, healthProfile = null, medicalRecordCount = 0;
-  if (typeof CaedrixStorage !== 'undefined' && CaedrixStorage.isSupported()) {
-    try {
-      // folderConnected (set once at page load) can go stale if permission
-      // lapsed since then. Re-check live, and — since this only ever runs
-      // from the "Research" button's click handler, i.e. a real user
-      // gesture — silently re-request permission if needed, instead of
-      // quietly falling back to a possibly outdated localStorage copy.
-      let status = folderConnected ? 'connected' : await CaedrixStorage.restoreConnection();
-      if (status === 'needs-permission') {
-        try {
-          await CaedrixStorage.reconnectFolder();
-          status = 'connected';
-        } catch (_) {
-          status = 'none'; // user declined re-confirmation
-        }
-      }
-      folderConnected = (status === 'connected');
-
-      if (folderConnected) {
-        const ctx = await CaedrixStorage.getLocalHealthContext();
-        if (ctx && ctx.connected) {
-          personalDetails = ctx.personalDetails;
-          healthProfile = ctx.healthProfile;
-          medicalRecordCount = (ctx.medicalRecordFiles || []).length;
-        }
-      }
-    } catch (_) { /* fall through to localStorage below */ }
-  }
-  if (!personalDetails) {
-    try { personalDetails = JSON.parse(localStorage.getItem('caedrix_life_context') || 'null'); } catch (_) {}
-  }
-  if (!healthProfile) {
-    try { healthProfile = JSON.parse(localStorage.getItem('caedrix_health_profile') || 'null'); } catch (_) {}
-  }
-  return { personalDetails, healthProfile, medicalRecordCount };
-}
-
+/* Understand Diagnosis doesn't use personal details — it researches the
+   diagnosis itself. Kept as a stub so the rest of the page is unchanged. */
 async function buildCaedrixHealthContextBlock() {
-  const { personalDetails, healthProfile, medicalRecordCount } = await getCaedrixMergedProfile();
-  const parts = [];
-  if (personalDetails) {
-    const p = [];
-    if (personalDetails.activities) p.push('Favorite activities: ' + personalDetails.activities);
-    if (personalDetails.important)  p.push('Important personal context: ' + personalDetails.important);
-    if (personalDetails.caregiver)  p.push('Caregiver responsibilities: ' + personalDetails.caregiver);
-    if (personalDetails.living)     p.push('Living situation: ' + personalDetails.living);
-    if (p.length) parts.push('Personal context about this patient:\n' + p.join('\n'));
-  }
-  if (healthProfile) {
-    const h = [];
-    if (healthProfile.age)           h.push('Age: ' + healthProfile.age);
-    if (healthProfile.sex)           h.push('Biological sex: ' + healthProfile.sex);
-    if (healthProfile.smoking)       h.push('Smoking status: ' + healthProfile.smoking);
-    if (healthProfile.diabetes)      h.push('Diabetes: ' + healthProfile.diabetes);
-    if (healthProfile.heartDisease)  h.push('Heart disease: ' + healthProfile.heartDisease);
-    if (healthProfile.conditions)    h.push('Other conditions: ' + healthProfile.conditions);
-    if (healthProfile.medications)   h.push('Current medications: ' + healthProfile.medications);
-    if (healthProfile.screenings)    h.push('Recent screenings: ' + healthProfile.screenings);
-    if (healthProfile.familyHistory) h.push('Family history: ' + healthProfile.familyHistory);
-    if (h.length) parts.push('Patient health profile:\n' + h.join('\n'));
-  }
-  if (medicalRecordCount > 0) {
-    parts.push(`Patient has ${medicalRecordCount} uploaded medical record document(s) on file, indicating an engaged, documented patient.`);
-  }
-  if (!parts.length) return '';
-  return '\n\n---\n' + parts.join('\n\n') + '\n---';
+  return '';
 }
 
 /* ════════════════════════════════════
@@ -671,21 +627,6 @@ function setHint(el){
 /* ════════════════════════════════════
    AGENT STATE UI
 ════════════════════════════════════ */
-
-/* Reads personal context saved on the Precision Medicine page */
-function getCaedrixLifeContext(){
-  try{
-    const ctx=JSON.parse(localStorage.getItem('caedrix_life_context')||'null');
-    if(!ctx)return '';
-    const parts=[];
-    if(ctx.activities)parts.push('Favorite activities: '+ctx.activities);
-    if(ctx.important) parts.push('Important personal context: '+ctx.important);
-    if(ctx.caregiver) parts.push('Caregiver responsibilities: '+ctx.caregiver);
-    if(ctx.living)    parts.push('Living situation: '+ctx.living);
-    if(!parts.length) return '';
-    return '\n\n---\nPersonal context about this patient:\n'+parts.join('\n')+'\n---';
-  }catch(_){return '';}
-}
 
 const AGENT_ICONS={1:'💬',2:'🩺',3:'🔬',4:'⚖️',5:'✦'};
 // Track fill % when each agent completes — visual progress indicator across the 5-stage pipeline

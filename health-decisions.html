@@ -870,82 +870,6 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
   .section-pane{display:block!important;margin-bottom:24px;}
 }
 
-
-/* ═══════════════════ PROFILE CONTEXT BOX ═══════════════════ */
-.profile-context-box {
-  border-radius: 16px; margin-bottom: 24px; overflow: hidden;
-  border: 1px solid rgba(184,147,42,0.28);
-  background: rgba(184,147,42,0.06);
-  backdrop-filter: blur(8px);
-  animation: fadeUp 0.5s ease 0.25s both;
-}
-.profile-context-header {
-  display: flex; align-items: flex-start; gap: 14px;
-  padding: 18px 24px 14px;
-  border-bottom: 1px solid rgba(184,147,42,0.15);
-}
-.profile-context-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
-.profile-context-statement {
-  font-family: 'Crimson Pro', serif;
-  font-size: 16px; color: rgba(255,255,255,0.7);
-  line-height: 1.55; font-style: italic;
-}
-.profile-context-body {
-  padding: 18px 24px 4px;
-  display: flex; flex-direction: column; gap: 18px;
-}
-.profile-context-empty {
-  font-family: 'Crimson Pro', serif;
-  font-size: 15px; color: rgba(255,255,255,0.3);
-  font-style: italic; padding: 4px 0 12px;
-}
-.profile-context-group-label {
-  font-size: 10px; font-weight: 700; letter-spacing: 2px;
-  text-transform: uppercase; color: var(--gold-light);
-  margin-bottom: 10px;
-}
-.profile-context-rows { display: flex; flex-direction: column; gap: 6px; }
-.profile-context-row {
-  display: grid; grid-template-columns: 160px 1fr;
-  gap: 10px; padding: 9px 14px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 8px; align-items: start;
-}
-.profile-context-key {
-  font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.35);
-  text-transform: uppercase; letter-spacing: 0.5px; padding-top: 1px;
-}
-.profile-context-val {
-  font-family: 'Crimson Pro', serif;
-  font-size: 15px; color: rgba(255,255,255,0.75); line-height: 1.45;
-}
-.profile-context-actions {
-  padding: 14px 24px 18px;
-  display: flex; gap: 10px; flex-wrap: wrap;
-}
-.profile-ctx-btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 9px 18px; border-radius: 8px;
-  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
-  text-decoration: none; transition: all 0.2s;
-}
-.profile-ctx-btn-teal {
-  background: linear-gradient(135deg,#13a090,#0a7c6e); color: white;
-  box-shadow: 0 3px 12px rgba(10,124,110,0.2);
-}
-.profile-ctx-btn-teal:hover { box-shadow: 0 5px 18px rgba(10,124,110,0.35); transform: translateY(-1px); }
-.profile-ctx-btn-gold {
-  background: linear-gradient(135deg,#d4aa3a,#b8932a); color: #0c1e3a;
-  box-shadow: 0 3px 12px rgba(184,147,42,0.2);
-}
-.profile-ctx-btn-gold:hover { box-shadow: 0 5px 18px rgba(184,147,42,0.35); transform: translateY(-1px); }
-@media(max-width:768px){
-  .profile-context-row { grid-template-columns: 1fr; gap: 3px; }
-  .profile-context-actions { flex-direction: column; }
-  .profile-ctx-btn { justify-content: center; }
-}
-
 /* ── Coming Soon buttons ── */
 .coming-soon-note {
   display: block;
@@ -967,6 +891,11 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
   pointer-events: none;
 }
 
+
+/* Page graphic (top of page) */
+.page-graphic{max-width:540px;margin:0 auto 26px;}
+.page-graphic svg{display:block;width:100%;height:auto;}
+@media(max-width:600px){.page-graphic{margin-bottom:18px;}.page-graphic .pg-caption{display:none;}}
 </style>
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -983,7 +912,6 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
     </a>
   </div>
     <div class="nav-actions">
-    <a href="precision-medicine3.html"  class="nav-mini btn1">Precision Medicine</a>
     <a href="health-decisions.html"    class="nav-mini btn2" style="border:1px solid rgba(19,160,144,0.6);">Health Decisions</a>
     <a href="determine-diagnosis.html"  class="nav-mini btn4">Determine Diagnosis</a>
     <a href="understand-diagnosis.html" class="nav-mini btn3">Understand Diagnosis</a>
@@ -1000,6 +928,35 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
   <div class="hero-bg"></div>
   <div class="hero-grid"></div>
   <div class="hero-inner">
+    <div class="page-graphic">
+    <svg viewBox="0 0 540 200" role="img" aria-label="Your decision branches into several options; Caedrix AI compares them and highlights the best fit for you" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="1.6" stroke-linecap="round">
+     <path d="M104 92 C150 92 160 37 205 37"/>
+     <path d="M104 92 L205 92" stroke="#d4aa3a" stroke-width="2"/>
+     <path d="M104 92 C150 92 160 147 205 147"/>
+     <path d="M335 92 L410 92" stroke="#d4aa3a" stroke-width="2" stroke-dasharray="1 0"/>
+    </g>
+    <circle cx="70" cy="92" r="34" fill="rgba(19,160,144,0.14)" stroke="#13a090" stroke-width="1.8"/>
+    <g stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+     <path d="M70 76 V110"/>
+     <path d="M70 80 H86 L91 85 L86 90 H70"/>
+     <path d="M70 94 H54 L49 99 L54 104 H70"/>
+    </g>
+    <text x="70" y="150" text-anchor="middle" font-size="15" font-weight="500" font-family="'DM Sans',system-ui,sans-serif" fill="rgba(255,255,255,0.78)">Your decision</text>
+    <rect x="205" y="16" width="130" height="42" rx="9" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/><text x="220" y="42" text-anchor="start" font-size="14" font-weight="500" font-family="'DM Sans',system-ui,sans-serif" fill="rgba(255,255,255,0.7)">Option A</text><rect x="290" y="35.0" width="7" height="12.0" rx="1.5" fill="rgba(255,255,255,0.3)"/><rect x="301" y="29.4" width="7" height="17.6" rx="1.5" fill="rgba(255,255,255,0.3)"/><rect x="312" y="39.0" width="7" height="8.0" rx="1.5" fill="rgba(255,255,255,0.3)"/>
+    <rect x="205" y="71" width="130" height="42" rx="9" fill="rgba(212,170,58,0.12)" stroke="#d4aa3a" stroke-width="1.6"/><text x="220" y="97" text-anchor="start" font-size="14" font-weight="500" font-family="'DM Sans',system-ui,sans-serif" fill="#fff">Option B</text><rect x="290" y="87.6" width="7" height="14.4" rx="1.5" fill="#d4aa3a"/><rect x="301" y="82.8" width="7" height="19.200000000000003" rx="1.5" fill="#d4aa3a"/><rect x="312" y="79.6" width="7" height="22.400000000000002" rx="1.5" fill="#d4aa3a"/>
+    <rect x="205" y="126" width="130" height="42" rx="9" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/><text x="220" y="152" text-anchor="start" font-size="14" font-weight="500" font-family="'DM Sans',system-ui,sans-serif" fill="rgba(255,255,255,0.7)">Option C</text><rect x="290" y="141.0" width="7" height="16.0" rx="1.5" fill="rgba(255,255,255,0.3)"/><rect x="301" y="148.2" width="7" height="8.8" rx="1.5" fill="rgba(255,255,255,0.3)"/><rect x="312" y="145.0" width="7" height="12.0" rx="1.5" fill="rgba(255,255,255,0.3)"/>
+    <circle cx="446" cy="92" r="34" fill="rgba(212,170,58,0.14)" stroke="#d4aa3a" stroke-width="1.8"/>
+    <g stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+     <circle cx="446" cy="83" r="8"/>
+     <path d="M431 107 C433 97 459 97 461 107"/>
+    </g>
+    <circle cx="469" cy="70" r="10" fill="#d4aa3a"/>
+    <path d="M464 70 L468 74 L475 66" stroke="#0c1e3a" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="446" y="150" text-anchor="middle" font-size="15" font-weight="500" font-family="'DM Sans',system-ui,sans-serif" fill="rgba(255,255,255,0.78)">Best fit for you</text>
+    <text class="pg-caption" x="270" y="192" text-anchor="middle" font-size="13" font-weight="400" font-family="'DM Sans',system-ui,sans-serif" fill="rgba(255,255,255,0.45)">Options compared against the evidence</text>
+    </svg>
+    </div>
     <div class="hero-eyebrow">
       <div class="eyebrow-line"></div>
       Caedrix AI · Health Decisions
@@ -1007,8 +964,8 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
     </div>
     <h1>The Right <em>Questions.</em><br>The Right <em>Information.</em></h1>
     <p class="hero-sub">
-      Describe the health decision you're facing. Caedrix AI will analyze your personal health record,
-      review the evidence, and give you a clear, individualized breakdown of your options — so you
+      Describe the health decision you're facing and tell us a little about yourself. Caedrix AI will
+      review the evidence and give you a clear, individualized breakdown of your options — so you
       walk into your next appointment informed and prepared.
     </p>
   </div>
@@ -1018,32 +975,8 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 <section class="interface-section" id="interface">
   <div class="interface-wrap">
 
-    <!-- Profile Context Summary -->
-    <div class="profile-context-box" id="profileContextBox">
-      <div class="profile-context-header">
-        <span class="profile-context-icon">📋</span>
-        <div class="profile-context-statement">
-          The following personal and health information will be used to craft the best answer for you.
-        </div>
-      </div>
-      <div class="profile-context-body">
-        <div class="profile-context-empty" id="ctxEmpty">
-          No profile information added yet — add your details on the Precision Medicine page to receive personalized guidance.
-        </div>
-        <div class="profile-context-group" id="ctxPersonalGroup" style="display:none;">
-          <div class="profile-context-group-label">🙋 Personal Details</div>
-          <div class="profile-context-rows" id="ctxPersonalRows"></div>
-        </div>
-        <div class="profile-context-group" id="ctxHealthGroup" style="display:none;">
-          <div class="profile-context-group-label">🏥 Health Profile</div>
-          <div class="profile-context-rows" id="ctxHealthRows"></div>
-        </div>
-      </div>
-      <div class="profile-context-actions">
-        <a href="precision-medicine3.html#connect" class="profile-ctx-btn profile-ctx-btn-teal">✏️ Edit Personal Details</a>
-        <a href="precision-medicine3.html#connect" class="profile-ctx-btn profile-ctx-btn-gold">✏️ Edit Health Profile</a>
-      </div>
-    </div>
+    <!-- About You (entered fresh each visit — see caedrix-about-you.js) -->
+    <div id="aboutYouPanel" data-accent="#b8932a"></div>
 
     <!-- Question card -->
     <div class="question-card" id="questionCard">
@@ -1179,7 +1112,7 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
     <div class="context-box" id="contextBox" style="display:none;">
       <div class="context-icon">🩺</div>
       <div>
-        <div class="context-text-label">Personalized to your health record</div>
+        <div class="context-text-label">Personalized to your details</div>
         <div class="context-text-body" id="contextBody"></div>
       </div>
     </div>
@@ -1234,6 +1167,7 @@ footer p { font-size: 14px; line-height: 1.7; max-width: 600px; margin: 0 auto 1
 <script src="caedrix-local-storage.js"></script>
 <script src="caedrix-pdf-report.js"></script>
 <script src="caedrix-token-gate.js"></script>
+<script src="caedrix-about-you.js"></script>
 <script>
 /* ══════════════════════════════════════════════════════
    CAEDRIX AUTH — shared state (localStorage-backed)
@@ -1255,7 +1189,6 @@ function caedrixInitUserBar() {
       '<div class="subs-right"><span class="subs-email" style="opacity:.5;font-size:12px;">Sign in happens automatically when you buy searches</span></div>';
     return;
   }
-  const rc      = CaedrixAuth.isRecordsConnected();
   const initials= (user.email||'?')[0].toUpperCase();
   const email   = user.email || '';
   bar.innerHTML =
@@ -1264,10 +1197,6 @@ function caedrixInitUserBar() {
       '<span class="subs-email">'+email+'</span>' +
     '</div>' +
     '<div class="subs-right">' +
-      (rc
-        ? '<div class="subs-records subs-records-on"><div class="subs-rdot subs-rdot-on"></div><span>Records Linked</span></div>'
-        : '<a href="health-decisions.html" class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Link Medical Records</span></a>'
-      ) +
       '<button class="subs-signout" onclick="CaedrixAuth.logout()">Sign out</button>' +
     '</div>';
 }
@@ -1293,12 +1222,9 @@ const CaedrixState = {
 window.addEventListener('DOMContentLoaded', async () => {
   caedrixInitUserBar();
   await initFolderConnection();
-  await renderProfileContextBox();
+  CaedrixAboutYou.init('aboutYouPanel');
   CaedrixTokenGate.renderBalanceBadge('caedrixBalanceBadge');
   CaedrixTokenGate.syncButtonLabel('submitBtn', 'Analyze My Decision', 'Analyze My Decision — $2.99');
-  if (CaedrixState.isRecordsConnected()) {
-    recordsConnected = true;
-  }
   const savedDraft = CaedrixTokenGate.getAndClearResumeDraft();
   if (savedDraft) {
     document.getElementById('questionInput').value = savedDraft;
@@ -1329,124 +1255,15 @@ async function initFolderConnection() {
   }
 }
 
-/* Fetches personalDetails + healthProfile, preferring the connected local
-   folder over the localStorage fallback (same precedence used on
-   personal-details.html / health-profile.html when saving). */
-async function getCaedrixMergedProfile() {
-  let personalDetails = null, healthProfile = null, medicalRecordCount = 0;
-
-  if (typeof CaedrixStorage !== 'undefined' && CaedrixStorage.isSupported()) {
-    try {
-      // folderConnected (set once at page load) can go stale if permission
-      // lapsed since then. Re-check live, and — since this only ever runs
-      // from the "Ask" button's click handler, i.e. a real user gesture —
-      // silently re-request permission if needed, instead of quietly
-      // falling back to a possibly outdated localStorage copy.
-      let status = folderConnected ? 'connected' : await CaedrixStorage.restoreConnection();
-      if (status === 'needs-permission') {
-        try {
-          await CaedrixStorage.reconnectFolder();
-          status = 'connected';
-        } catch (_) {
-          status = 'none'; // user declined re-confirmation
-        }
-      }
-      folderConnected = (status === 'connected');
-
-      if (folderConnected) {
-        const ctx = await CaedrixStorage.getLocalHealthContext();
-        if (ctx && ctx.connected) {
-          personalDetails = ctx.personalDetails;
-          healthProfile = ctx.healthProfile;
-          medicalRecordCount = (ctx.medicalRecordFiles || []).length;
-        }
-      }
-    } catch (_) { /* fall through to localStorage below */ }
-  }
-  if (!personalDetails) {
-    try { personalDetails = JSON.parse(localStorage.getItem('caedrix_life_context') || 'null'); } catch (_) {}
-  }
-  if (!healthProfile) {
-    try { healthProfile = JSON.parse(localStorage.getItem('caedrix_health_profile') || 'null'); } catch (_) {}
-  }
-  return { personalDetails, healthProfile, medicalRecordCount };
-}
-
-/* Builds the text block sent to the AI. Replaces the old
-   getCaedrixHealthProfile()/getCaedrixLifeContext() calls, which only
-   ever looked at localStorage and silently missed folder-only data. */
-async function buildCaedrixHealthContextBlock() {
-  const { personalDetails, healthProfile, medicalRecordCount } = await getCaedrixMergedProfile();
-  const parts = [];
-
-  if (personalDetails) {
-    const p = [];
-    if (personalDetails.activities) p.push('Favorite activities: ' + personalDetails.activities);
-    if (personalDetails.important)  p.push('Important personal context: ' + personalDetails.important);
-    if (personalDetails.caregiver)  p.push('Caregiver responsibilities: ' + personalDetails.caregiver);
-    if (personalDetails.living)     p.push('Living situation: ' + personalDetails.living);
-    if (p.length) parts.push('Personal context about this patient:\n' + p.join('\n'));
-  }
-
-  if (healthProfile) {
-    const h = [];
-    if (healthProfile.age)           h.push('Age: ' + healthProfile.age);
-    if (healthProfile.sex)           h.push('Biological sex: ' + healthProfile.sex);
-    if (healthProfile.smoking)       h.push('Smoking status: ' + healthProfile.smoking);
-    if (healthProfile.diabetes)      h.push('Diabetes: ' + healthProfile.diabetes);
-    if (healthProfile.heartDisease)  h.push('Heart disease: ' + healthProfile.heartDisease);
-    if (healthProfile.conditions)    h.push('Other conditions: ' + healthProfile.conditions);
-    if (healthProfile.medications)   h.push('Current medications: ' + healthProfile.medications);
-    if (healthProfile.screenings)    h.push('Recent screenings: ' + healthProfile.screenings);
-    if (healthProfile.familyHistory) h.push('Family history: ' + healthProfile.familyHistory);
-    if (h.length) parts.push('Patient health profile:\n' + h.join('\n'));
-  }
-
-  if (medicalRecordCount > 0) {
-    parts.push(`Patient has ${medicalRecordCount} uploaded medical record document(s) on file, indicating an engaged, documented patient.`);
-  }
-
-  if (!parts.length) return '';
-  return '\n\n---\n' + parts.join('\n\n') + '\n---';
+/* Builds the text block sent to the AI from the "About you" boxes.
+   Nothing is read from storage — the user enters it fresh each visit. */
+function buildCaedrixHealthContextBlock() {
+  return CaedrixAboutYou.buildContextBlock();
 }
 
 /* ══════════════════════════════════════════════════════
    SCROLL PROGRESS
 ══════════════════════════════════════════════════════ */
-
-/* Reads personal context saved on the Precision Medicine page */
-function getCaedrixLifeContext(){
-  try{
-    const ctx=JSON.parse(localStorage.getItem('caedrix_life_context')||'null');
-    if(!ctx)return '';
-    const parts=[];
-    if(ctx.activities)parts.push('Favorite activities: '+ctx.activities);
-    if(ctx.important) parts.push('Important personal context: '+ctx.important);
-    if(ctx.caregiver) parts.push('Caregiver responsibilities: '+ctx.caregiver);
-    if(ctx.living)    parts.push('Living situation: '+ctx.living);
-    if(!parts.length) return '';
-    return '\n\n---\nPersonal context about this patient:\n'+parts.join('\n')+'\n---';
-  }catch(_){return '';}
-}
-
-function getCaedrixHealthProfile(){
-  try{
-    const hp=JSON.parse(localStorage.getItem('caedrix_health_profile')||'null');
-    if(!hp)return '';
-    const parts=[];
-    if(hp.age)          parts.push('Age: '+hp.age);
-    if(hp.sex)          parts.push('Biological sex: '+hp.sex);
-    if(hp.smoking)      parts.push('Smoking status: '+hp.smoking);
-    if(hp.diabetes)     parts.push('Diabetes: '+hp.diabetes);
-    if(hp.heartDisease) parts.push('Heart disease: '+hp.heartDisease);
-    if(hp.conditions)   parts.push('Other conditions: '+hp.conditions);
-    if(hp.medications)  parts.push('Current medications: '+hp.medications);
-    if(hp.screenings)   parts.push('Recent screenings: '+hp.screenings);
-    if(hp.familyHistory)parts.push('Family history: '+hp.familyHistory);
-    if(!parts.length)return '';
-    return '\n\n---\nPatient health profile:\n'+parts.join('\n')+'\n---';
-  }catch(_){return '';}
-}
 
 window.addEventListener('scroll', () => {
   const d = document.documentElement;
@@ -1458,47 +1275,6 @@ window.addEventListener('scroll', () => {
 /* ══════════════════════════════════════════════════════
    RECORDS
 ══════════════════════════════════════════════════════ */
-async function renderProfileContextBox() {
-  const PERSONAL_LABELS = {
-    activities: 'Favorite Activities', important: 'Important Context',
-    caregiver: 'Caregiver Role',       living: 'Living Situation'
-  };
-  const HEALTH_LABELS = {
-    age: 'Age', sex: 'Biological Sex', smoking: 'Smoking Status',
-    diabetes: 'Diabetes', heartDisease: 'Heart Disease',
-    conditions: 'Other Conditions', medications: 'Medications',
-    screenings: 'Recent Screenings', familyHistory: 'Family History',
-    allergies: 'Allergies', surgeries: 'Surgeries / Procedures',
-    exerciseHabits: 'Exercise Habits', riskFactors: 'Risk Factors'
-  };
-  let hasAny = false;
-  const { personalDetails: ctx, healthProfile: hp } = await getCaedrixMergedProfile();
-  try {
-    const group = document.getElementById('ctxPersonalGroup');
-    const rows  = document.getElementById('ctxPersonalRows');
-    if (ctx && group && rows) {
-      const html = Object.entries(PERSONAL_LABELS)
-        .filter(([k]) => ctx[k]?.trim())
-        .map(([k, lbl]) => `<div class="profile-context-row"><div class="profile-context-key">${lbl}</div><div class="profile-context-val">${ctx[k].trim()}</div></div>`)
-        .join('');
-      if (html) { rows.innerHTML = html; group.style.display = 'block'; hasAny = true; }
-    }
-  } catch(_) {}
-  try {
-    const group = document.getElementById('ctxHealthGroup');
-    const rows  = document.getElementById('ctxHealthRows');
-    if (hp && group && rows) {
-      const html = Object.entries(HEALTH_LABELS)
-        .filter(([k]) => hp[k] && String(hp[k]).trim())
-        .map(([k, lbl]) => `<div class="profile-context-row"><div class="profile-context-key">${lbl}</div><div class="profile-context-val">${String(hp[k]).trim()}</div></div>`)
-        .join('');
-      if (html) { rows.innerHTML = html; group.style.display = 'block'; hasAny = true; }
-    }
-  } catch(_) {}
-  const empty = document.getElementById('ctxEmpty');
-  if (empty) empty.style.display = hasAny ? 'none' : 'block';
-}
-
 function connectRecords() {
   window.location.href = '/api/healthex-auth';
 }
@@ -1769,14 +1545,16 @@ async function runAnalysis() {
   const q = document.getElementById('questionInput').value.trim();
   if (!q) { document.getElementById('questionInput').focus(); return; }
 
+  CaedrixAboutYou.holdForCheckout();
   const tokenOk = await CaedrixTokenGate.spendTokenOrPrompt(q);
   if (!tokenOk) return;
+  CaedrixAboutYou.clearHeld();
 
   lastQuestion        = q;
   clarifyingHistory   = [];
   clarifyRound        = 0;
   finalClarifications = {};
-  cachedHealthContextBlock = await buildCaedrixHealthContextBlock();
+  cachedHealthContextBlock = buildCaedrixHealthContextBlock();
 
   document.getElementById('submitBtn').disabled = true;
   document.getElementById('questionInput').disabled = true;
@@ -1902,13 +1680,12 @@ async function runMainPipeline() {
   }
   // Determine what personal data is available
   const hasPersonalizedContext = cachedHealthContextBlock.length > 0;
-  if (recordsConnected) {
-    userMsg += '\n\nNote: This patient has linked their medical records via HealthEx. Personalize your analysis accordingly.';
-  } else if (hasPersonalizedContext) {
-    userMsg += '\n\nIMPORTANT: The patient has provided their personal health profile and/or personal context above. These are real, self-reported health details about this specific patient. You MUST use this information to personalize your analysis — do not treat this as a generic query. Reference the specific details provided (age, conditions, medications, activities, living situation, etc.) in your how_it_applies fields and key_takeaway. Populate patient_context_used with a summary of which profile details you applied.';
+  if (hasPersonalizedContext) {
+    userMsg += '\n\nIMPORTANT: The patient has entered personal details about themselves above (such as age, sex, activities, living situation, social history, medical history, previous surgery, and substance use). These are real, self-reported details about this specific patient. You MUST use this information to personalize your analysis — do not treat this as a generic query. Reference the specific details provided in your how_it_applies fields and key_takeaway. Populate patient_context_used with a summary of which details you applied.';
   } else {
-    userMsg += '\n\nNo personal health profile or records are available. Provide high-quality general guidance and note that adding a health profile on the Precision Medicine page would allow a more personalized analysis.';
+    userMsg += '\n\nThe patient did not enter any personal details. Provide high-quality general guidance and note that filling in the "About you" section (activities, living situation, age and sex, social history, medical history, previous surgery, substance use) would allow a more personalized analysis.';
   }
+
 
   try {
     /* ── Agent 2: Clinical Analysis ── */
@@ -2021,11 +1798,9 @@ function renderResults(result, accuracy, legal, originalQuestion) {
 
   const now = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   const hasProfileData = cachedHealthContextBlock.length > 0;
-  const personalizationChip = recordsConnected
-    ? '<div class="results-meta-chip">🏥 Personalized to your records</div>'
-    : hasProfileData
-      ? '<div class="results-meta-chip">👤 Personalized to your profile</div>'
-      : '<div class="results-meta-chip">📚 General guidance</div>';
+  const personalizationChip = hasProfileData
+    ? '<div class="results-meta-chip">👤 Personalized to your details</div>'
+    : '<div class="results-meta-chip">📚 General guidance</div>';
   document.getElementById('resultsMeta').innerHTML = `
     <div class="results-meta-chip">📅 ${now}</div>
     ${personalizationChip}
@@ -2040,7 +1815,7 @@ function renderResults(result, accuracy, legal, originalQuestion) {
   ].filter(Boolean).join(' · ');
   document.getElementById('agentNote').textContent = accuracyNote || 'Reviewed by Caedrix AI 5-agent pipeline.';
 
-  if (result.patient_context_used && (recordsConnected || hasProfileData)) {
+  if (result.patient_context_used && hasProfileData) {
     document.getElementById('contextBox').style.display = 'flex';
     document.getElementById('contextBody').textContent = result.patient_context_used;
   } else {

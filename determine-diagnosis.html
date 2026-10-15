@@ -268,6 +268,11 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
   .section-pane{display:block!important;margin-bottom:24px;}
 }
 
+
+/* Page graphic (top of page) */
+.page-graphic{max-width:540px;margin:0 auto 26px;}
+.page-graphic svg{display:block;width:100%;height:auto;}
+@media(max-width:600px){.page-graphic{margin-bottom:18px;}.page-graphic .pg-caption{display:none;}}
 </style>
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -281,8 +286,7 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
     </a>
   </div>
     <div class="nav-actions">
-    <a href="precision-medicine3.html"  class="nav-mini btn1">Precision Medicine</a>
-    <a href="health-decisions4.html"    class="nav-mini btn2">Health Decisions</a>
+    <a href="health-decisions.html"    class="nav-mini btn2">Health Decisions</a>
     <a href="determine-diagnosis.html"  class="nav-mini btn4" style="border:1px solid rgba(155,89,182,0.6);">Determine Diagnosis</a>
     <a href="understand-diagnosis.html" class="nav-mini btn3">Understand Diagnosis</a>
   </div>
@@ -291,6 +295,27 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
 
 <div class="page-wrap">
   <div class="page-header">
+    <div class="page-graphic">
+    <svg viewBox="0 0 540 200" role="img" aria-label="Your symptoms are analyzed and possible causes are ranked from most to least likely" xmlns="http://www.w3.org/2000/svg">
+    <rect x="30" y="26" width="92" height="120" rx="10" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.28)" stroke-width="1.4"/>
+    <rect x="58" y="19" width="36" height="14" rx="4" fill="#0c1e3a" stroke="#b07cc6" stroke-width="1.6"/>
+    <g stroke-linecap="round" stroke-width="2.2">
+     <circle cx="47" cy="56" r="2.5" fill="#b07cc6" stroke="none"/><path d="M57 56 H106" stroke="rgba(255,255,255,0.55)"/>
+     <circle cx="47" cy="78" r="2.5" fill="#b07cc6" stroke="none"/><path d="M57 78 H98" stroke="rgba(255,255,255,0.55)"/>
+     <circle cx="47" cy="100" r="2.5" fill="#b07cc6" stroke="none"/><path d="M57 100 H104" stroke="rgba(255,255,255,0.55)"/>
+     <circle cx="47" cy="122" r="2.5" fill="#b07cc6" stroke="none"/><path d="M57 122 H90" stroke="rgba(255,255,255,0.55)"/>
+    </g>
+    <text x="76" y="172" text-anchor="middle" font-size="15" font-weight="500" font-family="'DM Sans',system-ui,sans-serif" fill="rgba(255,255,255,0.78)">Your symptoms</text>
+    <path d="M134 86 H162" stroke="rgba(255,255,255,0.3)" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="208" cy="80" r="38" fill="rgba(155,89,182,0.12)" stroke="#b07cc6" stroke-width="2"/>
+    <path d="M180 82 H192 L198 68 L206 98 L213 74 L218 82 H236" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M235 108 L254 127" stroke="#b07cc6" stroke-width="7" stroke-linecap="round"/>
+    <text x="208" y="172" text-anchor="middle" font-size="15" font-weight="500" font-family="'DM Sans',system-ui,sans-serif" fill="rgba(255,255,255,0.78)">Analyzed</text>
+    <path d="M268 86 H300" stroke="rgba(255,255,255,0.3)" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="330" cy="52" r="11" fill="rgba(176,124,198,0.2)" stroke="#b07cc6" stroke-width="1.4"/><text x="330" y="57" text-anchor="middle" font-size="12" font-weight="700" font-family="'DM Sans',system-ui,sans-serif" fill="#fff">1</text><rect x="352" y="39" width="150" height="9" rx="4.5" fill="#b07cc6"/><text x="352" y="67" text-anchor="start" font-size="13" font-weight="500" font-family="'DM Sans',system-ui,sans-serif" fill="rgba(255,255,255,0.85)">Most likely</text><circle cx="330" cy="96" r="11" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.32)" stroke-width="1.4"/><text x="330" y="101" text-anchor="middle" font-size="12" font-weight="700" font-family="'DM Sans',system-ui,sans-serif" fill="rgba(255,255,255,0.6)">2</text><rect x="352" y="83" width="104" height="9" rx="4.5" fill="rgba(255,255,255,0.32)"/><text x="352" y="111" text-anchor="start" font-size="13" font-weight="500" font-family="'DM Sans',system-ui,sans-serif" fill="rgba(255,255,255,0.55)">Possible</text><circle cx="330" cy="140" r="11" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.32)" stroke-width="1.4"/><text x="330" y="145" text-anchor="middle" font-size="12" font-weight="700" font-family="'DM Sans',system-ui,sans-serif" fill="rgba(255,255,255,0.6)">3</text><rect x="352" y="127" width="62" height="9" rx="4.5" fill="rgba(255,255,255,0.32)"/><text x="352" y="155" text-anchor="start" font-size="13" font-weight="500" font-family="'DM Sans',system-ui,sans-serif" fill="rgba(255,255,255,0.55)">Less likely</text>
+    <text class="pg-caption" x="420" y="192" text-anchor="middle" font-size="13" font-weight="400" font-family="'DM Sans',system-ui,sans-serif" fill="rgba(255,255,255,0.45)">Possible causes, ranked</text>
+    </svg>
+    </div>
     <div class="page-eyebrow"><div class="eyebrow-line"></div>Caedrix AI · Determine Diagnosis<div class="eyebrow-line" style="transform:scaleX(-1)"></div></div>
     <h1 class="page-title">What Could Be<br><em>Causing This?</em></h1>
     <p class="page-sub">Describe your symptoms and our AI will help you understand the possible diagnoses — ranked by probability — so you can have a more informed conversation with your doctor.</p>
@@ -303,6 +328,9 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
       </div>
     </div>
   </div>
+
+  <!-- About You (entered fresh each visit — see caedrix-about-you.js) -->
+  <div id="aboutYouPanel" data-accent="#9b59b6"></div>
 
   <div class="input-card" id="inputCard">
     <div class="input-card-header">
@@ -401,6 +429,7 @@ footer{margin-top:80px;padding:32px 48px;border-top:1px solid rgba(255,255,255,0
 <script src="caedrix-local-storage.js"></script>
 <script src="caedrix-pdf-report.js"></script>
 <script src="caedrix-token-gate.js"></script>
+<script src="caedrix-about-you.js"></script>
 <script>
 
 async function handleSaveToMyRecords(){
@@ -431,11 +460,9 @@ function caedrixInitUserBar() {
       '<div class="subs-right"><span class="subs-email" style="opacity:.5;font-size:12px;">Sign in happens automatically when you buy searches</span></div>';
     return;
   }
-  const rc=CaedrixAuth.isRecordsConnected();
   const initials=(user.email||'?')[0].toUpperCase(), email=user.email||'';
   bar.innerHTML='<div class="subs-left"><div class="subs-avatar">'+initials+'</div><span class="subs-email">'+email+'</span></div>'+
-    '<div class="subs-right">'+(rc?'<div class="subs-records subs-records-on"><div class="subs-rdot subs-rdot-on"></div><span>Records Linked</span></div>':
-    '<a href="health-decisions4.html" class="subs-records subs-records-off"><div class="subs-rdot subs-rdot-off"></div><span>Link Medical Records</span></a>')+
+    '<div class="subs-right">'+
     '<button class="subs-signout" onclick="CaedrixAuth.logout()">Sign out</button></div>';
 }
 
@@ -450,6 +477,7 @@ const CaedrixState = {
 window.addEventListener('DOMContentLoaded',async ()=>{
   caedrixInitUserBar();
   await initFolderConnection();
+  CaedrixAboutYou.init('aboutYouPanel');
   CaedrixTokenGate.renderBalanceBadge('caedrixBalanceBadge');
   CaedrixTokenGate.syncButtonLabel('submitBtn', 'Analyze Symptoms →', 'Analyze Symptoms — $2.99 →');
   const savedDraft = CaedrixTokenGate.getAndClearResumeDraft();
@@ -482,74 +510,11 @@ async function initFolderConnection() {
   }
 }
 
-async function getCaedrixMergedProfile() {
-  let personalDetails = null, healthProfile = null, medicalRecordCount = 0;
-  if (typeof CaedrixStorage !== 'undefined' && CaedrixStorage.isSupported()) {
-    try {
-      // folderConnected (set once at page load) can go stale if permission
-      // lapsed since then. Re-check live, and — since this only ever runs
-      // from the "Analyze" button's click handler, i.e. a real user
-      // gesture — silently re-request permission if needed, instead of
-      // quietly falling back to a possibly outdated localStorage copy.
-      let status = folderConnected ? 'connected' : await CaedrixStorage.restoreConnection();
-      if (status === 'needs-permission') {
-        try {
-          await CaedrixStorage.reconnectFolder();
-          status = 'connected';
-        } catch (_) {
-          status = 'none'; // user declined re-confirmation
-        }
-      }
-      folderConnected = (status === 'connected');
-
-      if (folderConnected) {
-        const ctx = await CaedrixStorage.getLocalHealthContext();
-        if (ctx && ctx.connected) {
-          personalDetails = ctx.personalDetails;
-          healthProfile = ctx.healthProfile;
-          medicalRecordCount = (ctx.medicalRecordFiles || []).length;
-        }
-      }
-    } catch (_) { /* fall through to localStorage below */ }
-  }
-  if (!personalDetails) {
-    try { personalDetails = JSON.parse(localStorage.getItem('caedrix_life_context') || 'null'); } catch (_) {}
-  }
-  if (!healthProfile) {
-    try { healthProfile = JSON.parse(localStorage.getItem('caedrix_health_profile') || 'null'); } catch (_) {}
-  }
-  return { personalDetails, healthProfile, medicalRecordCount };
-}
-
-async function buildCaedrixHealthContextBlock() {
-  const { personalDetails, healthProfile, medicalRecordCount } = await getCaedrixMergedProfile();
-  const parts = [];
-  if (personalDetails) {
-    const p = [];
-    if (personalDetails.activities) p.push('Favorite activities: ' + personalDetails.activities);
-    if (personalDetails.important)  p.push('Important personal context: ' + personalDetails.important);
-    if (personalDetails.caregiver)  p.push('Caregiver responsibilities: ' + personalDetails.caregiver);
-    if (personalDetails.living)     p.push('Living situation: ' + personalDetails.living);
-    if (p.length) parts.push('Personal context about this patient:\n' + p.join('\n'));
-  }
-  if (healthProfile) {
-    const h = [];
-    if (healthProfile.age)           h.push('Age: ' + healthProfile.age);
-    if (healthProfile.sex)           h.push('Biological sex: ' + healthProfile.sex);
-    if (healthProfile.smoking)       h.push('Smoking status: ' + healthProfile.smoking);
-    if (healthProfile.diabetes)      h.push('Diabetes: ' + healthProfile.diabetes);
-    if (healthProfile.heartDisease)  h.push('Heart disease: ' + healthProfile.heartDisease);
-    if (healthProfile.conditions)    h.push('Other conditions: ' + healthProfile.conditions);
-    if (healthProfile.medications)   h.push('Current medications: ' + healthProfile.medications);
-    if (healthProfile.screenings)    h.push('Recent screenings: ' + healthProfile.screenings);
-    if (healthProfile.familyHistory) h.push('Family history: ' + healthProfile.familyHistory);
-    if (h.length) parts.push('Patient health profile:\n' + h.join('\n'));
-  }
-  if (medicalRecordCount > 0) {
-    parts.push(`Patient has ${medicalRecordCount} uploaded medical record document(s) on file, indicating an engaged, documented patient.`);
-  }
-  if (!parts.length) return '';
-  return '\n\n---\n' + parts.join('\n\n') + '\n---';
+/* Builds the text block sent to the AI from the "About you" boxes.
+   Nothing is read from storage — the user enters it fresh each visit.
+   Age and sex go on their own line in the request, so they're left out here. */
+function buildCaedrixHealthContextBlock() {
+  return CaedrixAboutYou.buildContextBlock({ includeAgeSex: false });
 }
 window.addEventListener('scroll',()=>{const d=document.documentElement;const p=d.scrollHeight-d.clientHeight;document.getElementById('ppFill').style.width=p>0?(d.scrollTop/p*100)+'%':'0%';});
 
@@ -578,40 +543,6 @@ function setAgentState(n, state, msg) {
   } else {
     flag.textContent = icons[n] || '○';
   }
-}
-
-/* Reads personal context saved on the Precision Medicine page */
-function getCaedrixLifeContext(){
-  try{
-    const ctx=JSON.parse(localStorage.getItem('caedrix_life_context')||'null');
-    if(!ctx)return '';
-    const parts=[];
-    if(ctx.activities)parts.push('Favorite activities: '+ctx.activities);
-    if(ctx.important) parts.push('Important personal context: '+ctx.important);
-    if(ctx.caregiver) parts.push('Caregiver responsibilities: '+ctx.caregiver);
-    if(ctx.living)    parts.push('Living situation: '+ctx.living);
-    if(!parts.length) return '';
-    return '\n\n---\nPersonal context about this patient:\n'+parts.join('\n')+'\n---';
-  }catch(_){return '';}
-}
-
-function getCaedrixHealthProfile(){
-  try{
-    const hp=JSON.parse(localStorage.getItem('caedrix_health_profile')||'null');
-    if(!hp)return '';
-    const parts=[];
-    if(hp.age)          parts.push('Age: '+hp.age);
-    if(hp.sex)          parts.push('Biological sex: '+hp.sex);
-    if(hp.smoking)      parts.push('Smoking status: '+hp.smoking);
-    if(hp.diabetes)     parts.push('Diabetes: '+hp.diabetes);
-    if(hp.heartDisease) parts.push('Heart disease: '+hp.heartDisease);
-    if(hp.conditions)   parts.push('Other conditions: '+hp.conditions);
-    if(hp.medications)  parts.push('Current medications: '+hp.medications);
-    if(hp.screenings)   parts.push('Recent screenings: '+hp.screenings);
-    if(hp.familyHistory)parts.push('Family history: '+hp.familyHistory);
-    if(!parts.length)return '';
-    return '\n\n---\nPatient health profile:\n'+parts.join('\n')+'\n---';
-  }catch(_){return '';}
 }
 
 async function callClaude({ systemPrompt, userContent, maxTokens = 1500, useWebSearch = false, model = 'claude-sonnet-4-6' }, _retry = 0) {
@@ -724,12 +655,13 @@ Return the EXACT same JSON schema. Start with { and end with }. Return ONLY vali
 async function runAnalysis(){
   const symptoms=document.getElementById('symptomInput').value.trim();
   if(!symptoms){document.getElementById('symptomInput').focus();return;}
+  CaedrixAboutYou.holdForCheckout();
   const tokenOk = await CaedrixTokenGate.spendTokenOrPrompt(symptoms);
   if(!tokenOk) return;
+  CaedrixAboutYou.clearHeld();
   lastSymptoms=symptoms;
-  cachedHealthContextBlock = await buildCaedrixHealthContextBlock();
-  const { healthProfile: hp } = await getCaedrixMergedProfile();
-  lastAge=hp?.age||''; lastSex=hp?.sex||'';
+  cachedHealthContextBlock = buildCaedrixHealthContextBlock();
+  lastAge=CaedrixAboutYou.getAge(); lastSex=CaedrixAboutYou.getSex();
   clarifyingHistory=[];clarifyRound=0;finalClarifications={};
   document.getElementById('submitBtn').disabled=true;document.getElementById('symptomInput').disabled=true;
   document.getElementById('clarifyPanel').classList.remove('visible');
@@ -772,6 +704,7 @@ async function runMainPipeline(){
   let msg=`Symptoms: "${lastSymptoms}"\nAge: ${lastAge||'not provided'}, Sex: ${lastSex||'not provided'}${cachedHealthContextBlock}`;
   const hasClarif=Object.values(finalClarifications).some(v=>v);
   if(hasClarif){msg+='\n\nAdditional clarifications:\n';Object.entries(finalClarifications).forEach(([q,a])=>{if(a)msg+=`Q: ${q}\nA: ${a}\n`;});}
+  if(cachedHealthContextBlock){msg+='\n\nThe patient entered personal details above (medical history, previous surgery, substance use, activities, living and social situation). Use them when ranking likelihood — e.g. a prior surgery, smoking history, or existing condition can make some causes more or less likely — and mention relevant ones in your reasoning.';}
   try{
     setAgentState(2,'running','Building differential…');
     const r2=await callClaude({systemPrompt:AGENT_DIFFERENTIAL_SYSTEM,userContent:msg,maxTokens:6000});
