@@ -713,7 +713,7 @@ async function runMainPipeline(){
   let msg=`Symptoms: "${lastSymptoms}"\nAge: ${lastAge||'not provided'}, Sex: ${lastSex||'not provided'}${cachedHealthContextBlock}`;
   const hasClarif=Object.values(finalClarifications).some(v=>v);
   if(hasClarif){msg+='\n\nAdditional clarifications:\n';Object.entries(finalClarifications).forEach(([q,a])=>{if(a)msg+=`Q: ${q}\nA: ${a}\n`;});}
-  if(cachedHealthContextBlock){msg+='\n\nThe patient entered personal details above (medical history, previous surgery, substance use, activities, living and social situation). Use them when ranking likelihood — e.g. a prior surgery, smoking history, or existing condition can make some causes more or less likely — and mention relevant ones in your reasoning.';}
+  if(cachedHealthContextBlock){msg+='\n\nThe patient entered personal details above (medical history, current medications, medication allergies, previous surgery, substance use, activities, living and social situation). Use them when ranking likelihood — e.g. a prior surgery, smoking history, existing condition, or a medication side effect can make some causes more or less likely — and mention relevant ones in your reasoning.';}
   try{
     setAgentState(2,'running','Building differential…');
     const r2=await callClaude({systemPrompt:AGENT_DIFFERENTIAL_SYSTEM,userContent:msg,maxTokens:6000});

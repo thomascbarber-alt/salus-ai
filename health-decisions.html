@@ -1692,9 +1692,9 @@ async function runMainPipeline() {
   // Determine what personal data is available
   const hasPersonalizedContext = cachedHealthContextBlock.length > 0;
   if (hasPersonalizedContext) {
-    userMsg += '\n\nIMPORTANT: The patient has entered personal details about themselves above (such as age, sex, activities, living situation, social history, medical history, previous surgery, and substance use). These are real, self-reported details about this specific patient. You MUST use this information to personalize your analysis — do not treat this as a generic query. Reference the specific details provided in your how_it_applies fields and key_takeaway. Populate patient_context_used with a summary of which details you applied.';
+    userMsg += '\n\nIMPORTANT: The patient has entered personal details about themselves above (such as age, sex, activities, living situation, social history, medical history, current medications, medication allergies, previous surgery, and substance use). These are real, self-reported details about this specific patient. You MUST use this information to personalize your analysis — do not treat this as a generic query. Reference the specific details provided in your how_it_applies fields and key_takeaway. Check every option against the listed current medications and medication allergies, and flag any interaction or allergy concern. Populate patient_context_used with a summary of which details you applied.';
   } else {
-    userMsg += '\n\nThe patient did not enter any personal details. Provide high-quality general guidance and note that filling in the "About you" section (activities, living situation, age and sex, social history, medical history, previous surgery, substance use) would allow a more personalized analysis.';
+    userMsg += '\n\nThe patient did not enter any personal details. Provide high-quality general guidance and note that filling in the "About you" section (activities, living situation, age and sex, social history, medical history, current medications, medication allergies, previous surgery, substance use) would allow a more personalized analysis.';
   }
 
 

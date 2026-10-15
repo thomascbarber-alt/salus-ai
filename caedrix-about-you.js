@@ -31,7 +31,11 @@
     { key: 'social', label: 'Social history',
       hint: 'e.g. retired teacher; caring for my mother; two teenagers at home' },
     { key: 'medical', label: 'Medical history',
-      hint: 'e.g. type 2 diabetes, high blood pressure; medications: metformin, lisinopril; allergic to penicillin' },
+      hint: 'e.g. type 2 diabetes, high blood pressure, atrial fibrillation' },
+    { key: 'medications', label: 'Current medications',
+      hint: 'e.g. metformin 500 mg twice a day, lisinopril 10 mg, baby aspirin' },
+    { key: 'allergies', label: 'Medication allergies',
+      hint: 'e.g. penicillin (hives), sulfa drugs; or "none known"' },
     { key: 'surgery', label: 'Previous surgery',
       hint: 'e.g. right knee arthroscopy 2015, appendix removed as a teenager' },
     { key: 'substance', label: 'Substance use',
@@ -43,6 +47,8 @@
     living: 'Living situation',
     social: 'Social history (work, family)',
     medical: 'Medical history',
+    medications: 'Current medications',
+    allergies: 'Medication allergies',
     surgery: 'Previous surgery',
     substance: 'Substance use (smoking, alcohol, drugs)'
   };
